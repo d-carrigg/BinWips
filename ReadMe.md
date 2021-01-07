@@ -84,9 +84,26 @@ You can modify the session in which your script is run as an executable. This is
 An example of a modification comes from the BinWips source code. In the default class template, the BinWips module adds the `Get-PSBinaryResource` cmdlet to the runspace. This is used if you include resources as described in the [Resources section](#including-resources-with-your-application).
 **TODO fill in**
 
+
+
+## Check if an application is a BinWips executable
+
+Built in functionality is provided for checking if an assembly (`exe` or `dll`) was built with BinWips via the `Test-PSBinary` command:
+
+```powershell
+Test-PSBinary PSBinary.exe
+```
+
+ If you don’t have the BinWips module installed on a machine you can use the following:
+
+```
+$asm = 
+```
+
 ## Advanced Usage
 
-You can fully customize the generated output by replacing the class template and you can run additional preprocessing before the compiler is invoked. If the built in customization options don't meet your needs this section will guide you through full customization of the compiled output. This section requires knowledge of C#.
+You can fully customize the generated output by replacing the class template and you can run additional preprocessing before the compiler is invoked. If the built in customization options don't meet your needs this section will guide you through full customization of the compiled output. This section requires knowledge of C#. Additionally, unless you include the default BinWips attribute in your attributes/class template you will not be able to detect your application as a BinWips application (how-to is included in this section). 
+
 **TODO fill in**
 
 ## TODO List
@@ -106,6 +123,12 @@ You can fully customize the generated output by replacing the class template and
 - [ ] More Tests
 - [ ] Finish Documentation
 - [ ] Finish ReadMe
+
+
+
+## Limitations
+
+**TODO**
 
 ## Inspiration and References
 
