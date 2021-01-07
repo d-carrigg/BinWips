@@ -117,7 +117,6 @@ namespace {#Namespace#} {
             // additional setup could be added 
             // by default we do an out string so that
             // console output looks nice 
-            Console.WriteLine(runtimeSetup);
             powerShell.AddScript(runtimeSetup)
                         .AddScript(script)
                         .AddCommand("Out-String");

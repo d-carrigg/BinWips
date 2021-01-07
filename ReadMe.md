@@ -113,12 +113,12 @@ You can fully customize the generated output by replacing the class template and
 - [ ] Different Template for Libraries
 - [ ] Allow Method Name Modification
 - [ ] Attributes Template Parameter
-- [ ] CSC Argument List
+- [x] CSC Argument List
 - [ ] PSRuntimeModifications
 - [ ] Clean
 - [ ] KeepScratchDir
 - [ ] Force
-- [ ] Resources
+- [x] Resources
 - [ ] NoEmbedResources
 - [ ] More Tests
 - [ ] Finish Documentation
