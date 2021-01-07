@@ -30,9 +30,9 @@
       # Source Script file
       [string]
       [Parameter(Mandatory = $true,
-      ValueFromPipelineByPropertyName = $true,
-      Position = 0,
-      ParameterSetName = 'File')]
+         ValueFromPipelineByPropertyName = $true,
+         Position = 0,
+         ParameterSetName = 'File')]
       $InFile,
 
       # Namespace for the generated program. 
@@ -92,7 +92,7 @@
               {#PSNamespace#} is replaced with PSBinary to produce namesapce PSBinary {...}
         #>
       [string]
-      $ClassTemplate  =   @"
+      $ClassTemplate = @"
 // Generaed by BinWips {#BinWipsVersion#}
 using System;
 using BinWips;
@@ -110,14 +110,16 @@ namespace {#Namespace#} {
             var powerShell = PowerShell.Create();
             
             // script is inserted in base64 so we need to decode it
-            var decodedBytes = Convert.FromBase64String("{#Script#}");
-            var script = System.Text.Encoding.Unicode.GetString(decodedBytes);
+            var runtimeSetup = DecodeBase64("{#RuntimeSetup#}");
+            var script = DecodeBase64("{#Script#}");
             
             // build runspace and execute it
             // additional setup could be added 
             // by default we do an out string so that
             // console output looks nice 
-            powerShell.AddScript(script)
+            Console.WriteLine(runtimeSetup);
+            powerShell.AddScript(runtimeSetup)
+                        .AddScript(script)
                         .AddCommand("Out-String");
             var results = powerShell.Invoke();
 
@@ -126,7 +128,12 @@ namespace {#Namespace#} {
                   Console.WriteLine(result);
             }
          }
-      }
+         static string DecodeBase64(string encoded){
+            var decodedBytes = Convert.FromBase64String(encoded);
+            var text = System.Text.Encoding.Unicode.GetString(decodedBytes);
+            return text;
+         }
+      }    
 }
 "@,
 
@@ -232,41 +239,70 @@ namespace {#Namespace#} {
       $hasTokens = $PSBoundParameters.ContainsKey('Tokens')
       $hasClassAttributes = $PSBoundParameters.ContainsKey('ClassAttributes')
       $hasAssemblyAttributes = $PSBoundParameters.ContainsKey('AssemblyAttributes')
-      $hasOutDir =  $PSBoundParameters.ContainsKey('OutDir')
-      $hasScratchDir =  $PSBoundParameters.ContainsKey('ScratchDir')
-      $hasOutFile =  $PSBoundParameters.ContainsKey('HasOutFile')
+      $hasOutDir = $PSBoundParameters.ContainsKey('OutDir')
+      $hasScratchDir = $PSBoundParameters.ContainsKey('ScratchDir')
+      $hasOutFile = $PSBoundParameters.ContainsKey('HasOutFile')
+      $hasResources = $PSBoundParameters.ContainsKey('Resources')
       
       # TODO: Reference a newer version of the PowerShell SDK
       $powerShellSDK = "C:\Windows\assembly\GAC_MSIL\System.Management.Automation\1.0.0.0__31bf3856ad364e35\System.Management.Automation.dll"
       $dotNetPath = "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe" 
 
-      if($Library){
+      if ($Library)
+      {
          $target = "library"
-      } else {
+      }
+      else
+      {
          $target = "exe"
       }
 
-      if(!$hasOutDir){
+      if (!$hasOutDir)
+      {
          $OutDir = Get-Location
       }
-      if(!$hasScratchDir){
+      if (!$hasScratchDir)
+      {
          $ScratchDir = "$(Get-Location)\obj"
       }
-      if(!$hasOutFile){
-         if($inline){
+      if (!$hasOutFile)
+      {
+         if ($inline)
+         {
             $OutFile = "$OutDir\PSBinary.exe"
-         } else {
-            $OutFile = $InFile.Replace(".ps1",".exe")
          }
-        
+         else
+         {
+            $OutFile = $InFile.Replace(".ps1", ".exe")
+         }
+         
       }
-    
+
+      $runtimeSetupScript = @"
+      function Get-PSBinaryResource {
+         [cmdletbinding()]
+         param (
+            [Parameter(Mandatory=`$true,Position=0)]
+            [string] `$Path
+         )
+         `$asm = [System.Reflection.Assembly]::LoadFile("`$(pwd)\{#AssemblyPath#}")
+         `$stream = `$asm.GetManifestResourceStream(`$Path)
+         `$reader = [System.IO.StreamReader]::new(`$stream)
+         `$result = `$reader.ReadToEnd()
+         `$stream.Close()
+         `$stream.Dispose()
+         `$reader.Close()
+         `$reader.Dipose();
+         return `$result 
+      }     
+"@
+
+      $runtimeSetupScript = $runtimeSetupScript | Set-PSBinaryToken -Key AssemblyPath -Value ($OutFile.TrimStart('.')) -Required
+      $encodedRuntimeSetup = [Convert]::ToBase64String(([System.Text.Encoding]::Unicode.GetBytes($runtimeSetupScript)))
       $cscArgs = @("-out:$OutFile", 
-                  "/reference:$powerShellSDK",
-                  "/target:$target",
-                  "$ScratchDir\PSBinary.cs", 
-                  "$ScratchDir\BinWipsAttr.cs"
-               )
+         "/reference:$powerShellSDK",
+         "/target:$target"
+      )
       $cscArgs += $CscArgumentList
    
       # Create directories
@@ -274,6 +310,21 @@ namespace {#Namespace#} {
       [System.IO.Directory]::CreateDirectory($OutDir)
       # TODO: Clean out dir if specified
       # TODO: Handle Resources
+      if ($hasResources)
+      {
+         if ($NoEmbedResources)
+         {
+            #TODO:
+         }
+         else
+         {
+            foreach ($r in $Resources)
+            {
+               #https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-options/resource-compiler-option
+               $cscArgs += "-resource:$r"
+            }
+         }
+      }
      
       # 2. 
       if (!$inline)
@@ -290,21 +341,24 @@ namespace {#Namespace#} {
       
       # 4. 
       $csProgram = $ClassTemplate | Set-PSBinaryToken -Key Script -Value $encodedScript `
+      | Set-PSBinaryToken -Key RuntimeSetup -Value $encodedRuntimeSetup -Required `
       | Set-PSBinaryToken -Key ClassName -Value $ClassName -Required `
       | Set-PSBinaryToken -Key Namespace -Value $Namespace -Required `
       | Set-PSBinaryToken -Key BinWipsVersion -Value "0.1"
 
-      if($hasAssemblyAttributes){
+      if ($hasAssemblyAttributes)
+      {
          # TODO: preformat assembly attributes
          # $csProgram = $csProgram | Set-PSBinaryToken -Key AssemblyAttributes -Value 
       }
-      if($hasClassAttributes){
+      if ($hasClassAttributes)
+      {
          # TODO: preformat class attributes
          # $csProgram = $csProgram | Set-PSBinaryToken -Key ClassAttributes -Value 
       }
-      if($hasTokens)
+      if ($hasTokens)
       {
-         $Tokens.GetEnumerator() | % {
+         $Tokens.GetEnumerator() | ForEach-Object {
             $csProgram = $csProgram | Set-PSBinaryToken -Key $_.Key -Value $_.Value 
          } 
       }
@@ -327,13 +381,15 @@ namespace BinWips {
       $attributesTemplate | Out-File "$ScratchDir\BinWipsAttr.cs" -Encoding utf8 -Force:$Force
 
       # 6. 
+      $cscArgs += @("$ScratchDir\PSBinary.cs", 
+         "$ScratchDir\BinWipsAttr.cs") # add files to args last
       $x = "$dotNetPath $cscArgs"
-      
       Invoke-Expression $x
 
       # 7.
       # TODO: Cleanup
-      if(!$KeepScratchDir){
+      if (!$KeepScratchDir)
+      {
          #Remove-Item $ScratchDir -Recurse
       }
       
