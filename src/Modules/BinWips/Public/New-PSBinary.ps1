@@ -63,7 +63,7 @@
              - Invalid attributes will throw a c# compiler exception
              - Attributes are applied in addition to the defaults unless -NoDefaultAttributes
         #>
-      [hashtable]
+      [string[]]
       $AssemblyAttributes,
 
       <#
@@ -101,6 +101,7 @@ using System.Management.Automation;
 // attributes which can be used to identify this assembly as a BinWips
 // https://stackoverflow.com/questions/1936953/custom-assembly-attributes
 [assembly: BinWips("{#BinWipsVersion#}")]
+{#CustomAssemblyAttributes#}
 
 // main namespace
 namespace {#Namespace#} {
@@ -348,7 +349,16 @@ namespace {#Namespace#} {
       if ($hasAssemblyAttributes)
       {
          # TODO: preformat assembly attributes
-         # $csProgram = $csProgram | Set-PSBinaryToken -Key AssemblyAttributes -Value 
+         Write-Host "Applying Assembly Attribuytes"
+         $att = ""
+       $AssemblyAttributes | % {
+               $att += "$_`r`n"
+         }
+         if($att -eq $null)
+         {
+            Write-Error "Failed to build attributes"
+         }
+         $csProgram = $csProgram | Set-PSBinaryToken -Key CustomAssemblyAttributes -Value $att
       }
       if ($hasClassAttributes)
       {
