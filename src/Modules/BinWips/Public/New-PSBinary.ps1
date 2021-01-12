@@ -159,6 +159,7 @@ namespace {#Namespace#} {
       $CscArgumentList,
 
       # Not sure if this is gonna be a thing yet, but provide option to set default runtime customizations
+      [string[]]
       $PsRuntimeModifications,
 
       # Directory to place output in, defaults to current directory
@@ -245,6 +246,9 @@ namespace {#Namespace#} {
       $hasScratchDir = $PSBoundParameters.ContainsKey('ScratchDir')
       $hasOutFile = $PSBoundParameters.ContainsKey('HasOutFile')
       $hasResources = $PSBoundParameters.ContainsKey('Resources')
+      $hasRuntimeModifications = $PSBoundParameters.ContainsKey('PSRuntimeModifications')
+      $hasClassTemplate = $PSBoundParameters.ContainsKey('ClassTemplate')
+      $hasAttributesTemplate = $PSBoundParameters.ContainsKey('AttributesTemplate')
       
       # TODO: Reference a newer version of the PowerShell SDK
       $powerShellSDK = "C:\Windows\assembly\GAC_MSIL\System.Management.Automation\1.0.0.0__31bf3856ad364e35\System.Management.Automation.dll"

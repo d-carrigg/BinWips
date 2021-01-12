@@ -1,8 +1,8 @@
 # BinWips
 
-:construction: Warning: This repository is still under construction, see the TODO List at the bottom to make sure the features you want are complete​
+:construction: Warning: This repository is still under construction, see the [TODO List](#TODO-List) at the bottom to make sure the features you want are complete​
 
-Binary Written in PowerShell. Convert `.ps1` files to executables with sensible defaults. You can use the built in parameters to customize output to the fullest extent. Including complete control over the generated `.cs`, `.exe` files and any additional resources.  You can also generate .NET libraries (`.dll`s) which can be consumed by other .NET applications. Compilation targets include any valid platform for `.NET` application including `x86`,`x64` and MSIL (`Any CPU`).  
+Binary Written in PowerShell. Convert `.ps1` files to executables with sensible defaults. You can use the built in parameters to customize output to the fullest extent. Including complete control over the generated `.cs`, `.exe` files and any additional resources.  You can also generate .NET libraries (`.dll`s) which can be consumed by other .NET applications. Compilation targets include any valid platform for `.NET` application including `x86`,`x64` and MSIL (`Any CPU`).  In addition, you can target different .NET releases and reference external assemblies. 
 
 ## Getting Started
 
@@ -42,7 +42,27 @@ An executable will be generated in the current directory with the name `myScript
 New-PsBinary -InFile "path/to/myScript.ps1" -Library
 ```
 
+## Parameters
 
+BinWips assemblies (both `exe`s and `dll`s) can accept arguments from the caller. If you generate a `.exe` the arguments work the same as they would if you wrote a script. E.g.
+
+```bash
+.\PSBinary.exe -String1 "Some Text" -ScriptBlock "{Write-Host 'Inception'}" -Switch1 -Array "Arrays?","Of Course"
+```
+
+Libraries look a little different than you might except coming from C#, but they just take a `param string[] args` parameter similar to the Main method of a c# program. The `param` modifier is supplied in case no parameters are passed. Calling in C# would look like
+
+```c#
+// both of these work, note the escaping of special chars (",') where neccessary
+object result = PSBinary.Invoke("-String 1 'Some Text'", "-ScriptBlock \"{Write-Host 'Inception'}\"", "-Switch1 -Array \"Arrays?\",\"Of Course\"");
+object result = PSBinary.Invoke("-String1 \"Some Text\" -ScriptBlock \"{Write-Host 'Inception'}\" -Switch1 -Array \"Arrays?\",\"Of Course\")";
+```
+
+**TODO: Fill in how to set parameters**
+
+## Libraries
+
+**TODO fill in**
 
 ## Including Resources with your Application
 
@@ -122,9 +142,12 @@ You can fully customize the generated output by replacing the class template and
 
 ## TODO List
 
+Order doesn’t matter.
+
 - [x] Basic Executeable
 - [x] Assembly Attributes
 - [x] ClassAttributes
+- [ ] Parameters
 - [ ] Different Template for Libraries
 - [ ] Allow Method Name Modification for libraries
 - [ ] Attributes Template Parameter
@@ -139,15 +162,20 @@ You can fully customize the generated output by replacing the class template and
 - [ ] Finish Documentation
 - [ ] Finish ReadMe
 
-
-
 ## Limitations
 
-**TODO**
+There are some things that cannot be accomplished by the BinWips module.
+
+1. Anything from the TODO List that is unchecked won’t work.
+2. Second, you should be aware of any security risks for the .NET Framework version you target
+3. BinWips encodes scripts as Base64 strings (and the default class template decodes those strings into plain text before adding them to the runspace) and I believe this helps prevent against sanitization issues, but I haven’t fully tested this. I think this is primarily only a concern if you have a script which creates an `.exe` based on user generated content but I felt it worth sharing.
+4. I do not yet recommend using BinWips for production and/or critical environments because of the reasons listed above. 
+
+I plan to fix all of the above limitations as much as possible. 
 
 ## Inspiration and References
 
-The following links either provided inspiration for this module or are stack overflow links. There are a few non-stackoverflow links but regardless I want to credit the authors. This is just a general list but you'll find some of the same links within the source code if you choose to visit that section of this repository.
+The following links either provided inspiration for this module or are stack overflow links. There are a few non-stack overflow links but regardless I want to credit the authors. This is just a general list but you'll find some of the same links within the source code if you choose to visit that section of this repository.
 
 - https://gallery.technet.microsoft.com/scriptcenter/PS2EXE-GUI-Convert-e7cb69d5
 - https://stackoverflow.com/questions/15414678/how-to-decode-a-base64-string
