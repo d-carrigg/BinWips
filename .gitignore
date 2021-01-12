@@ -1,3 +1,4 @@
-/tests/
-!/tests/*.ps1
+**/tests/**/*.exe
+**/tests/**/*.cs
+!**/tests/**.ps1
 

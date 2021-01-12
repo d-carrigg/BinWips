@@ -1,0 +1,1 @@
+"Resource Content=$(Get-PSBinaryResource -Path 'out.txt')"
