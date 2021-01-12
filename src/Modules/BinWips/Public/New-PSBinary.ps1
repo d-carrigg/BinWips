@@ -101,11 +101,13 @@ using System.Management.Automation;
 // attributes which can be used to identify this assembly as a BinWips
 // https://stackoverflow.com/questions/1936953/custom-assembly-attributes
 [assembly: BinWips("{#BinWipsVersion#}")]
-{#CustomAssemblyAttributes#}
+{#AssemblyAttributes#}
 
 // main namespace
+
 namespace {#Namespace#} {
 
+      {#ClassAttributes#}
       class {#ClassName#} {
          public static void Main(string[] args) {
             var powerShell = PowerShell.Create();
@@ -351,19 +353,34 @@ namespace {#Namespace#} {
          # TODO: preformat assembly attributes
          Write-Host "Applying Assembly Attribuytes"
          $att = ""
-       $AssemblyAttributes | % {
+         $AssemblyAttributes | % {
                $att += "$_`r`n"
          }
          if($att -eq $null)
          {
-            Write-Error "Failed to build attributes"
+            Write-Error "Failed to build assembly attributes"
          }
          $csProgram = $csProgram | Set-PSBinaryToken -Key CustomAssemblyAttributes -Value $att
+      }
+      else {
+         $csProgram = $csProgram | Remove-PSBinaryToken -Key AssemblyAttributes
       }
       if ($hasClassAttributes)
       {
          # TODO: preformat class attributes
-         # $csProgram = $csProgram | Set-PSBinaryToken -Key ClassAttributes -Value 
+         Write-Host "Applying Class Attribuytes"
+         $att = ""
+         $ClassAttributes | % {
+               $att += "$_`r`n"
+         }
+         if($att -eq $null)
+         {
+            Write-Error "Failed to build class attributes"
+         }
+         $csProgram = $csProgram | Set-PSBinaryToken -Key ClassAttributes -Value $att
+      }
+      else {
+         $csProgram = $csProgram | Remove-PSBinaryToken -Key ClassAttributes
       }
       if ($hasTokens)
       {
