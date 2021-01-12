@@ -1,4 +1,4 @@
-function Remove-PSBinary {
+function Remove-PSBinaryToken {
     
         <#
     .SYNOPSIS
@@ -20,7 +20,7 @@ function Remove-PSBinary {
     }
     
     process {
-       $x =  $Source.Replace($Key, "")
+       $x =  $Source.Replace("{#$Key#}", "")
        return $x
     }
     

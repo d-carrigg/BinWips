@@ -360,7 +360,7 @@ namespace {#Namespace#} {
          {
             Write-Error "Failed to build assembly attributes"
          }
-         $csProgram = $csProgram | Set-PSBinaryToken -Key CustomAssemblyAttributes -Value $att
+         $csProgram = $csProgram | Set-PSBinaryToken -Key AssemblyAttributes -Value $att
       }
       else {
          $csProgram = $csProgram | Remove-PSBinaryToken -Key AssemblyAttributes
