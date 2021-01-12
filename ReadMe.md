@@ -147,6 +147,7 @@ Order doesn’t matter.
 - [x] Basic Executeable
 - [x] Assembly Attributes
 - [x] ClassAttributes
+- [ ] Multiple scripts support
 - [ ] Parameters
 - [ ] Different Template for Libraries
 - [ ] Allow Method Name Modification for libraries
