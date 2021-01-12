@@ -99,8 +99,13 @@ Test-PSBinary PSBinary.exe
  If you don’t have the BinWips module installed on a machine you can use the following:
 
 ```powershell
-$Path = "Path to assembly"
-$asm = [System.Reflection.Assembly]::LoadFile($Path)
+$Path = 'Path to assembly in question'
+# We gotta do some trickery to safely load this file
+# https://stackoverflow.com/questions/3832351/disposing-assembly
+# https://www.powershellmagazine.com/2014/03/17/pstip-reading-file-content-as-a-byte-array/
+$Path = Resolve-Path $Path
+$bytes = [System.IO.File]::ReadAllBytes($Path)
+$asm = [System.Reflection.Assembly]::Load($bytes)
 $attrItems = $asm.GetCustomAttributes($false)
 foreach($attr in $attrItems) {
   if($attr.TypeId.Name -eq 'BinWipsAttribute'){
@@ -149,4 +154,6 @@ The following links either provided inspiration for this module or are stack ove
 - [-resource (C# Compiler Options) | Microsoft Docs](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-options/resource-compiler-option)
 - [.net - How to read embedded resource text file - Stack Overflow](https://stackoverflow.com/questions/3314140/how-to-read-embedded-resource-text-file)
 - [c# - List all embedded resources in a folder - Stack Overflow](https://stackoverflow.com/questions/8208289/list-all-embedded-resources-in-a-folder)
-- 
+- [#PSTip Reading file content as a byte array – PowerShell Magazine](https://www.powershellmagazine.com/2014/03/17/pstip-reading-file-content-as-a-byte-array/)
+- [c# - Disposing assembly - Stack Overflow](https://stackoverflow.com/questions/3832351/disposing-assembly)
+

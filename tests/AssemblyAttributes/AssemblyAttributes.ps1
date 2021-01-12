@@ -12,20 +12,19 @@ catch {
 }
 
 
-$asm = [System.Reflection.Assembly]::LoadFile("$($PSScriptRoot)\PSBinary.exe")
+# $asm = [System.Reflection.Assembly]::LoadFile("$($PSScriptRoot)\PSBinary.exe")
 
-$attItems = $asm.GetCustomAttributes($false)
+# $attItems = $asm.GetCustomAttributes($false)
 
-$found = $false
-foreach($att in $attItems)
-{
-   if( $att.TypeId.Name -eq 'AssemblyFileVersionAttribute'){$found = $true}
-}
+# $found = $false
+# foreach($att in $attItems)
+# {
+#    if( $att.TypeId.Name -eq 'AssemblyFileVersionAttribute'){$found = $true}
+# }
+$found = Test-PSBinary "$PSScriptRoot\PSBinary.exe"
 if(!$found)
 {
     throw "Assembly Attribute failed to apply"
 }
-
-Remove-Variable asm
 
 Remove-Module BinWips
