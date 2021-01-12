@@ -108,10 +108,10 @@ You can fully customize the generated output by replacing the class template and
 
 ## TODO List
 
-- [ ] Assembly Attributes
-- [ ] ClassAttributes
+- [x] Assembly Attributes
+- [x] ClassAttributes
 - [ ] Different Template for Libraries
-- [ ] Allow Method Name Modification
+- [ ] Allow Method Name Modification for libraries
 - [ ] Attributes Template Parameter
 - [x] CSC Argument List
 - [ ] PSRuntimeModifications
