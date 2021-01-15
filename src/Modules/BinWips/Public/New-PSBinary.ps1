@@ -96,6 +96,14 @@
       [string]
       $ClassTemplate,
 
+      
+      <#
+            Override the default attributes template.
+            BinWips Tokens not supported.
+        #>
+      [string]
+      $AttributesTemplate,
+
       <#
             Hashtable of tokens to replace in the class template. 
             Exclude the '{#' and '#}' in the keys. 
@@ -199,7 +207,6 @@
       $hasScratchDir = $PSBoundParameters.ContainsKey('ScratchDir')
       $hasOutFile = $PSBoundParameters.ContainsKey('HasOutFile')
       $hasResources = $PSBoundParameters.ContainsKey('Resources')
-      $hasRuntimeModifications = $PSBoundParameters.ContainsKey('PSRuntimeModifications')
       $hasClassTemplate = $PSBoundParameters.ContainsKey('ClassTemplate')
       $hasAttributesTemplate = $PSBoundParameters.ContainsKey('AttributesTemplate')
       
@@ -340,6 +347,22 @@
          }
 "@
       }
+      if(!$hasAttributesTemplate)
+      {
+         $AttributesTemplate = @"
+         using System;
+         
+         namespace BinWips {
+             [AttributeUsage(AttributeTargets.Assembly)]
+             public class BinWipsAttribute : Attribute {
+                 public string Version {get;set;}
+                 public BinWipsAttribute(){}
+                 public BinWipsAttribute(string version){Version = version;}
+             }
+         }
+"@
+      }
+
 
       $runtimeSetupScript = @"
       function Get-PSBinaryResource {
@@ -451,20 +474,7 @@
       }
       # 5. 
       $csProgram | Out-File "$ScratchDir\PSBinary.cs" -Encoding utf8 -Force:$Force
-
-      # TODO: Move to parameter
-      $attributesTemplate = @"
-using System;
-
-namespace BinWips {
-    [AttributeUsage(AttributeTargets.Assembly)]
-    public class BinWipsAttribute : Attribute {
-        public string Version {get;set;}
-        public BinWipsAttribute(){}
-        public BinWipsAttribute(string version){Version = version;}
-    }
-}
-"@
+ 
       $attributesTemplate | Out-File "$ScratchDir\BinWipsAttr.cs" -Encoding utf8 -Force:$Force
 
       # 6. 
