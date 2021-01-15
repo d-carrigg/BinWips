@@ -3,6 +3,6 @@ rm "$PSScriptRoot\*" -Exclude "*.ps1" -Recurse
 
 Import-Module $pth -Force
 
-New-PSBinary -InFile "$PSScriptRoot\File1.ps1","$PSScriptRoot\File2.ps1" -OutDir $PSScriptRoot  -ErrorAction Stop
+New-PSBinary -ScriptBlock {Write-Host "It's aliBRARY!"} -OutDir $PSScriptRoot  -ErrorAction Stop -Library
 
-. "$PSScriptRoot\File2.exe"clear
+#. "$PSScriptRoot\PSBinar.exe"

@@ -151,7 +151,7 @@ Order doesn’t matter.
 - [x] ClassAttributes
 - [x] Multiple scripts support
 - [ ] Parameters
-- [ ] Different Template for Libraries
+- [x] Different Template for Libraries
 - [ ] Allow Method Name Modification for libraries
 - [ ] Attributes Template Parameter
 - [x] CSC Argument List
