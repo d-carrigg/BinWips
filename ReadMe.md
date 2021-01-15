@@ -44,7 +44,7 @@ New-PsBinary -InFile "path/to/myScript.ps1" -Library
 
 ## Parameters
 
-BinWips assemblies (both `exe`s and `dll`s) can accept arguments from the caller. If you generate a `.exe` the arguments work the same as they would if you wrote a script. E.g.
+BinWips assemblies (both `exe`s and `dll`s) can accept arguments from the caller but parameters need to be entered a bit differently for BinWips to support them.  If you generate a `.exe` the arguments work the same as they would if you wrote a script. E.g.
 
 ```bash
 .\PSBinary.exe -String1 "Some Text" -ScriptBlock "{Write-Host 'Inception'}" -Switch1 -Array "Arrays?","Of Course"
@@ -59,6 +59,8 @@ object result = PSBinary.Invoke("-String1 \"Some Text\" -ScriptBlock \"{Write-Ho
 ```
 
 **TODO: Fill in how to set parameters**
+
+
 
 ## Libraries
 
@@ -147,7 +149,7 @@ Order doesn’t matter.
 - [x] Basic Executeable
 - [x] Assembly Attributes
 - [x] ClassAttributes
-- [ ] Multiple scripts support
+- [x] Multiple scripts support
 - [ ] Parameters
 - [ ] Different Template for Libraries
 - [ ] Allow Method Name Modification for libraries

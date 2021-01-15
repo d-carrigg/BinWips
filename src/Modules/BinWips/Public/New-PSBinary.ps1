@@ -27,8 +27,10 @@
          ParameterSetName = 'Inline')]
       $ScriptBlock,
 
-      # Source Script file
-      [string]
+      # Source Script file(s), order is important
+      # Files added in order entered
+      # Exe name is defaulted to last file in array
+      [string[]]
       [Parameter(Mandatory = $true,
          ValueFromPipelineByPropertyName = $true,
          Position = 0,
@@ -158,10 +160,6 @@ namespace {#Namespace#} {
       [string[]]
       $CscArgumentList,
 
-      # Not sure if this is gonna be a thing yet, but provide option to set default runtime customizations
-      [string[]]
-      $PsRuntimeModifications,
-
       # Directory to place output in, defaults to current directory
       # Dir will be created if it doesn't already exist. 
       [string]
@@ -249,10 +247,12 @@ namespace {#Namespace#} {
       $hasRuntimeModifications = $PSBoundParameters.ContainsKey('PSRuntimeModifications')
       $hasClassTemplate = $PSBoundParameters.ContainsKey('ClassTemplate')
       $hasAttributesTemplate = $PSBoundParameters.ContainsKey('AttributesTemplate')
-      
+
       # TODO: Reference a newer version of the PowerShell SDK
       $powerShellSDK = "C:\Windows\assembly\GAC_MSIL\System.Management.Automation\1.0.0.0__31bf3856ad364e35\System.Management.Automation.dll"
       $dotNetPath = "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe" 
+
+      $multipleFiles = !$inline -and ($InFile.Count -gt 0)
 
       if ($Library)
       {
@@ -276,6 +276,10 @@ namespace {#Namespace#} {
          if ($inline)
          {
             $OutFile = "$OutDir\PSBinary.exe"
+         }
+         elseif($multipleFiles)
+         {
+            $OutFile = $InFile[-1].Replace(".ps1", ".exe")
          }
          else
          {
@@ -313,7 +317,7 @@ namespace {#Namespace#} {
    
       # Create directories
       [System.IO.Directory]::CreateDirectory($ScratchDir)
-      [System.IO.Directory]::CreateDirectory($OutDir)
+      [System.IO.Directory]::CreateDirectory($OutDir)	
       # TODO: Clean out dir if specified
       # TODO: Handle Resources
       if ($hasResources)
@@ -333,13 +337,14 @@ namespace {#Namespace#} {
       }
      
       # 2. 
-      if (!$inline)
-      {
-         $psScript = Get-Content $InFile
-      }
-      else
+      if ($inline)
       {
          $psScript = $ScriptBlock
+         
+      }
+      else
+      { 
+         $psScript = Get-Content $InFile | Out-String
       }
 
       # 3. (https://stackoverflow.com/questions/15414678/how-to-decode-a-base64-string)
@@ -371,8 +376,7 @@ namespace {#Namespace#} {
       }
       if ($hasClassAttributes)
       {
-         # TODO: preformat class attributes
-         Write-Host "Applying Class Attribuytes"
+         Write-Host "Applying class attributes"
          $att = ""
          $ClassAttributes | % {
                $att += "$_`r`n"

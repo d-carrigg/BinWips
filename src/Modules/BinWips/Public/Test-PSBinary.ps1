@@ -31,7 +31,7 @@
 
         # The binary is a BinWips binary if any of the attributes are the BinWipsAttribute
         # we know this since that attribute is added by default to the assembly
-        # if it's not there no dice, no way for us to detect if it was made by BinWips
+        # if it's not there no dice, no way for us to detect if it was made by BinWips		
         $attrItems = $asm.GetCustomAttributes($false)
         foreach($attr in $attrItems) {
             if($attr.TypeId.Name -eq 'BinWipsAttribute'){
