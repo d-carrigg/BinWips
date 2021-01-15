@@ -153,7 +153,7 @@ Order doesn’t matter.
 - [ ] Parameters
 - [x] Different Template for Libraries
 - [ ] Allow Method Name Modification for libraries
-- [ ] Attributes Template Parameter
+- [x] Attributes Template Parameter
 - [x] CSC Argument List
 - [ ] Clean
 - [ ] KeepScratchDir
