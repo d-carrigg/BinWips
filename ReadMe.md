@@ -44,7 +44,15 @@ New-PsBinary -InFile "path/to/myScript.ps1" -Library
 
 ## Parameters
 
-BinWips assemblies (both `exe`s and `dll`s) can accept arguments from the caller but parameters need to be entered a bit differently for BinWips to support them.  If you generate a `.exe` the arguments work the same as they would if you wrote a script. E.g.
+BinWips assemblies (both `exe`s and `dll`s) can accept arguments from the caller but parameters need to be entered a bit differently for BinWips to support them. To generate an exe that supports parameters use the `-Parameters` parameter. E.g
+
+```powershell
+New-PSBinary -ScriptBlock {"Param was $myParam"} -Parameters 'param($myParam)' 
+# or 
+New-PSBinary -InFile "MyScript.ps1" -Parameters 'param($myParam)'  # make sure not to include the param statment in your scipt
+```
+
+  If you generate a `.exe` the arguments work the same as they would if you wrote a script. E.g.
 
 ```bash
 .\PSBinary.exe -String1 "Some Text" -ScriptBlock "{Write-Host 'Inception'}" -Switch1 -Array "Arrays?","Of Course"
@@ -64,6 +72,8 @@ object result = PSBinary.Invoke("-String1 \"Some Text\" -ScriptBlock \"{Write-Ho
 
 ## Libraries
 
+
+
 **TODO fill in**
 
 ## Including Resources with your Application
@@ -79,7 +89,7 @@ To include additional files, pass an array of file paths to the `-Resources` par
 you would use the following syntax:
 
 ```powershell
-New-Binary -File MyScript.ps1 -Resources @(
+New-PSBinary -File MyScript.ps1 -Resources @(
     '.\MyImage.png',
     'c:\foo\MyText.txt',
     'c:\Windows\ImportantFolder\MyRequiredLibrary.dll'
@@ -100,15 +110,6 @@ A few important notes:
 - You can’t use `Get-Content` or `Get-Item` cmdlets with these  files because they do not exist as files when deployed
 
 If you want to deploy the resources next to the `exe` instead of embedding them, include the `-NoEmbedResources` option. In which case the files will be copied to the `-OutDir` if they do not already exist at that location. If all resources are in the same directory as the script, or they already exist on the machine you want to deploy to. You don’t need to include them as resources, you can just access them as you normally would in your PowerShell script.
-
-## PowerShell Runtime Modifications
-
-You can modify the session in which your script is run as an executable. This is useful if you have multiple scripts which you convert to `.exe`s and you want to run some common setup before executing each script. This includes things such as shared cmdlets, module imports, startup messages, and *almost* anything else you can run as a PowerShell script. At this time you cannot modify the PowerShell host (you can't say change the output color of text). To accomplish that you will need to see the [Advanced Usage Section](#advanced-usage) section. 
-
-An example of a modification comes from the BinWips source code. In the default class template, the BinWips module adds the `Get-PSBinaryResource` cmdlet to the runspace. This is used if you include resources as described in the [Resources section](#including-resources-with-your-application).
-**TODO fill in**
-
-
 
 ## Check if an application is a BinWips executable
 
@@ -155,12 +156,21 @@ Order doesn’t matter.
 - [ ] Allow Method Name Modification for libraries
 - [x] Attributes Template Parameter
 - [x] CSC Argument List
+- [ ] Identify C# Compiler Errors (catch them)
+- [ ] Newer C# compiler
+- [ ] Newer PowerShell SDK version
+- [ ] Linux support (anything special needed)?
+- [ ] Interactive apps (investigate if anything special needs to be done to support adding user input at runtime)
 - [ ] Clean
+- [ ] Docs Section on how binwips works
 - [ ] KeepScratchDir
 - [ ] Force
 - [x] Resources
+- [x] Get-PSBinaryResource
+- [ ] `-AsFile` parameter for Get-PsBinaryResource which auto extracts to a temp dir and returns a file info object
 - [ ] NoEmbedResources
-- [ ] More Tests
+- [ ] More Tests (and switch to pester)
+- [ ] PlattyPS (or PSPlatty I forget) for documentation
 - [ ] Finish Documentation
 - [ ] Finish ReadMe
 
@@ -186,4 +196,5 @@ The following links either provided inspiration for this module or are stack ove
 - [c# - List all embedded resources in a folder - Stack Overflow](https://stackoverflow.com/questions/8208289/list-all-embedded-resources-in-a-folder)
 - [#PSTip Reading file content as a byte array – PowerShell Magazine](https://www.powershellmagazine.com/2014/03/17/pstip-reading-file-content-as-a-byte-array/)
 - [c# - Disposing assembly - Stack Overflow](https://stackoverflow.com/questions/3832351/disposing-assembly)
+- [How to Create a Console Shell - PowerShell | Microsoft Docs](https://docs.microsoft.com/en-us/powershell/scripting/developer/prog-guide/how-to-create-a-console-shell?view=powershell-7.1)
 

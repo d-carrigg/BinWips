@@ -37,6 +37,17 @@
          ParameterSetName = 'File')]
       $InFile,
 
+      # Parameter string to use for your program
+      # e.g. param($Param1,$Param2,$Param3)
+      # all param formats supported
+      # Don't include this param block in your source script(-ScriptBlock or -InFile)
+      # Don't use this parameter for parameters of cmdlets which you create in your scripts (use those as normal)
+      [Parameter(Mandatory= $false)]
+      [string]
+      [Alias('Param')]
+      [Alias('Parameters')]
+      $ParametersString,
+
       # Namespace for the generated program. 
       # This parameter is trumped by -Tokens, so placing a value here will be overriden by
       # whatever is in -Tokens
@@ -209,8 +220,8 @@
       $hasResources = $PSBoundParameters.ContainsKey('Resources')
       $hasClassTemplate = $PSBoundParameters.ContainsKey('ClassTemplate')
       $hasAttributesTemplate = $PSBoundParameters.ContainsKey('AttributesTemplate')
+      $hasParameters = $PSBoundParameters.ContainsKey('ParametersString')
       
-
       # TODO: Reference a newer version of the PowerShell SDK
       $powerShellSDK = "C:\Windows\assembly\GAC_MSIL\System.Management.Automation\1.0.0.0__31bf3856ad364e35\System.Management.Automation.dll"
       $dotNetPath = "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe" 
@@ -230,11 +241,11 @@
 
       if (!$hasOutDir)
       {
-         $OutDir = Get-Location
+         $OutDir = $PWD
       }
       if (!$hasScratchDir)
       {
-         $ScratchDir = "$(Get-Location)\obj"
+         $ScratchDir = "$PWD\obj"
       }
       if (!$hasOutFile)
       {
@@ -251,6 +262,10 @@
             $OutFile = $InFile.Replace(".ps1", ".$outExt")
          }
          
+      }
+      if(!$hasParameters)
+      {
+         $Parameters = ''
       }
       if(!$hasClassTemplate -and $Library)
       {
@@ -305,6 +320,7 @@
          using System;
          using BinWips;
          using System.Management.Automation; 
+         using System.Linq;
          
          // attributes which can be used to identify this assembly as a BinWips
          // https://stackoverflow.com/questions/1936953/custom-assembly-attributes
@@ -318,6 +334,11 @@
                {#ClassAttributes#}
                class {#ClassName#} {
                   public static void Main(string[] args) {
+                     System.Collections.Generic.List<string> sargs = args.ToList();
+                     foreach(var a in args)
+                     {
+                        Console.WriteLine("ARG!: " + a);
+                     }
                      var powerShell = PowerShell.Create();
                      
                      // script is inserted in base64 so we need to decode it
@@ -328,10 +349,9 @@
                      // additional setup could be added 
                      // by default we do an out string so that
                      // console output looks nice 
-                     powerShell.AddScript(runtimeSetup)
-                                 .AddScript(script)
+                     powerShell.AddScript(script)
                                  .AddCommand("Out-String");
-                     var results = powerShell.Invoke();
+                     var results = powerShell.AddParameters(sargs).Invoke();
          
                      // output the results
                      foreach(var result in results){
@@ -365,25 +385,28 @@
 
 
       $runtimeSetupScript = @"
-      function Get-PSBinaryResource {
-         [cmdletbinding()]
-         param (
-            [Parameter(Mandatory=`$true,Position=0)]
-            [string] `$Path
-         )
-         `$asm = [System.Reflection.Assembly]::LoadFile("`$(pwd)\{#AssemblyPath#}")
-         `$stream = `$asm.GetManifestResourceStream(`$Path)
-         `$reader = [System.IO.StreamReader]::new(`$stream)
-         `$result = `$reader.ReadToEnd()
-         `$stream.Close()
-         `$stream.Dispose()
-         `$reader.Close()
-         `$reader.Dipose();
-         return `$result 
-      }     
+{#Parameters#}
+
+function Get-PSBinaryResource {
+   [cmdletbinding()]
+   param (
+      [Parameter(Mandatory=`$true,Position=0)]
+      [string] `$Path
+   )
+   `$asm = [System.Reflection.Assembly]::LoadFile("`$(pwd)\{#AssemblyPath#}")
+   `$stream = `$asm.GetManifestResourceStream(`$Path)
+   `$reader = [System.IO.StreamReader]::new(`$stream)
+   `$result = `$reader.ReadToEnd()
+   `$stream.Close()
+   `$stream.Dispose()
+   `$reader.Close()
+   `$reader.Dipose();
+   return `$result 
+}     
 "@
 
-      $runtimeSetupScript = $runtimeSetupScript | Set-PSBinaryToken -Key AssemblyPath -Value ($OutFile.TrimStart('.')) -Required
+      $runtimeSetupScript = $runtimeSetupScript | Set-PSBinaryToken -Key AssemblyPath -Value ($OutFile.TrimStart('.')) -Required `
+                              | Set-PSBinaryToken -Key Parameters -Value $ParametersString
       $encodedRuntimeSetup = [Convert]::ToBase64String(([System.Text.Encoding]::Unicode.GetBytes($runtimeSetupScript)))
       $cscArgs = @("-out:$OutFile", 
          "/reference:$powerShellSDK",
@@ -422,9 +445,13 @@
       { 
          $psScript = Get-Content $InFile | Out-String
       }
+ 
+      $combined = $runtimeSetupScript + "`r`n" +  $psScript
+      $combined | out-file "$ScratchDir\Combined.ps1" -Encoding unicode 
 
       # 3. (https://stackoverflow.com/questions/15414678/how-to-decode-a-base64-string)
-      $encodedScript = [Convert]::ToBase64String(([System.Text.Encoding]::Unicode.GetBytes($psScript)))
+      # OLD:       $encodedScript = [Convert]::ToBase64String(([System.Text.Encoding]::Unicode.GetBytes($psScript)))
+      $encodedScript = [Convert]::ToBase64String(([System.Text.Encoding]::Unicode.GetBytes($combined)))
       
       # 4. 
       $csProgram = $ClassTemplate | Set-PSBinaryToken -Key Script -Value $encodedScript `
@@ -473,14 +500,15 @@
          } 
       }
       # 5. 
-      $csProgram | Out-File "$ScratchDir\PSBinary.cs" -Encoding utf8 -Force:$Force
+      $csProgram | Out-File "$ScratchDir\PSBinary.cs" -Encoding unicode -Force:$Force
  
-      $attributesTemplate | Out-File "$ScratchDir\BinWipsAttr.cs" -Encoding utf8 -Force:$Force
+      $attributesTemplate | Out-File "$ScratchDir\BinWipsAttr.cs" -Encoding unicode -Force:$Force
 
       # 6. 
       $cscArgs += @("$ScratchDir\PSBinary.cs", 
          "$ScratchDir\BinWipsAttr.cs") # add files to args last
       $x = "$dotNetPath $cscArgs"
+      Write-Host $x
       Invoke-Expression $x
 
       # 7.

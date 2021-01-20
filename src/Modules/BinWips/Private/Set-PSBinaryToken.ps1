@@ -26,7 +26,7 @@
         [string] $Key,
 
         # The value to substitue for -Key
-        [parameter(Mandatory=$true, Position=2)]
+        [parameter(Mandatory=$false, Position=2)]
         [string] $Value,
 
         # Error out if the token is not present
@@ -35,6 +35,13 @@
         [switch]
         $Required
     )
+    if($Required -and ($Value -eq $null)){
+        throw "Required property not inclued for key $Key"
+    } elseif(($Value -eq $null) -and (!$Required))
+    {
+        write-warning "Value for BinWipsToken: $Key was null so it will be removed. To throw an error, use the -Required paramter."
+        $Value = " "
+    }
     
     Write-Host "Replacing $key with $value"
     # TODO: Make regex and use that to prevent accidental replacements (allow escape sequences)
