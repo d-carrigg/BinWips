@@ -161,7 +161,7 @@ Order doesn’t matter.
 - [ ] Newer C# compiler
 - [ ] Newer PowerShell SDK version
 - [ ] Linux support (anything special needed)?
-- [ ] Interactive apps (investigate if anything special needs to be done to support adding user input at runtime)
+- [x] Interactive apps (investigate if anything special needs to be done to support adding user input at runtime)
   - [ ] It does, need to redirect the PS host input to console input, will this require me to implement a fully custom PS host?
 - [ ] Clean
 - [ ] Docs Section on how binwips works
@@ -171,7 +171,7 @@ Order doesn’t matter.
 - [x] Get-PSBinaryResource
 - [ ] BinWips PS Provider
 - [ ] `-AsFile` parameter for Get-PsBinaryResource which auto extracts to a temp dir and returns a file info object
-- [ ] NoEmbedResources
+~~- [ ] NoEmbedResources~~ Not needed with `-AsFile` for Get-PSBinaryResource
 - [ ] More Tests (and switch to pester)
 - [ ] PlattyPS (or PSPlatty I forget) for documentation
 - [ ] Finish Documentation
