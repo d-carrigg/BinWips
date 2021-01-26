@@ -47,7 +47,8 @@ New-PsBinary -InFile "path/to/myScript.ps1" -Library
 BinWips assemblies (both `exe`s and `dll`s) can accept arguments from the caller but parameters need to be entered a bit differently for BinWips to support them. To generate an exe that supports parameters use the `-Parameters` parameter. E.g
 
 ```powershell
-New-PSBinary -ScriptBlock {"Param was $myParam"} -Parameters 'param($myParam)' 
+# Note the escaped variable `$myParam
+New-PSBinary -ScriptBlock {"Param was `$myParam"} -Parameters 'param($myParam)' 
 # or 
 New-PSBinary -InFile "MyScript.ps1" -Parameters 'param($myParam)'  # make sure not to include the param statment in your scipt
 ```
@@ -106,7 +107,7 @@ $myDll = Get-PSBinaryResource "c:\Windows\ImportantFolder\MyRequiredLibrary.dll"
 
 A few important notes:
 
-- When you get a binary resource your are getting it’s content, not a path to a file, and not a `File` object. 
+- When you get a binary resource your are getting it’s content, not a path to a file, and not a `File` object. You can use the `-AsFile` parameter if you need a file reference, in which case the embedded resource will be written to a temp file (this is slower as content needs to first be written to disk).
 - You can’t use `Get-Content` or `Get-Item` cmdlets with these  files because they do not exist as files when deployed
 
 If you want to deploy the resources next to the `exe` instead of embedding them, include the `-NoEmbedResources` option. In which case the files will be copied to the `-OutDir` if they do not already exist at that location. If all resources are in the same directory as the script, or they already exist on the machine you want to deploy to. You don’t need to include them as resources, you can just access them as you normally would in your PowerShell script.
@@ -161,12 +162,14 @@ Order doesn’t matter.
 - [ ] Newer PowerShell SDK version
 - [ ] Linux support (anything special needed)?
 - [ ] Interactive apps (investigate if anything special needs to be done to support adding user input at runtime)
+  - [ ] It does, need to redirect the PS host input to console input, will this require me to implement a fully custom PS host?
 - [ ] Clean
 - [ ] Docs Section on how binwips works
 - [ ] KeepScratchDir
 - [ ] Force
 - [x] Resources
 - [x] Get-PSBinaryResource
+- [ ] BinWips PS Provider
 - [ ] `-AsFile` parameter for Get-PsBinaryResource which auto extracts to a temp dir and returns a file info object
 - [ ] NoEmbedResources
 - [ ] More Tests (and switch to pester)
