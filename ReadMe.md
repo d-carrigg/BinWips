@@ -365,8 +365,10 @@ Order doesn’t matter.
 - [x] Attributes Template Parameter
 - [x] CSC Argument List
 - [ ] Identify C# Compiler Errors (catch them)
-- [ ] Newer C# compiler
-- [ ] Newer PowerShell SDK version
+- [ ] Framework targeting
+  - [ ] Support to target and use new dotnet cli for builds, or include some form of dotnet cli in the module
+  - [ ] Allow for using the dotnet cli to build, or using the older .NET Framework csc (maybe have a switch for this)
+  - [ ] With the new dotnet build allow passing cli args and things like framework indenpendent (AOT)
 - [ ] Linux support (anything special needed)?
 - [x] Interactive apps (investigate if anything special needs to be done to support adding user input at runtime)
   - [ ] It does, need to redirect the PS host input to console input, will this require me to implement a fully custom PS host?
