@@ -223,9 +223,8 @@ PARAMETERS
 
 ## Libraries
 
-
-
-**TODO fill in**
+Libraries work but documentation needs to be added to this section describing them in more detail. Use the `-Library` flag to generate a .dll.
+When a library is used a Class is generated with your dll name that has a `Invoke(string[] args)` method which returns an IEnumerable.
 
 ## Embedding Resources
 
@@ -292,7 +291,64 @@ foreach($attr in $attrItems) {
 
 You can fully customize the generated output by replacing the class template and you can run additional preprocessing before the compiler is invoked. If the built in customization options don't meet your needs this section will guide you through full customization of the compiled output. This section requires knowledge of C#. Additionally, unless you include the default BinWips attribute in your attributes/class template you will not be able to detect your application as a BinWips application (how-to is included in this section). 
 
-**TODO fill in**
+### Class Tempalates
+
+When BinWips generates a .NET program it uses a class template to create and run the PowerShell runspace. You pass in a custom template as a string 
+using `-ClassTemplate` parameter. BinWips supports tokens in the class template which are replaced with values at runtime. Tokens are strings which begin with `{#` and end with `#}`. To override the BinWips version you could pass in `-Tokens @{BinWipsVersion='1.0.0'}`. See the below example `-ClassTemplate`
+for basic usage. This template would generate a console program.
+
+```c#
+// Generaed by BinWips {#BinWipsVersion#}
+using System;
+using BinWips;
+using System.Management.Automation;
+using System.Linq;
+
+// attributes which can be used to identify this assembly as a BinWips
+// https://stackoverflow.com/questions/1936953/custom-assembly-attributes
+[assembly: BinWips("{#BinWipsVersion#}")]
+{#AssemblyAttributes#}
+         
+         // main namespace
+
+         namespace {#Namespace#} {
+         
+               {#ClassAttributes#}
+               class {#ClassName#} {
+                  public static void Main(string[] args)
+        {
+            var powerShell = PowerShell.Create();
+
+            // script is inserted in base64 so we need to decode it
+            var runtimeSetup = DecodeBase64("{#RuntimeSetup#}");
+            var script = DecodeBase64("{#Script#}");
+
+            // build runspace and execute it
+            // additional setup could be added 
+            // by default we do an out string so that
+            // console output looks nice 
+            powerShell
+                      .AddScript(runtimeSetup)
+                      .AddScript(script)
+                      .AddParameters(args)
+                      .AddCommand("Out-String");
+            var results = powerShell.Invoke();
+
+            // output the results
+            foreach (var result in results)
+            {
+                Console.WriteLine(result);
+            }
+        }
+        static string DecodeBase64(string encoded)
+        {
+            var decodedBytes = Convert.FromBase64String(encoded);
+            var text = System.Text.Encoding.Unicode.GetString(decodedBytes);
+            return text;
+        }
+    }
+}
+```
 
 ## TODO List
 
