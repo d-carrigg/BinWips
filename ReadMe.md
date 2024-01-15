@@ -359,7 +359,7 @@ Order doesn’t matter.
 - [x] ClassAttributes
 - [x] Multiple scripts support
 - [X] Parameters
-- [ ] Improve Params for Libraries if Possible (any way to strongly type the args? or params array at least?)
+- [ ] Improve Params for Libraries if Possible (any way to strongly type the args? or params array at least?) -- source gen?
 - [x] Different Template for Libraries
 - [ ] Allow Method Name Modification for libraries
 - [x] Attributes Template Parameter
@@ -369,6 +369,8 @@ Order doesn’t matter.
   - [ ] Support to target and use new dotnet cli for builds, or include some form of dotnet cli in the module
   - [ ] Allow for using the dotnet cli to build, or using the older .NET Framework csc (maybe have a switch for this)
   - [ ] With the new dotnet build allow passing cli args and things like framework indenpendent (AOT)
+  - [ ] Gotta figure out best way to include the compiler or ensure it exists, don't really want to force people to install the .NET Framework SDK
+  - [ ] Maybe [bflat](https://github.com/bflattened/bflat) could be used to build the exe?
 - [ ] Linux support (anything special needed)?
 - [x] Interactive apps (investigate if anything special needs to be done to support adding user input at runtime)
   - [ ] It does, need to redirect the PS host input to console input, will this require me to implement a fully custom PS host?
