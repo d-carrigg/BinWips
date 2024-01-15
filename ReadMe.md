@@ -2,14 +2,16 @@
 
 :construction: Warning: This repository is still under construction, see the [TODO List](#TODO-List) at the bottom to make sure the features you want are complete​
 
-Binary Written in PowerShell. Convert `.ps1` files to executables with sensible defaults. You can use the built in parameters to customize output to the fullest extent. Including complete control over the generated `.cs`, `.exe` files and any additional resources.  You can also generate .NET libraries (`.dll`s) which can be consumed by other .NET applications. Compilation targets include any valid platform for `.NET` application including `x86`,`x64` and MSIL (`Any CPU`).  In addition, you can target different .NET releases and reference external assemblies. 
+Binary Written in PowerShell. Convert `.ps1` files to executables with sensible defaults. You can use the built in parameters to customize output, including control over the generated `.cs`, `.exe` files and any additional resources.  You can also generate .NET libraries (`.dll`s) which can be consumed by other .NET applications. Compilation targets include any valid platform for `.NET` application including `x86`,`x64` and MSIL (`Any CPU`).  In addition, you can target different .NET releases and reference external assemblies. 
 
 ## Getting Started
 
 Install the module with:
 
 ```powershell
-Install-Module BinWips
+# TODO: Publish so this works: Install-Module BinWips
+# For now, git clone the repo
+Install-Module /path/to/BinWips
 ```
 
 Create a simple program from an inline script block:
@@ -173,7 +175,6 @@ Order doesn’t matter.
 - [ ] `-AsFile` parameter for Get-PsBinaryResource which auto extracts to a temp dir and returns a file info object
 ~~- [ ] NoEmbedResources~~ Not needed with `-AsFile` for Get-PSBinaryResource
 - [ ] More Tests (and switch to pester)
-- [ ] PlattyPS (or PSPlatty I forget) for documentation
 - [ ] Finish Documentation
 - [ ] Finish ReadMe
 
@@ -185,8 +186,6 @@ There are some things that cannot be accomplished by the BinWips module.
 2. Second, you should be aware of any security risks for the .NET Framework version you target
 3. BinWips encodes scripts as Base64 strings (and the default class template decodes those strings into plain text before adding them to the runspace) and I believe this helps prevent against sanitization issues, but I haven’t fully tested this. I think this is primarily only a concern if you have a script which creates an `.exe` based on user generated content but I felt it worth sharing.
 4. I do not yet recommend using BinWips for production and/or critical environments because of the reasons listed above. 
-
-I plan to fix all of the above limitations as much as possible. 
 
 ## Inspiration and References
 
