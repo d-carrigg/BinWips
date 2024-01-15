@@ -184,7 +184,7 @@
          1. Verify params and perform setup (create dirs, clean, etc.)
          2. Read in script file if needed
          3. Base64 encode script for easy handling (no dealing with quotes)
-         4. Inser script and replace tokens in class template
+         4. Insert script and replace tokens in class template
          5. Output class + additional files to .cs files in scratch dur
             - Maybe add an additional step here in the future to run 
               preprocessing on c# files (allow a script block -PreprocessBlock argument)
@@ -284,7 +284,7 @@
       {
          if ($NoEmbedResources)
          {
-            #TODO:
+            #TODO: Copy to out dir
          }
          else
          {
