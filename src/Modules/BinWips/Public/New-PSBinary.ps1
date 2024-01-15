@@ -37,17 +37,6 @@
          ParameterSetName = 'File')]
       $InFile,
 
-      # Parameter string to use for your program
-      # e.g. param($Param1,$Param2,$Param3)
-      # all param formats supported
-      # Don't include this param block in your source script(-ScriptBlock or -InFile)
-      # Don't use this parameter for parameters of cmdlets which you create in your scripts (use those as normal)
-      [Parameter(Mandatory= $false)]
-      [string]
-      [Alias('Param')]
-      [Alias('Parameters')]
-      $ParametersString,
-
       # Namespace for the generated program. 
       # This parameter is trumped by -Tokens, so placing a value here will be overriden by
       # whatever is in -Tokens
@@ -263,10 +252,6 @@
          }
          
       }
-      if(!$hasParameters)
-      {
-         $Parameters = ''
-      }
       if(!$hasClassTemplate -and $Library)
       {
          $ClassTemplate = @"
@@ -315,108 +300,16 @@
       }
       elseif(!$hasClassTemplate)
       {
-         $ClassTemplate = @"
-         // Generaed by BinWips {#BinWipsVersion#}
-         using System;
-         using BinWips;
-         using System.Management.Automation; 
-         using System.Linq;
-         
-         // attributes which can be used to identify this assembly as a BinWips
-         // https://stackoverflow.com/questions/1936953/custom-assembly-attributes
-         [assembly: BinWips("{#BinWipsVersion#}")]
-         {#AssemblyAttributes#}
-         
-         // main namespace
-         
-         namespace {#Namespace#} {
-         
-               {#ClassAttributes#}
-               class {#ClassName#} {
-                  public static void Main(string[] args) {
-                     System.Collections.Generic.List<string> sargs = args.ToList();
-                     foreach(var a in args)
-                     {
-                        Console.WriteLine("ARG!: " + a);
-                     }
-                     var powerShell = PowerShell.Create();
-                     
-                     // script is inserted in base64 so we need to decode it
-                     var runtimeSetup = DecodeBase64("{#RuntimeSetup#}");
-                     var script = DecodeBase64("{#Script#}");
-                     
-                     // build runspace and execute it
-                     // additional setup could be added 
-                     // by default we do an out string so that
-                     // console output looks nice 
-                     powerShell.AddScript(script)
-                                 .AddCommand("Out-String");
-                     var results = powerShell.AddParameters(sargs).Invoke();
-         
-                     // output the results
-                     foreach(var result in results){
-                           Console.WriteLine(result);
-                     }
-                  }
-                  static string DecodeBase64(string encoded){
-                     var decodedBytes = Convert.FromBase64String(encoded);
-                     var text = System.Text.Encoding.Unicode.GetString(decodedBytes);
-                     return text;
-                  }
-               }    
-         }
-"@
+         $ClassTemplate = Get-Content -Raw "$PSScriptRoot\files\ClassTemplate.cs"
       }
       if(!$hasAttributesTemplate)
       {
-         $AttributesTemplate = @"
-         using System;
-         
-         namespace BinWips {
-             [AttributeUsage(AttributeTargets.Assembly)]
-             public class BinWipsAttribute : Attribute {
-                 public string Version {get;set;}
-                 public BinWipsAttribute(){}
-                 public BinWipsAttribute(string version){Version = version;}
-             }
-         }
-"@
+         $AttributesTemplate = Get-Content -Raw "$PSScriptRoot\files\AttributesTemplate.cs"
       }
 
+      $runtimeSetupScript = Get-Content -Raw "$PSScriptRoot\files\Setup-Runtime.ps1"
 
-      $runtimeSetupScript = @"
-{#Parameters#}
-
-function Get-PSBinaryResource {
-   [cmdletbinding()]
-   param (
-      [Parameter(Mandatory=$true,Position=0)]
-      [string] $Path,
-
-      [Parameter(Mandatory=$false,Position=1)]
-      [swtich]$AsFile
-   )
-   $asm = [System.Reflection.Assembly]::LoadFile("$(pwd)\{#AssemblyPath#}")
-   $stream = $asm.GetManifestResourceStream($Path)
-   $reader = [System.IO.StreamReader]::new($stream)
-   $result = $reader.ReadToEnd()
-   $stream.Close()
-   $stream.Dispose()
-   $reader.Close()
-   $reader.Dipose()
-   if(!$AsFile){
-    return $result 
-   } else {
-    $tmpFile = [System.IO.Path]::GetTempFileName()
-    $result | Out-File -Encoding unicode -FilePath $tmpFile
-     return get-item $tmpFile
-   }
-  
-}     
-"@
-
-      $runtimeSetupScript = $runtimeSetupScript | Set-PSBinaryToken -Key AssemblyPath -Value ($OutFile.TrimStart('.')) -Required `
-                              | Set-PSBinaryToken -Key Parameters -Value $ParametersString
+      $runtimeSetupScript = $runtimeSetupScript | Set-PSBinaryToken -Key AssemblyPath -Value ($OutFile.TrimStart('.')) -Required 
       $encodedRuntimeSetup = [Convert]::ToBase64String(([System.Text.Encoding]::Unicode.GetBytes($runtimeSetupScript)))
       $cscArgs = @("-out:$OutFile", 
          "/reference:$powerShellSDK",
@@ -448,20 +341,18 @@ function Get-PSBinaryResource {
       # 2. 
       if ($inline)
       {
-         $psScript = $ScriptBlock
+         $psScript = $ScriptBlock.ToString()
          
       }
       else
       { 
-         $psScript = Get-Content $InFile | Out-String
+         $psScript = Get-Content $InFile -Raw
       }
  
-      $combined = $runtimeSetupScript + "`r`n" +  $psScript
-      $combined | out-file "$ScratchDir\Combined.ps1" -Encoding unicode 
 
       # 3. (https://stackoverflow.com/questions/15414678/how-to-decode-a-base64-string)
       # OLD:       $encodedScript = [Convert]::ToBase64String(([System.Text.Encoding]::Unicode.GetBytes($psScript)))
-      $encodedScript = [Convert]::ToBase64String(([System.Text.Encoding]::Unicode.GetBytes($combined)))
+      $encodedScript = [Convert]::ToBase64String(([System.Text.Encoding]::Unicode.GetBytes($psScript)))
       
       # 4. 
       $csProgram = $ClassTemplate | Set-PSBinaryToken -Key Script -Value $encodedScript `

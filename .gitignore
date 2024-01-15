@@ -2,3 +2,8 @@
 **/tests/**/*.cs
 !**/tests/**.ps1
 
+**/bin/
+**/obj/
+
+tests/ExampleRunspace/bin/
+tests/ExampleRunspace/obj/

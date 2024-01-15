@@ -46,13 +46,14 @@ New-PsBinary -InFile "path/to/myScript.ps1" -Library
 
 ## Parameters
 
-BinWips assemblies (both `exe`s and `dll`s) can accept arguments from the caller but parameters need to be entered a bit differently for BinWips to support them. To generate an exe that supports parameters use the `-Parameters` parameter. E.g
+BinWips assemblies (both `exe`s and `dll`s) can accept arguments from the caller.
 
 ```powershell
 # Note the escaped variable `$myParam
-New-PSBinary -ScriptBlock {"Param was `$myParam"} -Parameters 'param($myParam)' 
+New-PSBinary -ScriptBlock {param($myParam); echo "Param was `$myParam"}
 # or 
-New-PSBinary -InFile "MyScript.ps1" -Parameters 'param($myParam)'  # make sure not to include the param statment in your scipt
+# assume MyScript.ps1 contains param($myParam)
+New-PSBinary -InFile "MyScript.ps1"
 ```
 
   If you generate a `.exe` the arguments work the same as they would if you wrote a script. E.g.
@@ -68,10 +69,6 @@ Libraries look a little different than you might except coming from C#, but they
 object result = PSBinary.Invoke("-String 1 'Some Text'", "-ScriptBlock \"{Write-Host 'Inception'}\"", "-Switch1 -Array \"Arrays?\",\"Of Course\"");
 object result = PSBinary.Invoke("-String1 \"Some Text\" -ScriptBlock \"{Write-Host 'Inception'}\" -Switch1 -Array \"Arrays?\",\"Of Course\")";
 ```
-
-**TODO: Fill in how to set parameters**
-
-
 
 ## Libraries
 
