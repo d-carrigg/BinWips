@@ -385,14 +385,13 @@ Order doesn’t matter.
 
 There are some things that cannot be accomplished by the BinWips module.
 
-1. Anything from the TODO List that is unchecked won’t work.
-2. Second, you should be aware of any security risks for the .NET Framework version you target
-3. BinWips encodes scripts as Base64 strings (and the default class template decodes those strings into plain text before adding them to the runspace) and I believe this helps prevent against sanitization issues, but I haven’t fully tested this. I think this is primarily only a concern if you have a script which creates an `.exe` based on user generated content but I felt it worth sharing.
-4. I do not yet recommend using BinWips for production and/or critical environments because of the reasons listed above. 
+1. See the [TODO List](#TODO-List) for a list of features that are not yet implemented
+2. You should be aware of any security risks for the .NET Framework version you target
+3. Assemblies are not signed so they are not tamper proof  
 
 ## Inspiration and References
 
-The following links either provided inspiration for this module or are stack overflow links. There are a few non-stack overflow links but regardless I want to credit the authors. This is just a general list but you'll find some of the same links within the source code if you choose to visit that section of this repository.
+The following links either provided inspiration for this module or were used as references when building it.
 
 - https://gallery.technet.microsoft.com/scriptcenter/PS2EXE-GUI-Convert-e7cb69d5
 - https://stackoverflow.com/questions/15414678/how-to-decode-a-base64-string
