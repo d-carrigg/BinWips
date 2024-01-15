@@ -1,8 +1,8 @@
-# BinWips
+# BinWips: Binary Written in PowerShell
 
 :construction: Warning: This repository is still under construction, see the [TODO List](#TODO-List) at the bottom to make sure the features you want are complete​
 
-Binary Written in PowerShell. Convert `.ps1` files to executables with sensible defaults. You can use the built in parameters to customize output, including control over the generated `.cs`, `.exe` files and any additional resources.  You can also generate .NET libraries (`.dll`s) which can be consumed by other .NET applications. Compilation targets include any valid platform for `.NET` application including `x86`,`x64` and MSIL (`Any CPU`). 
+Create .NET applications and libraries from PowerShell scripts and inline code blocks. Control the generated `.cs`, `.exe` files and any additional resources. Generate .NET libraries (`.dll`s) which can be consumed by other .NET applications. Compilation targets include any valid platform for `.NET` application including `x86`,`x64` and MSIL (`Any CPU`). 
 
 ## Getting Started
 
