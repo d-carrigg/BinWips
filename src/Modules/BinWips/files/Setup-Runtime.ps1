@@ -7,7 +7,7 @@
        [Parameter(Mandatory=$false,Position=1)]
        [swtich]$AsFile
     )
-    $asm = [System.Reflection.Assembly]::LoadFile("$(pwd)\{#AssemblyPath#}")
+    $asm = [System.Reflection.Assembly]::LoadFile("{#AssemblyPath#}")
     $stream = $asm.GetManifestResourceStream($Path)
     $reader = [System.IO.StreamReader]::new($stream)
     $result = $reader.ReadToEnd()
@@ -24,3 +24,7 @@
     }
    
  }     
+
+#  function Write-Output {
+#    param($InputObject) process {Write-Host $InputObject}
+#  }

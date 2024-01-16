@@ -1,13 +1,31 @@
 ﻿// See https://aka.ms/new-console-template for more information
 // Start a PowerShell runspace
+using System.Management.Automation.Language;
 using System.Management.Automation.Runspaces;
+using System.Diagnostics;
 
 public class Program
 {
     public static void Main(string[] args)
     {
 
-        var powerShell = System.Management.Automation.PowerShell.Create();
+        // var powerShell = System.Management.Automation.PowerShell.Create();
+
+           var psi = new ProcessStartInfo(@"C:\Program Files\PowerShell\7-preview\pwsh.exe");
+	    
+
+                   var wrappedScript = """
+function Write-Output {param($InputObject) process {Write-Host $InputObject} }
+
+    echo 'Hello World'
+""";
+ 
+            
+            psi.Arguments = "-NoProfile -NoLogo -WindowStyle Hidden -Command " + wrappedScript;
+            var process = Process.Start(psi);
+            process.WaitForExit();
+
+            
 
         var setupScript = """
 
@@ -30,21 +48,25 @@ public class Program
 
     Foo -Foo "Hello" -Bar "World"
 """;
-        powerShell
-        .AddScript(setupScript)
-        .AddScript(script)
-        .AddParameters(args);
-        var result = powerShell
-                        .AddCommand("Out-String")
-                        .Invoke();
+ 
+        // powerShell
+        // .AddScript(setupScript)
+        // .AddScript(script)
+        // .AddParameters(args);
+        // var result = powerShell
+        //                 .AddCommand("Out-String")
+        //                 .Invoke();
 
-        foreach (var psObject in result)
-        {
-            Console.WriteLine(psObject);
-        }
+        // foreach (var psObject in result)
+        // {
+        //     Console.WriteLine(psObject);
+        // }
 
-
-
+ 
+ 
     }
+
+
 }
 
+ 

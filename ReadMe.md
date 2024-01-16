@@ -12,6 +12,8 @@ application including `x86`,`x64` and MSIL (`Any CPU`). Currently only the .NET
 Framework is supported, but .NET Core support is planned. This includes support
 for other platforms such as Linux and MacOS.
 
+[[_TOC_]]
+
 ## Getting Started
 
 Install the module with:
@@ -338,8 +340,7 @@ application as a BinWips application (how-to is included in this section).
 
 ### Class Tempalates
 
-When BinWips generates a .NET program it uses a class template to create and run
-the PowerShell runspace. You pass in a custom template as a string using
+When BinWips generates a .NET program it uses a class template to setup a new powershell instance and run your scripts. You pass in a custom template as a string using
 `-ClassTemplate` parameter. BinWips supports tokens in the class template which
 are replaced with values at runtime. Tokens are strings which begin with `{#`
 and end with `#}`. To override the BinWips version you could pass in
@@ -399,6 +400,18 @@ using System.Linq;
 }
 ```
 
+## Testing
+
+Testing is done through Pester. To run the tests, clone the repo and run
+
+```powershell
+Invoke-Pester -Script ./tests/BinWips.Tests.ps1
+
+<#
+Tags: Named Params, Switches
+#>
+```
+
 ## TODO List
 
 Order doesn’t matter.
@@ -441,6 +454,9 @@ Order doesn’t matter.
 - [ ] More Tests (and switch to pester)
 - [ ] Finish Documentation
 - [ ] Finish ReadMe
+- [ ] Ability to package modules with the exe (Each Function is a verb so `Verb-Noun` becomes `exe_name verb parameters`)
+- [ ] Windows/GUIS
+- [ ] Help and Verison # Support (--help and --version or a verb/something along those lines)
 
 ## Limitations
 
