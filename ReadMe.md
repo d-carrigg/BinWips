@@ -67,7 +67,7 @@ a script. E.g.
 .\PSBinary.exe -String1 "Some Text" -ScriptBlock "{Write-Host 'Inception'}" -Switch1 -Array "Arrays?","Of Course"
 ```
 
-Parameter validation works the same but intellisense completion will no work. You can use `.\PSBinary.exe help` to get help. For your module. This will produce PowerShell style help for your program. No additional work is required on your part, this is done automatically.
+Parameter validation works, tab completion does not. You can use `.\PSBinary.exe help` to get help. For your module. This will produce PowerShell style help for your program. No additional work is required on your part, this is done automatically.
 
 ```text
 NAME
