@@ -1,9 +1,9 @@
-﻿function Test-PSBinary {
+﻿function Test-BinWips {
     <#
     .SYNOPSIS
         Check if an assembly was built with BinWips.
     .EXAMPLE
-        PS C:\> Test-PSBinary PSBinary.exe
+        PS C:\> Test-BinWips PSBinary.exe
     #>
     [CmdletBinding()]
     param (

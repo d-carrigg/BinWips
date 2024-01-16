@@ -5,12 +5,7 @@
 complete​
 
 Create .NET applications and libraries from PowerShell scripts and inline code
-blocks. Control the generated `.cs`, `.exe` files and any additional resources.
-Generate .NET libraries (`.dll`s) which can be consumed by other .NET
-applications. Compilation targets include any valid platform for `.NET`
-application including `x86`,`x64` and MSIL (`Any CPU`). Currently only the .NET
-Framework is supported, but .NET Core support is planned. This includes support
-for other platforms such as Linux and MacOS.
+blocks. Control over the generated `.cs`, `.exe`, and `.dll` files and any additional resources. Target linux and windows on x86, x64, and arm64.
 
 [[_TOC_]]
 
@@ -27,7 +22,7 @@ Install-Module /gitrepo/src/Modules/BinWips
 Create a simple program from an inline script block:
 
 ```powershell
-New-PSBinary -ScriptBlock {echo "Hello World!"}
+New-BinWips -ScriptBlock {echo "Hello World!"}
 ```
 
 This will generate a program named `PSBinary.exe` in the current directory.
@@ -46,16 +41,11 @@ Hello World!
 You can also generate programs from script files:
 
 ```powershell
-New-PSBinary -InFile "path/to/myScript.ps1"
+New-BinWips -InFile "path/to/myScript.ps1"
 ```
 
 An executable will be generated in the current directory with the name
-`myScript.exe`. If you want to produce a library (`dll`) instead you can do so
-by using the `-Library` parameter:
-
-```PowerShell
-New-PSBinary -InFile "path/to/myScript.ps1" -Library
-```
+`myScript.exe`. 
 
 ## Parameters
 
@@ -64,51 +54,69 @@ caller.
 
 ```powershell
 # Note the escaped variable `$myParam
-New-PSBinary -ScriptBlock {param($myParam); echo "Param was `$myParam"}
-# or
-# assume MyScript.ps1 contains param($myParam)
-New-PSBinary -InFile "MyScript.ps1"
+New-BinWips -ScriptBlock {
+    param($myParam)
+    echo "Param was `$myParam"
+}
+
+# Also works with scripts
+New-BinWips -InFile "MyScript.ps1"
+## Content of MyScript.ps1
+# param($myParam)
+# echo "Param was `$myParam"
 ```
 
 If you generate a `.exe` the arguments work the same as they would if you wrote
 a script. E.g.
 
-```bash
+```powershell
 .\PSBinary.exe -String1 "Some Text" -ScriptBlock "{Write-Host 'Inception'}" -Switch1 -Array "Arrays?","Of Course"
 ```
 
-Libraries look a little different than you might expect coming from C#, but they
-just take a `param string[] args` parameter similar to the Main method of a c#
-program. The `param` modifier is supplied in case no parameters are passed.
-Calling in C# would look like
+Parameter validation works the same but intellisense completion will no work. You can use `.\PSBinary.exe help` to get help. For your module. This will produce PowerShell style help for your program. No additional work is required on your part, this is done automatically.
 
-```c#
-// both of these work, note the escaping of special chars (",') where neccessary
-object result = PSBinary.Invoke("-String 1 'Some Text'", "-ScriptBlock \"{Write-Host 'Inception'}\"", "-Switch1 -Array \"Arrays?\",\"Of Course\"");
-object result = PSBinary.Invoke("-String1 \"Some Text\" -ScriptBlock \"{Write-Host 'Inception'}\" -Switch1 -Array \"Arrays?\",\"Of Course\")";
+```text
+NAME
+    PSBinary
+
+SYNTAX
+    PSBinary [-baz] [<CommonParameters>]
+
+
+PARAMETERS
+    -baz
+
+    <CommonParameters>
+        This cmdlet supports the common parameters: Verbose, Debug,
+        ErrorAction, ErrorVariable, WarningAction, WarningVariable,
+        OutBuffer, PipelineVariable, and OutVariable. For more information, see
+        about_CommonParameters (https://go.microsoft.com/fwlink/?LinkID=113216).
+
+REMARKS
+    None
 ```
 
-## Detailed Help
+## All New-BinWips Parameters
 
-Detailed help is included via the `Get-Help` cmdlet. Run
-`Get-Help New-PSBinary -Detailed` for more information.
+Detailed help for this module is included via the `Get-Help` cmdlet. Run
+`Get-Help New-BinWips -Detailed` for more information.
 
 ```
 NAME
-    New-PSBinary
+    New-BinWips
 
 SYNOPSIS
     Creates a new PowerShell binary.
 
 
 SYNTAX
-    New-PSBinary [-ScriptBlock] <Object> [-Namespace <String>] [-ClassName <Object>] [-OutFile <String>]
+    New-BinWips [-ScriptBlock] <Object> [-Namespace <String>] [-ClassName <Object>] [-OutFile <String>]
     [-AssemblyAttributes <String[]>] [-NoDefaultAttributes] [-ClassAttributes <Hashtable>] [-ClassTemplate <String>]
     [-AttributesTemplate <String>] [-Tokens <Hashtable>] [-CscArgumentList <String[]>] [-OutDir <String>] [-ScratchDir
     <String>] [-Clean] [-KeepScratchDir] [-Force] [-Resources <String[]>] [-NoEmbedResources] [-Library]
     [<CommonParameters>]
 
-    New-PSBinary [-InFile] <String[]> [-Namespace <String>] [-ClassName <Object>] [-OutFile <String>] [-AssemblyAttributes
+    New-BinWips [-InFile] <String[]> [-Namespace <String>] [-ClassName <Object>] [-OutFile <String>] [-AssemblyAttributes
     <String[]>] [-NoDefaultAttributes] [-ClassAttributes <Hashtable>] [-ClassTemplate <String>] [-AttributesTemplate
     <String>] [-Tokens <Hashtable>] [-CscArgumentList <String[]>] [-OutDir <String>] [-ScratchDir <String>] [-Clean]
     [-KeepScratchDir] [-Force] [-Resources <String[]>] [-NoEmbedResources] [-Library] [<CommonParameters>]
@@ -243,10 +251,22 @@ PARAMETERS
 
 ## Libraries
 
-Libraries work but documentation needs to be added to this section describing
-them in more detail. Use the `-Library` flag to generate a .dll. When a library
-is used a Class is generated with your dll name that has a
-`Invoke(string[] args)` method which returns an IEnumerable.
+If you want to produce a library (`dll`) instead you can do so
+by using the `-Library` parameter:
+
+```PowerShell
+New-BinWips -InFile "path/to/myScript.ps1" -Library
+```
+
+Libraries look a little different than you might expect coming from C#, but they
+just take a `param string[] args` parameter similar to the Main method of a c#
+program. The `param` modifier is supplied in case no parameters are passed.
+Calling in C# would look like
+
+```c#
+
+PSBinary.Invoke("-String 1 'Some Text'", "-ScriptBlock \"{Write-Host 'Inception'}\"", "-Switch1 -Array \"Arrays?\",\"Of Course\"");
+```
 
 ## Embedding Resources
 
@@ -267,7 +287,7 @@ parameter. For example, if you want to include 3 files:
 you would use the following syntax:
 
 ```powershell
-New-PSBinary -File MyScript.ps1 -Resources @(
+New-BinWips -File MyScript.ps1 -Resources @(
     '.\MyImage.png',
     'c:\foo\MyText.txt',
     'c:\Windows\ImportantFolder\MyRequiredLibrary.dll'
@@ -303,10 +323,10 @@ access them as you normally would in your PowerShell script.
 ## Check if an application is a BinWips executable
 
 Built in functionality is provided for checking if an assembly (`exe` or `dll`)
-was built with BinWips via the `Test-PSBinary` command:
+was built with BinWips via the `Test-BinWips` command:
 
 ```powershell
-Test-PSBinary PSBinary.exe
+Test-BinWips PSBinary.exe
 ```
 
 If you don’t have the BinWips module installed on a machine you can use the
@@ -351,50 +371,63 @@ basic usage. This template would generate a console program.
 // Generaed by BinWips {#BinWipsVersion#}
 using System;
 using BinWips;
-using System.Management.Automation;
-using System.Linq;
+using System.Diagnostics;
 
 // attributes which can be used to identify this assembly as a BinWips
 // https://stackoverflow.com/questions/1936953/custom-assembly-attributes
 [assembly: BinWips("{#BinWipsVersion#}")]
 {#AssemblyAttributes#}
-
-         // main namespace
-
-         namespace {#Namespace#} {
-
-               {#ClassAttributes#}
-               class {#ClassName#} {
-                  public static void Main(string[] args)
+namespace {#Namespace#} {
+         
+    {#ClassAttributes#}
+    class {#ClassName#} 
+    {
+        public static void Main(string[] args)
         {
-            var powerShell = PowerShell.Create();
+
 
             // script is inserted in base64 so we need to decode it
             var runtimeSetup = DecodeBase64("{#RuntimeSetup#}");
-            var script = DecodeBase64("{#Script#}");
+            var funcName = "{#FunctionName#}";
 
-            // build runspace and execute it
-            // additional setup could be added
-            // by default we do an out string so that
-            // console output looks nice
-            powerShell
-                      .AddScript(runtimeSetup)
-                      .AddScript(script)
-                      .AddParameters(args)
-                      .AddCommand("Out-String");
-            var results = powerShell.Invoke();
-
-            // output the results
-            foreach (var result in results)
+            var ending = "";
+            if (args.Length == 1 && args[0] == "help")
             {
-                Console.WriteLine(result);
+                ending = $"Get-Help -Detailed {funcName}";
             }
+            else
+            {
+                ending = $"{funcName} {string.Join(" ", args)}";
+            }
+
+            var script = DecodeBase64("{#Script#}");
+            var wrappedScript = $"{runtimeSetup}\n\n function {funcName}\n {{\n {script}\n }}\n{ending}";
+
+
+            var encodedCommand = EncodeBase64(wrappedScript);
+
+            // call PWSH to execute the script passing in the args
+            var psi = new ProcessStartInfo(@"pwsh.exe");
+            psi.Arguments = "-NoProfile -NoLogo -WindowStyle Hidden -EncodedCommand " + encodedCommand;
+            //psi.RedirectStandardInput = true;
+            var process = Process.Start(psi);
+            process.EnableRaisingEvents = true;
+
+            process.WaitForExit();
+
         }
         static string DecodeBase64(string encoded)
         {
             var decodedBytes = Convert.FromBase64String(encoded);
             var text = System.Text.Encoding.Unicode.GetString(decodedBytes);
             return text;
+        }
+
+        static string EncodeBase64(string text)
+        {
+            var bytes = System.Text.Encoding.Unicode.GetBytes(text);
+            var encoded = Convert.ToBase64String(bytes);
+            return encoded;
         }
     }
 }
@@ -429,17 +462,7 @@ Order doesn’t matter.
 - [x] CSC Argument List
 - [ ] Identify C# Compiler Errors (catch them)
 - [ ] Framework targeting
-  - [ ] Support to target and use new dotnet cli for builds, or include some
-        form of dotnet cli in the module
-  - [ ] Allow for using the dotnet cli to build, or using the older .NET
-        Framework csc (maybe have a switch for this)
-  - [ ] With the new dotnet build allow passing cli args and things like
-        framework indenpendent (AOT)
-  - [ ] Gotta figure out best way to include the compiler or ensure it exists,
-        don't really want to force people to install the .NET Framework SDK
-  - [ ] Maybe [bflat](https://github.com/bflattened/bflat) could be used to
-        build the exe?
-- [ ] Linux support (anything special needed)?
+- [x] Linux support (anything special needed)?
 - [x] Interactive apps (investigate if anything special needs to be done to
       support adding user input at runtime)
   - [ ] It does, need to redirect the PS host input to console input, will this
@@ -451,12 +474,14 @@ Order doesn’t matter.
 - [x] Resources
 - [x] Get-PSBinaryResource
 - [ ] BinWips PS Provider
-- [ ] More Tests (and switch to pester)
+- [x] More Tests (and switch to pester)
 - [ ] Finish Documentation
 - [ ] Finish ReadMe
 - [ ] Ability to package modules with the exe (Each Function is a verb so `Verb-Noun` becomes `exe_name verb parameters`)
 - [ ] Windows/GUIS
 - [ ] Help and Verison # Support (--help and --version or a verb/something along those lines)
+  - [x] Help
+  - [ ] Version
 
 ## Limitations
 

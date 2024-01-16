@@ -1,4 +1,4 @@
-﻿function New-PSBinary
+﻿function Build-NetFramework
 {
    <#
     .SYNOPSIS
@@ -23,19 +23,8 @@
       # cannot be combined with `InFile`
       [Parameter(Mandatory = $true,
          ValueFromPipelineByPropertyName = $true,
-         Position = 0,
-         ParameterSetName = 'Inline')]
-      $ScriptBlock,
-
-      # Source Script file(s), order is important
-      # Files added in order entered
-      # Exe name is defaulted to last file in array
-      [string[]]
-      [Parameter(Mandatory = $true,
-         ValueFromPipelineByPropertyName = $true,
-         Position = 0,
-         ParameterSetName = 'File')]
-      $InFile,
+         Position = 0)]
+      $Script,
 
       # Namespace for the generated program. 
       # This parameter is trumped by -Tokens, so placing a value here will be overriden by
@@ -58,6 +47,9 @@
       # PSBinary.exe if a script block is inlined
       [string]
       $OutFile,
+
+      [string]
+      $Target,
 
       <# Hashtable of assembly attributes to apply to the assembly level.
              - list of defaults here: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/attributes/global
@@ -173,13 +165,59 @@
       [switch]
       $Library
    )
-
+   
    Begin
    {
    }
    Process
    {
-      New-PSBinaryBflat @PSBoundParameters
+      $cscArgs = @("-out:$OutFile", 
+         "/reference:$powerShellSDK",
+         "/target:$target",
+         "/w:4"
+      )
+      $cscArgs += $CscArgumentList
+   
+      
+      if ($hasResources)
+      {
+         if ($NoEmbedResources)
+         {
+            #TODO: Copy to out dir
+         }
+         else
+         {
+            foreach ($r in $Resources)
+            {
+               #https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-options/resource-compiler-option
+               $cscArgs += "-resource:$r"
+            }
+         }
+      }
+      # 6. 
+      $cscArgs += @("$ScratchDir\PSBinary.cs", 
+         "$ScratchDir\BinWipsAttr.cs") # add files to args last
+
+         $args = @{
+            Script = $Script
+            Namespace = $Namespace
+            ClassName = $ClassName
+            OutFile = $OutFile
+            AssemblyAttributes = $AssemblyAttributes
+            ClassAttributes = $ClassAttributes
+            ClassTemplate = $ClassTemplate
+            AttributesTemplate = $AttributesTemplate
+            Tokens = $Tokens
+            OutDir = $OutDir
+            ScratchDir = $ScratchDir
+            Clean = $Clean
+            KeepScratchDir = $KeepScratchDir
+            Force = $Force
+            CompilerPath=$dotNetPath
+            CompilerArgs=$cscArgs
+         }
+      
+      Write-BinWipsExe @args
       
    }
    End

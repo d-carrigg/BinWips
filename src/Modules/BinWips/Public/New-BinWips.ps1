@@ -1,4 +1,4 @@
-﻿function New-PSBinaryNetFramework
+﻿function New-BinWips
 {
    <#
     .SYNOPSIS
@@ -6,11 +6,11 @@
     .DESCRIPTION
        Generates a .EXE from a script.
     .EXAMPLE
-       New-PSBinary -ScriptBlock {Get-Process}
+       New-BinWips -ScriptBlock {Get-Process}
        
        Creates a file in the current directory named PSBinary.exe which runs get-process
     .EXAMPLE
-       New-PsBinary MyScript.ps1
+       New-BinWips MyScript.ps1
 
        Creates an exe in the current directory named MyScript.exe
     #>
@@ -59,27 +59,21 @@
       [string]
       $OutFile,
 
+      [string]
+      $Target,
+
       <# Hashtable of assembly attributes to apply to the assembly level.
              - list of defaults here: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/attributes/global
              - custom attributes can also be aplied.
              - Invalid attributes will throw a c# compiler exception
-             - Attributes are applied in addition to the defaults unless -NoDefaultAttributes
         #>
       [string[]]
       $AssemblyAttributes,
 
-      <#
-            Exclude default attributes from being applied to PSBinary.
-            Unless this is included some default attributes will be applied to the program. 
-            So that other scripts/programs can identify it as a BinWips. 
-        #>
-      [switch]
-      $NoDefaultAttributes,
 
       <# Hashtable of assembly attributes to apply to the class.
              - Any valid c# class attribute can be applied
              - Invalid attributes will throw a c# compiler exception
-             - Attributes are applied in addition to the defaults unless -NoDefaultAttributes
         #>
       [hashtable]
       $ClassAttributes,
@@ -171,7 +165,17 @@
         
       # Output to a .NET .dll instead of an .exe
       [switch]
-      $Library
+      $Library,
+
+      # The platform to target
+      [string]
+      [ValidateSet('Linux', 'Windows')]
+      $Platform,
+
+      # The architecture to target
+      [string]
+      [ValidateSet('x86', 'x64', 'arm64')]
+      $Architecture
    )
 
    Begin
@@ -179,20 +183,21 @@
    }
    Process
    {
-      <#
+
+            <#
          Basic procedure is as follows:
          1. Verify params and perform setup (create dirs, clean, etc.)
          2. Read in script file if needed
          3. Base64 encode script for easy handling (no dealing with quotes)
          4. Insert script and replace tokens in class template
-         5. Output class + additional files to .cs files in scratch dur
+         5. Output class + additional files to .cs files in scratch dir
             - Maybe add an additional step here in the future to run 
               preprocessing on c# files (allow a script block -PreprocessBlock argument)
          6. Run C# compiler over those files and produce an exe in the out dir
          7. Cleanup
        #>
 
-      # 1. 
+      # 1. Verify params and perform setup (create dirs, clean, etc.)
       $inline = $PSCmdlet.ParameterSetName -eq 'Inline'
       if (!$inline -and !(Test-Path $InFile))
       {
@@ -200,21 +205,11 @@
       }
 
       # flags for later
-      $hasTokens = $PSBoundParameters.ContainsKey('Tokens')
-      $hasClassAttributes = $PSBoundParameters.ContainsKey('ClassAttributes')
-      $hasAssemblyAttributes = $PSBoundParameters.ContainsKey('AssemblyAttributes')
       $hasOutDir = $PSBoundParameters.ContainsKey('OutDir')
       $hasScratchDir = $PSBoundParameters.ContainsKey('ScratchDir')
       $hasOutFile = $PSBoundParameters.ContainsKey('OutFile')
-      $hasResources = $PSBoundParameters.ContainsKey('Resources')
       $hasClassTemplate = $PSBoundParameters.ContainsKey('ClassTemplate')
       $hasAttributesTemplate = $PSBoundParameters.ContainsKey('AttributesTemplate')
-      $hasParameters = $PSBoundParameters.ContainsKey('ParametersString')
-      
-      # TODO: Reference a newer version of the PowerShell SDK
-      $powerShellSDK = "C:\Windows\assembly\GAC_MSIL\System.Management.Automation\1.0.0.0__31bf3856ad364e35\System.Management.Automation.dll"
-      $dotNetPath = "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe" 
-
       $multipleFiles = !$inline -and ($InFile.Count -gt 0)
 
       if ($Library)
@@ -227,14 +222,14 @@
          $target = "exe"
          $outExt = "exe"
       }
-
+      $currentDir = (Get-Location).Path
       if (!$hasOutDir)
       {
-         $OutDir = $PWD
+         $OutDir = $currentDir
       }
       if (!$hasScratchDir)
       {
-         $ScratchDir = "$PWD\obj"
+         $ScratchDir = "$currentDir\obj"
       }
       if (!$hasOutFile)
       {
@@ -252,6 +247,10 @@
          }
          
       } 
+       # Create directories
+       [System.IO.Directory]::CreateDirectory($ScratchDir)
+       [System.IO.Directory]::CreateDirectory($OutDir)	
+
 
       if(!$hasClassTemplate -and $Library)
       {
@@ -266,39 +265,6 @@
          $AttributesTemplate = Get-Content -Raw "$PSScriptRoot\..\files\AttributesTemplate.cs"
       }
 
-      $runtimeSetupScript = Get-Content -Raw "$PSScriptRoot\..\files\Setup-Runtime.ps1"
-
-      $runtimeSetupScript = $runtimeSetupScript | Set-PSBinaryToken -Key AssemblyPath -Value ($OutFile.TrimStart('.')) -Required 
-      $encodedRuntimeSetup = [Convert]::ToBase64String(([System.Text.Encoding]::Unicode.GetBytes($runtimeSetupScript)))
-      $cscArgs = @("-out:$OutFile", 
-         "/reference:$powerShellSDK",
-         "/target:$target",
-         "/w:4"
-      )
-      $cscArgs += $CscArgumentList
-   
-      # Create directories
-      [System.IO.Directory]::CreateDirectory($ScratchDir)
-      [System.IO.Directory]::CreateDirectory($OutDir)	
-      # TODO: Clean out dir if specified
-      # TODO: Handle Resources
-      if ($hasResources)
-      {
-         if ($NoEmbedResources)
-         {
-            #TODO: Copy to out dir
-         }
-         else
-         {
-            foreach ($r in $Resources)
-            {
-               #https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-options/resource-compiler-option
-               $cscArgs += "-resource:$r"
-            }
-         }
-      }
-     
-      # 2. 
       if ($inline)
       {
          $psScript = $ScriptBlock.ToString()
@@ -308,85 +274,49 @@
       { 
          $psScript = Get-Content $InFile -Raw
       }
- 
 
-      # 3. (https://stackoverflow.com/questions/15414678/how-to-decode-a-base64-string)
-      # OLD:       $encodedScript = [Convert]::ToBase64String(([System.Text.Encoding]::Unicode.GetBytes($psScript)))
-      $encodedScript = [Convert]::ToBase64String(([System.Text.Encoding]::Unicode.GetBytes($psScript)))
-      
-      # 4. 
-      $csProgram = $ClassTemplate | Set-PSBinaryToken -Key Script -Value $encodedScript `
-      | Set-PSBinaryToken -Key RuntimeSetup -Value $encodedRuntimeSetup -Required `
-      | Set-PSBinaryToken -Key ClassName -Value $ClassName -Required `
-      | Set-PSBinaryToken -Key Namespace -Value $Namespace -Required `
-      | Set-PSBinaryToken -Key BinWipsVersion -Value "0.1"
+      # If Platform and Architecture are not specified, use the current platform and architecture
+      if (!$PSBoundParameters.ContainsKey('Platform') -and $IsWindows)
+      {
+         $Platform = 'Windows'
+        
+      } elseif(!$PSBoundParameters.ContainsKey('Platform') -and $IsLinux){
+         $Platform = 'Linux'
+      } else {
+         throw "Unsported platform"
+      }
 
-      if ($hasAssemblyAttributes)
+      if (!$PSBoundParameters.ContainsKey('Architecture') -and $IsWindows)
       {
-         # TODO: preformat assembly attributes
-         Write-Verbose "Applying Assembly Attribuytes"
-         $att = ""
-         $AssemblyAttributes | % {
-               $att += "$_`r`n"
-         }
-         if($att -eq $null)
-         {
-            Write-Error "Failed to build assembly attributes"
-         }
-         $csProgram = $csProgram | Set-PSBinaryToken -Key AssemblyAttributes -Value $att
+         $Architecture = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()
       }
-      else {
-         $csProgram = $csProgram | Remove-PSBinaryToken -Key AssemblyAttributes
-      }
-      if ($hasClassAttributes)
-      {
-         Write-Verbose "Applying class attributes"
-         $att = ""
-         $ClassAttributes | % {
-               $att += "$_`r`n"
-         }
-         if($att -eq $null)
-         {
-            Write-Error "Failed to build class attributes"
-         }
-         $csProgram = $csProgram | Set-PSBinaryToken -Key ClassAttributes -Value $att
-      }
-      else {
-         $csProgram = $csProgram | Remove-PSBinaryToken -Key ClassAttributes
-      }
-      if ($hasTokens)
-      {
-         $Tokens.GetEnumerator() | ForEach-Object {
-            $csProgram = $csProgram | Set-PSBinaryToken -Key $_.Key -Value $_.Value 
-         } 
-      }
-      # 5. 
-      $csProgram | Out-File "$ScratchDir\PSBinary.cs" -Encoding unicode -Force:$Force
- 
-      $attributesTemplate | Out-File "$ScratchDir\BinWipsAttr.cs" -Encoding unicode -Force:$Force
 
-      # 6. 
-      $cscArgs += @("$ScratchDir\PSBinary.cs", 
-         "$ScratchDir\BinWipsAttr.cs") # add files to args last
-      $x = "$dotNetPath $cscArgs"
-      Write-Verbose $x
-      try {
-         Push-Location $ScratchDir
-         Write-Host "IN DIR: $(Get-Location)"
-         $results = Invoke-Expression $x
-         Write-Host $results
-      } finally {
-         Pop-Location
+      $args = @{
+         Script=$psScript
+         Namespace=$Namespace
+         ClassName=$ClassName
+         OutFile=$OutFile
+         Target=$target
+         AssemblyAttributes=$AssemblyAttributes
+         ClassAttributes=$ClassAttributes
+         ClassTemplate=$ClassTemplate
+         AttributesTemplate=$AttributesTemplate
+         Tokens=$Tokens
+         CscArgumentList=$CscArgumentList
+         OutDir=$OutDir
+         ScratchDir=$ScratchDir
+         Clean=$Clean
+         KeepScratchDir=$KeepScratchDir
+         Force=$Force
+         Resources=$Resources
+         NoEmbedResources=$NoEmbedResources
+         Platform=$Platform
+         Architecture=$Architecture
       }
-      #$results = Invoke-Expression $x
+
       
 
-      # 7.
-      # TODO: Cleanup
-      if (!$KeepScratchDir)
-      {
-         #Remove-Item $ScratchDir -Recurse
-      }
+      Build-Bflat @args
       
    }
    End

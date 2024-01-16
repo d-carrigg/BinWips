@@ -1,4 +1,4 @@
-﻿function Set-PSBinaryToken
+﻿function Set-BinWipsToken
 {
     <#
     .SYNOPSIS

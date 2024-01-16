@@ -1,4 +1,4 @@
-function Remove-PSBinaryToken {
+function Remove-BinWipsToken {
     
         <#
     .SYNOPSIS

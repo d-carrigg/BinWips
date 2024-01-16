@@ -1,8 +1,9 @@
 ﻿// Generaed by BinWips {#BinWipsVersion#}
 using System;
-using System.Collections;
+
 using BinWips;
-using System.Management.Automation; 
+using System.Diagnostics;
+
 
 // attributes which can be used to identify this assembly as a BinWips
 // https://stackoverflow.com/questions/1936953/custom-assembly-attributes
@@ -15,26 +16,49 @@ namespace {#Namespace#} {
 
       {#ClassAttributes#}
       class {#ClassName#} {
-         public static IEnumerable Invoke(string[] args) {
-            var powerShell = PowerShell.Create();
-            
-            // script is inserted in base64 so we need to decode it
-            var runtimeSetup = DecodeBase64("{#RuntimeSetup#}");
-            var script = DecodeBase64("{#Script#}");
-            
-            // build runspace and execute it
-            // additional setup could be added 
-            powerShell.AddScript(runtimeSetup)
-                      .AddScript(script)
-                      .AddParameters(args);
-            
-            var results = powerShell.Invoke();         
-            return results;
+      public static void Invoke(string[] args)
+      {
+         // script is inserted in base64 so we need to decode it
+         var runtimeSetup = DecodeBase64("{#RuntimeSetup#}");
+         var funcName = "{#FunctionName#}";
+
+         var ending = "";
+         if (args.Length == 1 && args[0] == "help")
+         {
+            ending = $"Get-Help -Detailed {funcName}";
          }
-         static string DecodeBase64(string encoded){
-            var decodedBytes = Convert.FromBase64String(encoded);
-            var text = System.Text.Encoding.Unicode.GetString(decodedBytes);
-            return text;
+         else
+         {
+            ending = $"{funcName} {string.Join(" ", args)}";
          }
-      }    
+
+         var script = DecodeBase64("{#Script#}");
+         var wrappedScript = $"{runtimeSetup}\n\n function {funcName}\n {{\n {script}\n }}\n{ending}";
+
+
+         var encodedCommand = EncodeBase64(wrappedScript);
+
+         // call PWSH to execute the script passing in the args
+         var psi = new ProcessStartInfo(@"pwsh.exe");
+         psi.Arguments = "-NoProfile -NoLogo -WindowStyle Hidden -EncodedCommand " + encodedCommand;
+         //psi.RedirectStandardInput = true;
+         var process = Process.Start(psi);
+         process.EnableRaisingEvents = true;
+
+         process.WaitForExit();
+
+      }
+      static string DecodeBase64(string encoded)
+      {
+         var decodedBytes = Convert.FromBase64String(encoded);
+         var text = System.Text.Encoding.Unicode.GetString(decodedBytes);
+         return text;
+      }
+      static string EncodeBase64(string text)
+      {
+         var bytes = System.Text.Encoding.Unicode.GetBytes(text);
+         var encoded = Convert.ToBase64String(bytes);
+         return encoded;
+      }
+   }
 }

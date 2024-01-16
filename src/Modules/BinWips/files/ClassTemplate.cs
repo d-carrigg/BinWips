@@ -10,7 +10,8 @@ using System.Diagnostics;
 namespace {#Namespace#} {
          
     {#ClassAttributes#}
-    class {#ClassName#} {
+    class {#ClassName#} 
+    {
         public static void Main(string[] args)
         {
 

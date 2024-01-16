@@ -10,16 +10,16 @@
 AfterAll {
     # Cleanup
     #Remove-Item -Path $script:outFile -ErrorAction SilentlyContinue
-    #Remove-Item $script:scratchDir -Recurse -ErrorAction SilentlyContinue
+    Remove-Item $script:scratchDir -Recurse -ErrorAction SilentlyContinue
 }
 
 
-Describe 'New-PSBinary' {
+Describe 'New-BinWips' {
 
 
     It 'Given a script block, should create a .exe that runs the script block' -Tag 'Basic' {
         
-        New-PSBinary -ScriptBlock { Write-Host "Hello World" } -ScratchDir $script:scratchDir -OutFile $script:outFile
+        New-BinWips -ScriptBlock { Write-Host "Hello World" } -ScratchDir $script:scratchDir -OutFile $script:outFile
 
         $script:outFile | Should -Exist
         $result = & $script:outFile
@@ -28,7 +28,7 @@ Describe 'New-PSBinary' {
     }
 
     It 'Given a script file, should create a .exe that runs the script'   {
-        New-PSBinary -InFile "$PSScriptRoot\HelloWorld.ps1" -ScratchDir $script:scratchDir -OutFile $script:outFile
+        New-BinWips -InFile "$PSScriptRoot\HelloWorld.ps1" -ScratchDir $script:scratchDir -OutFile $script:outFile
 
         $script:outFile | Should -Exist
         $result = & $script:outFile
@@ -37,7 +37,7 @@ Describe 'New-PSBinary' {
     }
 
     It 'Given a script block with parameters, should accept the valid parameters' {
-        New-PSBinary -ScriptBlock { param($foo) Write-Output "$foo" } -ScratchDir $script:scratchDir -OutFile $script:outFile
+        New-BinWips -ScriptBlock { param($foo) Write-Output "$foo" } -ScratchDir $script:scratchDir -OutFile $script:outFile
 
         $script:outFile | Should -Exist
         $result = & $script:outFile "bar"
@@ -54,7 +54,7 @@ Describe 'New-PSBinary' {
             )
             Write-Output "$foo"
         }
-        New-PSBinary -ScriptBlock $sb -ScratchDir $script:scratchDir -OutFile $script:outFile
+        New-BinWips -ScriptBlock $sb -ScratchDir $script:scratchDir -OutFile $script:outFile
 
         $script:outFile | Should -Exist
         $result = & $script:outFile -foo "bar"
@@ -71,7 +71,7 @@ Describe 'New-PSBinary' {
                 Write-Output "Switch was true"
             }
         }
-        New-PSBinary -ScriptBlock $sb -ScratchDir $script:scratchDir -OutFile $script:outFile
+        New-BinWips -ScriptBlock $sb -ScratchDir $script:scratchDir -OutFile $script:outFile
         $script:outFile | Should -Exist
         $result = & $script:outFile -baz
         $result | Should -Be "Switch was true"
