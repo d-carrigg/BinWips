@@ -57,7 +57,7 @@ New-BinWips -ScriptBlock {
 New-BinWips -InFile "MyScript.ps1"
 ## Content of MyScript.ps1
 # param($myParam)
-# echo "Param was `$myParam"
+# echo "Param was $myParam"
 ```
 
 If you generate a `.exe` the arguments work the same as they would if you wrote
