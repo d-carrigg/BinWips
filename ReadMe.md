@@ -7,8 +7,6 @@ complete​
 Create .NET applications and libraries from PowerShell scripts and inline code
 blocks. Control over the generated `.cs`, `.exe`, and `.dll` files and any additional resources. Target linux and windows on x86, x64, and arm64.
 
-[[_TOC_]]
-
 ## Getting Started
 
 Install the module with:
