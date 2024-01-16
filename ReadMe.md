@@ -1,9 +1,5 @@
 # BinWips: Binary Written in PowerShell
 
-:construction: Warning: This repository is still under construction, see the
-[TODO List](#TODO-List) at the bottom to make sure the features you want are
-complete​
-
 Create .NET applications and libraries from PowerShell scripts and inline code
 blocks. Control over the generated `.cs`, `.exe`, and `.dll` files and any additional resources. Target linux and windows on x86, x64, and arm64.
 
