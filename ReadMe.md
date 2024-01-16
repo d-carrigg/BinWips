@@ -476,6 +476,9 @@ Order doesn’t matter.
 - [ ] Help and Verison # Support (--help and --version or a verb/something along those lines)
   - [x] Help
   - [ ] Version
+- [ ] Is there a way to pass variables back to the host terminal? So if we 
+      did something like -ErrorVariable or -OutVariable we could pass that back 
+      if the host terminal was PWSH. Maybe a way with remoting (check if parent proc is pwsh, if so use remoting to pass back). 
 
 ## Limitations
 
