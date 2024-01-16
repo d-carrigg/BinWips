@@ -37,6 +37,33 @@
          ParameterSetName = 'File')]
       $InFile,
 
+      # Directory to place output in, defaults to current directory
+      # Dir will be created if it doesn't already exist. 
+      [string]
+      $OutDir,
+
+      # Change the directory where work will be done defaults to 'obj' folder in current directory
+      # Use -Clean to clean this directory before building
+      # Dir will be created if it doesn't already exist. 
+      [string]
+      $ScratchDir,
+
+      # Name of the .exe to generate. Defaults to the -InFile (replaced with .exe) or 
+      # PSBinary.exe if a script block is inlined
+      [string]
+      $OutFile,
+
+
+      # Clean the scratch directory before building
+      # As compared to -KeepScratchDir which removes scratch dir *after* build. 
+      [switch]
+      $Cleanup,
+
+      
+      # Overrite -OutFile if it already exists
+      [switch]
+      $Force, 
+
       # Namespace for the generated program. 
       # This parameter is trumped by -Tokens, so placing a value here will be overriden by
       # whatever is in -Tokens
@@ -54,10 +81,7 @@
       # Defaults to Program
       $ClassName = "Program",
 
-      # Name of the .exe to generate. Defaults to the -InFile (replaced with .exe) or 
-      # PSBinary.exe if a script block is inlined
-      [string]
-      $OutFile,
+
 
       [string]
       $Target,
@@ -113,35 +137,6 @@
       [hashtable]
       $Tokens,
 
-      # Additional C# Compiler parameters you want to pass (e.g. references)
-      [string[]]
-      $CscArgumentList,
-
-      # Directory to place output in, defaults to current directory
-      # Dir will be created if it doesn't already exist. 
-      [string]
-      $OutDir,
-
-      # Change the directory where work will be done defaults to 'obj' folder in current directory
-      # Use -Clean to clean this directory before building
-      # Dir will be created if it doesn't already exist. 
-      [string]
-      $ScratchDir,
-
-      # Clean the scratch directory before building
-      # As compared to -KeepScratchDir which removes scratch dir *after* build. 
-      [switch]
-      $Clean,
-
-      # After build don't remove the scratch dir.
-      # As compared to -Clean which removes all files in scratch dir *before* build. 
-      [switch]
-      $KeepScratchDir,
-
-      # Overrite -OutFile if it already exists
-      [switch]
-      $Force, 
-
       <# List of files to include with the app 
              - If -NoEmbedResources is specified then files are embedded in the exe.
                 - Files are copied to out dir with exe if they don't already exist
@@ -175,7 +170,11 @@
       # The architecture to target
       [string]
       [ValidateSet('x86', 'x64', 'arm64')]
-      $Architecture
+      $Architecture,
+
+      # Additional C# Compiler parameters you want to pass (e.g. references)
+      [string[]]
+      $CscArgumentList
    )
 
    Begin
@@ -184,7 +183,7 @@
    Process
    {
 
-            <#
+      <#
          Basic procedure is as follows:
          1. Verify params and perform setup (create dirs, clean, etc.)
          2. Read in script file if needed
@@ -229,7 +228,7 @@
       }
       if (!$hasScratchDir)
       {
-         $ScratchDir = "$currentDir\obj"
+         $ScratchDir = "$currentDir\.binwips"
       }
       if (!$hasOutFile)
       {
@@ -237,7 +236,7 @@
          {
             $OutFile = "$OutDir\PSBinary.$outExt"
          }
-         elseif($multipleFiles)
+         elseif ($multipleFiles)
          {
             $OutFile = $InFile[-1].Replace(".ps1", ".$outExt")
          }
@@ -247,20 +246,20 @@
          }
          
       } 
-       # Create directories
-       [System.IO.Directory]::CreateDirectory($ScratchDir)
-       [System.IO.Directory]::CreateDirectory($OutDir)	
+      # Create directories
+      [System.IO.Directory]::CreateDirectory($ScratchDir)
+      [System.IO.Directory]::CreateDirectory($OutDir)	
 
 
-      if(!$hasClassTemplate -and $Library)
+      if (!$hasClassTemplate -and $Library)
       {
          $ClassTemplate = Get-Content -Raw "$PSScriptRoot\..\files\LibraryClassTemplate.cs"
       }
-      elseif(!$hasClassTemplate)
+      elseif (!$hasClassTemplate)
       {
          $ClassTemplate = Get-Content -Raw "$PSScriptRoot\..\files\ClassTemplate.cs"
       }
-      if(!$hasAttributesTemplate)
+      if (!$hasAttributesTemplate)
       {
          $AttributesTemplate = Get-Content -Raw "$PSScriptRoot\..\files\AttributesTemplate.cs"
       }
@@ -280,9 +279,13 @@
       {
          $Platform = 'Windows'
         
-      } elseif(!$PSBoundParameters.ContainsKey('Platform') -and $IsLinux){
+      }
+      elseif (!$PSBoundParameters.ContainsKey('Platform') -and $IsLinux)
+      {
          $Platform = 'Linux'
-      } else {
+      }
+      else
+      {
          throw "Unsported platform"
       }
 
@@ -291,30 +294,30 @@
          $Architecture = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()
       }
 
-      $args = @{
-         Script=$psScript
-         Namespace=$Namespace
-         ClassName=$ClassName
-         OutFile=$OutFile
-         Target=$target
-         AssemblyAttributes=$AssemblyAttributes
-         ClassAttributes=$ClassAttributes
-         ClassTemplate=$ClassTemplate
-         AttributesTemplate=$AttributesTemplate
-         Tokens=$Tokens
-         CscArgumentList=$CscArgumentList
-         OutDir=$OutDir
-         ScratchDir=$ScratchDir
-         Clean=$Clean
-         KeepScratchDir=$KeepScratchDir
-         Force=$Force
-         Resources=$Resources
-         NoEmbedResources=$NoEmbedResources
-         Platform=$Platform
-         Architecture=$Architecture
-      }
+      [System.IO.Directory]::CreateDirectory($ScratchDir)
+      [System.IO.Directory]::CreateDirectory($OutDir)
 
-      
+      $args = @{
+         Script             = $psScript
+         Namespace          = $Namespace
+         ClassName          = $ClassName
+         OutFile            = $OutFile
+         Target             = $target
+         AssemblyAttributes = $AssemblyAttributes
+         ClassAttributes    = $ClassAttributes
+         ClassTemplate      = $ClassTemplate
+         AttributesTemplate = $AttributesTemplate
+         Tokens             = $Tokens
+         CscArgumentList    = $CscArgumentList
+         OutDir             = $OutDir
+         ScratchDir         = $ScratchDir
+         Cleanup            = $Cleanup
+         Force              = $Force
+         Resources          = $Resources
+         NoEmbedResources   = $NoEmbedResources
+         Platform           = $Platform
+         Architecture       = $Architecture
+      }     
 
       Build-Bflat @args
       

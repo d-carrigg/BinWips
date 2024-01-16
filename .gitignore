@@ -4,6 +4,7 @@
 
 **/bin/
 **/obj/
+**/.binwips/
 
 tests/ExampleRunspace/bin/
 tests/ExampleRunspace/obj/

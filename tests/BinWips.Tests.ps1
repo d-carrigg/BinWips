@@ -2,7 +2,7 @@
     $path = Resolve-Path "$PSScriptRoot/../src/Modules/BinWips"
     Import-Module -Name $path -Force
 
-    $script:scratchDir = Join-Path $PSScriptRoot "out"
+    $script:scratchDir = Join-Path $PSScriptRoot ".binwips"
     $script:outFile = Join-Path $PSScriptRoot "PSBinary.exe"
 }
 
@@ -10,7 +10,7 @@
 AfterAll {
     # Cleanup
     #Remove-Item -Path $script:outFile -ErrorAction SilentlyContinue
-    Remove-Item $script:scratchDir -Recurse -ErrorAction SilentlyContinue
+   # Remove-Item $script:scratchDir -Recurse -ErrorAction SilentlyContinue
 }
 
 

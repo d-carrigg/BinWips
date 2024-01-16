@@ -200,8 +200,8 @@ PARAMETERS
         Dir will be created if it doesn't already exist.
 
     -ScratchDir <String>
-        Change the directory where work will be done defaults to 'obj' folder in current directory
-        Use -Clean to clean this directory before building
+        Change the directory where work will be done defaults to '.binwips' folder in current directory
+        Use -Clean to clean this directory after building
         Dir will be created if it doesn't already exist.
 
     -Clean [<SwitchParameter>]

@@ -114,20 +114,10 @@
       $OutDir,
 
       # Change the directory where work will be done defaults to 'obj' folder in current directory
-      # Use -Clean to clean this directory before building
       # Dir will be created if it doesn't already exist. 
       [string]
       $ScratchDir,
 
-      # Clean the scratch directory before building
-      # As compared to -KeepScratchDir which removes scratch dir *after* build. 
-      [switch]
-      $Clean,
-
-      # After build don't remove the scratch dir.
-      # As compared to -Clean which removes all files in scratch dir *before* build. 
-      [switch]
-      $KeepScratchDir,
 
       # Overrite -OutFile if it already exists
       [switch]
@@ -163,7 +153,10 @@
       # The architecture to target
       [string]
       [ValidateSet('x86', 'x64', 'arm64')]
-      $Architecture
+      $Architecture,
+
+      [switch]
+      $Cleanup 
    )
 
    Begin
@@ -181,15 +174,14 @@
       $cscArgs = @("build",
          "--out $OutFile", 
          "--target $target",
-         "--no-debug-info",
-         "--no-stacktrace-data",
+         # "--no-debug-info",
+         # "--no-stacktrace-data",
          "--os $($Platform.ToLower())",
          "--arch $($Architecture.ToLower())"
       )
       $cscArgs += $CscArgumentList
    
      
-      # TODO: Clean out dir if specified
       # TODO: Handle Resources
       if ($Resources -and $NoEmbedResources)
       {
@@ -224,12 +216,11 @@
          AttributesTemplate = $AttributesTemplate
          Tokens             = $Tokens
          OutDir             = $OutDir
-         ScratchDir         = $ScratchDir
-         Clean              = $Clean
-         KeepScratchDir     = $KeepScratchDir
+         Cleanup            = $Cleanup
          Force              = $Force
          CompilerPath       = $dotNetPath
          CompilerArgs       = $cscArgs
+         ScratchDir         = $ScratchDir
       }
 
       Write-BinWipsExe @args
