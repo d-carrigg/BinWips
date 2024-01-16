@@ -386,8 +386,8 @@
       $results = Invoke-Expression $buildCmd
       if ($results -like '*Error*'){
          Write-Error $results
-      } else {
-         Write-Verbose $results
+      } elseif($null -ne $results) {
+         Write-Host $results
       }
 
       # 7.
