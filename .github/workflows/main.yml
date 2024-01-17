@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Download BFlat
         shell: pwsh
-        run: ./scripts/download-bflat.ps1
+        run: ./tools/download-bflat.ps1
 
 
       # - name: Run PS Script Analyzer
