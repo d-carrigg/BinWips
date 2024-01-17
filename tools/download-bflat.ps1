@@ -14,7 +14,9 @@ $winDir = "$PSScriptRoot/../src/Modules/BinWips/files/bflat/windows"
 Invoke-WebRequest -Uri $linUrl -OutFile $linOut
 Invoke-WebRequest -Uri $winUrl -OutFile $winOut
 
-Expand-Archive -Path $linOut -DestinationPath $linDir
+#Expand-Archive -Path $linOut -DestinationPath $linDir
+# need to use tar -xvzf on the linux file
+tar -xvzf $linOut -C $linDir
 Expand-Archive -Path $winOut -DestinationPath $winDir
 
 Remove-Item $linOut
