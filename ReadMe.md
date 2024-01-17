@@ -3,8 +3,11 @@
 Create .NET applications from PowerShell scripts and inline code
 blocks with control over the generated `.cs` and `.exe` files and any additional resources. Target linux and windows on x86, x64, and arm64.
 
-
-> MyScript.ps1 -> MyScript.exe
+```powershell
+New-BinWips -ScriptBlock {echo "Hello World!"}
+.\PSBinary.exe 
+# Hello World!
+```
 
 ## Getting Started
 
