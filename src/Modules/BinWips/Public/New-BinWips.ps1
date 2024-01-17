@@ -277,7 +277,7 @@
          throw "Unsported platform"
       }
 
-      if (!$PSBoundParameters.ContainsKey('Architecture') -and $IsWindows)
+      if (!$PSBoundParameters.ContainsKey('Architecture'))
       {
          $Architecture = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()
       }
