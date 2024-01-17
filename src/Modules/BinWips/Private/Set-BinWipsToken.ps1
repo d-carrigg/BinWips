@@ -30,7 +30,6 @@
         [string] $Value,
 
         # Error out if the token is not present
-        # TODO: Make this parameter work
         [Parameter()]
         [switch]
         $Required
