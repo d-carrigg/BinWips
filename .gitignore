@@ -10,3 +10,5 @@ tests/ExampleRunspace/bin/
 tests/ExampleRunspace/obj/
 tests/out
 test/**.exe
+.idea/
+**/*.pdb

@@ -135,7 +135,7 @@
 
         #>
       [hashtable]
-      $Tokens,
+      $Tokens = @{},
 
       <# List of files to include with the app 
              - If -NoEmbedResources is specified then files are embedded in the exe.

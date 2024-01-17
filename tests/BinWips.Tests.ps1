@@ -28,7 +28,7 @@ Describe 'New-BinWips' {
     }
 
     It 'Given a script file, should create a .exe that runs the script'   {
-        New-BinWips -InFile "$PSScriptRoot\HelloWorld.ps1" -ScratchDir $script:scratchDir -OutFile $script:outFile
+        New-BinWips -InFile "$PSScriptRoot\files\HelloWorld.ps1" -ScratchDir $script:scratchDir -OutFile $script:outFile
 
         $script:outFile | Should -Exist
         $result = & $script:outFile
@@ -76,4 +76,15 @@ Describe 'New-BinWips' {
         $result = & $script:outFile -baz
         $result | Should -Be "Switch was true"
     }
+
+   It 'Given resources, should embed those resources and make them accessible in the script' -Tag "Resources" {
+    $sb = {
+        $content =  Get-BinWipsResource "EmbeddedResource.txt"
+        write-host $content
+    }
+    New-BinWips -ScriptBlock $sb -ScratchDir $script:scratchDir -OutFile $script:outFile -Resources @('tests/files/EmbeddedResource.txt')
+    $script:outFile | Should -Exist
+    $result = & $script:outFile -baz
+    $result | Should -Be "This is an embedded resource."
+   }
 }

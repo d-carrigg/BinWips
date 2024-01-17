@@ -177,7 +177,8 @@
          # "--no-debug-info",
          # "--no-stacktrace-data",
          "--os $($Platform.ToLower())",
-         "--arch $($Architecture.ToLower())"
+         "--arch $($Architecture.ToLower())",
+         "-i Main"
       )
       $cscArgs += $CscArgumentList
    
@@ -204,6 +205,9 @@
          "$ScratchDir\PSBinary.cs", 
          "$ScratchDir\BinWipsAttr.cs"
       )
+
+      $guid = [guid]::NewGuid().ToString()
+      $Tokens['BinWipsPipeGuid'] = $guid
 
       $args = @{
          Script             = $Script

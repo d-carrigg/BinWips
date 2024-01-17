@@ -1,27 +1,42 @@
-﻿function Get-PSBinaryResource {
+﻿function Get-BinWipsResource {
+   [Alias("Get-PSBinaryResource")]
     [cmdletbinding()]
     param (
        [Parameter(Mandatory=$true,Position=0)]
        [string] $Path,
  
        [Parameter(Mandatory=$false,Position=1)]
-       [swtich]$AsFile
+       [switch]$AsFile
     )
-    $asm = [System.Reflection.Assembly]::LoadFile("{#AssemblyPath#}")
-    $stream = $asm.GetManifestResourceStream($Path)
-    $reader = [System.IO.StreamReader]::new($stream)
-    $result = $reader.ReadToEnd()
-    $stream.Close()
-    $stream.Dispose()
-    $reader.Close()
-    $reader.Dipose()
-    if(!$AsFile){
-     return $result 
-    } else {
-     $tmpFile = [System.IO.Path]::GetTempFileName()
-     $result | Out-File -Encoding unicode -FilePath $tmpFile
-      return get-item $tmpFile
-    }
+   $csharp = @"
+   using System.IO;
+   using System.IO.Pipes;
+   using System;
+   
+   namespace BinWips.Runtime
+   {
+       public static class RuntimeUtils
+       {
+           public static string GetResource(string path)
+           {
+               var client = new NamedPipeClientStream("BinWipsPipe{#BinWipsPipeGuid#}");
+               client.Connect();
+                
+               StreamReader reader = new StreamReader(client);
+               StreamWriter writer = new StreamWriter(client);
+   
+               string input = path;
+               writer.WriteLine(input);
+               writer.Flush();
+               var result = reader.ReadLine();
+               return result;
+           }
+       }
+   }
+"@
+
+    Add-Type $csharp
+    [BinWips.Runtime.RuntimeUtils]::GetResource($Path)
    
  }     
 
