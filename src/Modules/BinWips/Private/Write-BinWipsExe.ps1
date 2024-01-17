@@ -205,9 +205,9 @@ function Write-BinWipsExe
 
    # 5. Output class + additional files to .cs files in scratch dir
    Write-Verbose "Writing to $ScratchDir"
-   $csProgram | Out-File "$ScratchDir\PSBinary.cs" -Encoding unicode -Force:$Force
+   $csProgram | Out-File "$ScratchDir/PSBinary.cs" -Encoding unicode -Force:$Force
  
-   $attributesTemplate | Out-File "$ScratchDir\BinWipsAttr.cs" -Encoding unicode -Force:$Force
+   $attributesTemplate | Out-File "$ScratchDir/BinWipsAttr.cs" -Encoding unicode -Force:$Force
 
 
    

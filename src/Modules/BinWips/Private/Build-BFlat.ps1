@@ -202,8 +202,8 @@
  
       # 6. Run C# compiler over those files and produce an exe in the out dir
       $cscArgs += @(
-         "$ScratchDir\PSBinary.cs", 
-         "$ScratchDir\BinWipsAttr.cs"
+         "$ScratchDir/PSBinary.cs", 
+         "$ScratchDir/BinWipsAttr.cs"
       )
 
       $guid = [guid]::NewGuid().ToString()
