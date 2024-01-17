@@ -1,7 +1,9 @@
 # BinWips: Binary Written in PowerShell
 
-Create .NET applications and libraries from PowerShell scripts and inline code
-blocks with control over the generated `.cs`, `.exe`, and `.dll` files and any additional resources. Target linux and windows on x86, x64, and arm64.
+Create .NET applications from PowerShell scripts and inline code
+blocks with control over the generated `.cs` and `.exe` files and any additional resources. Target linux and windows on x86, x64, and arm64.
+
+> MyScript.ps1 -> MyScript.exe
 
 ## Getting Started
 
@@ -39,12 +41,11 @@ New-BinWips -InFile "path/to/myScript.ps1"
 ```
 
 An executable will be generated in the current directory with the name
-`myScript.exe`. 
+`myScript.exe`.
 
 ## Parameters
 
-BinWips assemblies (both `exe`s and `dll`s) can accept arguments from the
-caller.
+BinWips programs can take parameters just like the PowerShell scripts they are based on.
 
 ```powershell
 # Note the escaped variable `$myParam
@@ -233,33 +234,11 @@ PARAMETERS
         Don't embed any resource specifed by -Resources
         instead they are copied to out dir if they don't already exist
 
-    -Library [<SwitchParameter>]
-        Output to a .NET .dll instead of an .exe
-
     <CommonParameters>
         This cmdlet supports the common parameters: Verbose, Debug,
         ErrorAction, ErrorVariable, WarningAction, WarningVariable,
         OutBuffer, PipelineVariable, and OutVariable. For more information, see
         about_CommonParameters (https://go.microsoft.com/fwlink/?LinkID=113216).
-```
-
-## Libraries
-
-If you want to produce a library (`dll`) instead you can do so
-by using the `-Library` parameter:
-
-```PowerShell
-New-BinWips -InFile "path/to/myScript.ps1" -Library
-```
-
-Libraries look a little different than you might expect coming from C#, but they
-just take a `param string[] args` parameter similar to the Main method of a c#
-program. The `param` modifier is supplied in case no parameters are passed.
-Calling in C# would look like
-
-```c#
-
-PSBinary.Invoke("-String 1 'Some Text'", "-ScriptBlock \"{Write-Host 'Inception'}\"", "-Switch1 -Array \"Arrays?\",\"Of Course\"");
 ```
 
 ## Embedding Resources
@@ -300,7 +279,7 @@ $myDll = Get-PSBinaryResource "MyRequiredLibrary.dll"
 
 A few important notes:
 
-- The file names are case sensitive and do not include the path (filename only). 
+- The file names are case sensitive and do not include the path (filename only).
   
 - You can’t use `Get-Content` or `Get-Item` cmdlets with these files because
   they do not exist as files when deployed
