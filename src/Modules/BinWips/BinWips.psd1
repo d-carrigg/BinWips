@@ -24,16 +24,16 @@ GUID = 'a67b9ad4-4aa5-4d3b-b9f2-6603ae7df2e9'
 Author = 'dcarrigg'
 
 # Company or vendor of this module
-CompanyName = 'Unknown'
+CompanyName = 'dcarrigg'
 
 # Copyright statement for this module
-Copyright = '(c) dcarrigg. All rights reserved.'
+Copyright = '(c) 2021 dcarrigg. All rights reserved.'
 
 # Description of the functionality provided by this module
-Description = 'Binary Written in PowerShell.'
+Description = 'Binary Written in PowerShell. Convert PowerShell scripts into .NET Applications'
 
 # Minimum version of the PowerShell engine required by this module
-PowerShellVersion = '3.0'
+PowerShellVersion = '6.0'
 
 # Name of the PowerShell host required by this module
 # PowerShellHostName = ''
@@ -98,10 +98,10 @@ PrivateData = @{
         # Tags = @()
 
         # A URL to the license for this module.
-        # LicenseUri = ''
+        LicenseUri = 'https://github.com/d-carrigg/BinWips/blob/master/LICENSE.txt'
 
         # A URL to the main website for this project.
-        # ProjectUri = ''
+        ProjectUri = 'https://github.com/d-carrigg/BinWips'
 
         # A URL to an icon representing this module.
         # IconUri = ''

@@ -164,12 +164,12 @@
    }
    Process
    {
-      $dotNetPath = "where.exe bflat" | Invoke-Expression
-      if ($dotNetPath -eq "INFO: Could not find files for the given pattern(s).")
-      {
-         Write-Error "winget install bflat"
+      # Locate the compiler
+      if($IsWindows){
+         $dotNetPath = Resolve-Path "$PSScriptRoot\..\files\bflat\windows\bflat.exe"
+      } else {
+         $dotNetPath = Resolve-Path "$PSScriptRoot\..\files\bflat\linux\bflat"
       }
-
     
       $cscArgs = @("build",
          "--out $OutFile", 
