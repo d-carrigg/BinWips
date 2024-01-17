@@ -312,34 +312,6 @@ are in the same directory as the script, or they already exist on the machine
 you want to deploy to. You don’t need to include them as resources, you can just
 access them as you normally would in your PowerShell script.
 
-## Check if an application is a BinWips executable
-
-Built in functionality is provided for checking if an assembly (`exe` or `dll`)
-was built with BinWips via the `Test-BinWips` command:
-
-```powershell
-Test-BinWips PSBinary.exe
-```
-
-If you don’t have the BinWips module installed on a machine you can use the
-following:
-
-```powershell
-$Path = 'Path to assembly in question'
-# We gotta do some trickery to safely load this file
-# https://stackoverflow.com/questions/3832351/disposing-assembly
-# https://www.powershellmagazine.com/2014/03/17/pstip-reading-file-content-as-a-byte-array/
-$Path = Resolve-Path $Path
-$bytes = [System.IO.File]::ReadAllBytes($Path)
-$asm = [System.Reflection.Assembly]::Load($bytes)
-$attrItems = $asm.GetCustomAttributes($false)
-foreach($attr in $attrItems) {
-  if($attr.TypeId.Name -eq 'BinWipsAttribute'){
-     Write-Host "Assembly is a BinWips executeable"
-	}
-}
-```
-
 ## Advanced Usage
 
 You can fully customize the generated output by replacing the class template and
