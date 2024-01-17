@@ -12,3 +12,4 @@ tests/out
 test/**.exe
 .idea/
 **/*.pdb
+src/Modules/BinWips/files/bflat/**
