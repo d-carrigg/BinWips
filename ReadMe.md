@@ -12,7 +12,8 @@ Install the module with:
 ```powershell
 # TODO: Publish so this works: Install-Module BinWips
 # For now, git clone the repo
-Install-Module /gitrepo/src/Modules/BinWips
+git clone https://github.com/d-carrigg/BinWips.git
+Install-Module /BinWips/src/Modules/BinWips
 ```
 
 Create a simple program from an inline script block:
