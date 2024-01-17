@@ -134,7 +134,15 @@ function Write-BinWipsExe
 
    $runtimeSetupScript = $runtimeSetupScript | Set-BinWipsToken -Key AssemblyPath -Value ($OutFile.TrimStart('.')) -Required 
 
+   if ($Tokens)
+   {
+      $Tokens.GetEnumerator() | ForEach-Object {
+         $runtimeSetupScript = $runtimeSetupScript | Set-BinWipsToken -Key $_.Key -Value $_.Value 
+      } 
+   }
+
    Write-Verbose $runtimeSetupScript
+   $runtimeSetupScript | Out-File "$ScratchDir\Setup-Runtime.ps1" -Encoding unicode -Force:$Force
    $encodedRuntimeSetup = [Convert]::ToBase64String(([System.Text.Encoding]::Unicode.GetBytes($runtimeSetupScript)))
  
 

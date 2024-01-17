@@ -135,7 +135,7 @@
 
         #>
       [hashtable]
-      $Tokens,
+      $Tokens = @{},
 
       <# List of files to include with the app 
              - If -NoEmbedResources is specified then files are embedded in the exe.
@@ -157,10 +157,6 @@
       # instead they are copied to out dir if they don't already exist
       [switch]
       $NoEmbedResources,
-        
-      # Output to a .NET .dll instead of an .exe
-      [switch]
-      $Library,
 
       # The platform to target
       [string]
@@ -210,17 +206,9 @@
       $hasClassTemplate = $PSBoundParameters.ContainsKey('ClassTemplate')
       $hasAttributesTemplate = $PSBoundParameters.ContainsKey('AttributesTemplate')
       $multipleFiles = !$inline -and ($InFile.Count -gt 0)
-
-      if ($Library)
-      {
-         $target = "library"
-         $outExt = ".dll"
-      }
-      else
-      {
-         $target = "exe"
-         $outExt = "exe"
-      }
+      $target = "exe"
+      $outExt = "exe"
+      
       $currentDir = (Get-Location).Path
       if (!$hasOutDir)
       {

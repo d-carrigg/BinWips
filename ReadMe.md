@@ -1,7 +1,10 @@
 # BinWips: Binary Written in PowerShell
 
-Create .NET applications and libraries from PowerShell scripts and inline code
-blocks with control over the generated `.cs`, `.exe`, and `.dll` files and any additional resources. Target linux and windows on x86, x64, and arm64.
+Create .NET applications from PowerShell scripts and inline code
+blocks with control over the generated `.cs` and `.exe` files and any additional resources. Target linux and windows on x86, x64, and arm64.
+
+
+> MyScript.ps1 -> MyScript.exe
 
 ## Getting Started
 
@@ -10,7 +13,8 @@ Install the module with:
 ```powershell
 # TODO: Publish so this works: Install-Module BinWips
 # For now, git clone the repo
-Install-Module /gitrepo/src/Modules/BinWips
+git clone https://github.com/d-carrigg/BinWips.git
+Install-Module /BinWips/src/Modules/BinWips
 ```
 
 Create a simple program from an inline script block:
@@ -39,12 +43,11 @@ New-BinWips -InFile "path/to/myScript.ps1"
 ```
 
 An executable will be generated in the current directory with the name
-`myScript.exe`. 
+`myScript.exe`.
 
 ## Parameters
 
-BinWips assemblies (both `exe`s and `dll`s) can accept arguments from the
-caller.
+BinWips programs can take parameters just like the PowerShell scripts they are based on.
 
 ```powershell
 # Note the escaped variable `$myParam
@@ -95,25 +98,26 @@ REMARKS
 Detailed help for this module is included via the `Get-Help` cmdlet. Run
 `Get-Help New-BinWips -Detailed` for more information.
 
-```
+```text
 NAME
     New-BinWips
-
+    
 SYNOPSIS
     Creates a new PowerShell binary.
-
-
+    
+    
 SYNTAX
-    New-BinWips [-ScriptBlock] <Object> [-Namespace <String>] [-ClassName <Object>] [-OutFile <String>]
-    [-AssemblyAttributes <String[]>] [-NoDefaultAttributes] [-ClassAttributes <Hashtable>] [-ClassTemplate <String>]
-    [-AttributesTemplate <String>] [-Tokens <Hashtable>] [-CscArgumentList <String[]>] [-OutDir <String>] [-ScratchDir
-    <String>] [-Clean] [-KeepScratchDir] [-Force] [-Resources <String[]>] [-NoEmbedResources] [-Library]
+    New-BinWips [-ScriptBlock] <Object> [-OutDir <String>] [-ScratchDir <String>] [-OutFile <String>] [-Cleanup] [-Force]    
+    [-Namespace <String>] [-ClassName <Object>] [-Target <String>] [-AssemblyAttributes <String[]>] [-ClassAttributes        
+    <Hashtable>] [-ClassTemplate <String>] [-AttributesTemplate <String>] [-Tokens <Hashtable>] [-Resources <String[]>]      
+    [-NoEmbedResources] [-Library] [-Platform <String>] [-Architecture <String>] [-CscArgumentList <String[]>]
     [<CommonParameters>]
 
-    New-BinWips [-InFile] <String[]> [-Namespace <String>] [-ClassName <Object>] [-OutFile <String>] [-AssemblyAttributes
-    <String[]>] [-NoDefaultAttributes] [-ClassAttributes <Hashtable>] [-ClassTemplate <String>] [-AttributesTemplate
-    <String>] [-Tokens <Hashtable>] [-CscArgumentList <String[]>] [-OutDir <String>] [-ScratchDir <String>] [-Clean]
-    [-KeepScratchDir] [-Force] [-Resources <String[]>] [-NoEmbedResources] [-Library] [<CommonParameters>]
+    New-BinWips [-InFile] <String[]> [-OutDir <String>] [-ScratchDir <String>] [-OutFile <String>] [-Cleanup] [-Force]       
+    [-Namespace <String>] [-ClassName <Object>] [-Target <String>] [-AssemblyAttributes <String[]>] [-ClassAttributes        
+    <Hashtable>] [-ClassTemplate <String>] [-AttributesTemplate <String>] [-Tokens <Hashtable>] [-Resources <String[]>]      
+    [-NoEmbedResources] [-Library] [-Platform <String>] [-Architecture <String>] [-CscArgumentList <String[]>]
+    [<CommonParameters>]
 
 
 DESCRIPTION
@@ -129,6 +133,26 @@ PARAMETERS
         Source Script file(s), order is important
         Files added in order entered
         Exe name is defaulted to last file in array
+
+    -OutDir <String>
+        Directory to place output in, defaults to current directory
+        Dir will be created if it doesn't already exist.
+
+    -ScratchDir <String>
+        Change the directory where work will be done defaults to 'obj' folder in current directory
+        Use -Clean to clean this directory before building
+        Dir will be created if it doesn't already exist.
+
+    -OutFile <String>
+        Name of the .exe to generate. Defaults to the -InFile (replaced with .exe) or
+        PSBinary.exe if a script block is inlined
+
+    -Cleanup [<SwitchParameter>]
+        Clean the scratch directory before building
+        As compared to -KeepScratchDir which removes scratch dir *after* build.
+
+    -Force [<SwitchParameter>]
+        Overrite -OutFile if it already exists
 
     -Namespace <String>
         Namespace for the generated program.
@@ -146,9 +170,7 @@ PARAMETERS
         must be a valid c# class name and cannot be equal to -Namespace
         Defaults to Program
 
-    -OutFile <String>
-        Name of the .exe to generate. Defaults to the -InFile (replaced with .exe) or
-        PSBinary.exe if a script block is inlined
+    -Target <String>
 
     -AssemblyAttributes <String[]>
         Hashtable of assembly attributes to apply to the assembly level.
@@ -156,18 +178,11 @@ PARAMETERS
         https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/attributes/global
                     - custom attributes can also be aplied.
                     - Invalid attributes will throw a c# compiler exception
-                    - Attributes are applied in addition to the defaults unless -NoDefaultAttributes
-
-    -NoDefaultAttributes [<SwitchParameter>]
-        Exclude default attributes from being applied to PSBinary.
-        Unless this is included some default attributes will be applied to the program.
-        So that other scripts/programs can identify it as a BinWips.
 
     -ClassAttributes <Hashtable>
         Hashtable of assembly attributes to apply to the class.
                     - Any valid c# class attribute can be applied
                     - Invalid attributes will throw a c# compiler exception
-                    - Attributes are applied in addition to the defaults unless -NoDefaultAttributes
 
     -ClassTemplate <String>
         Override the default class template.
@@ -192,29 +207,6 @@ PARAMETERS
         ---------------
         {#Script#} The script content to compile
 
-    -CscArgumentList <String[]>
-        Additional C# Compiler parameters you want to pass (e.g. references)
-
-    -OutDir <String>
-        Directory to place output in, defaults to current directory
-        Dir will be created if it doesn't already exist.
-
-    -ScratchDir <String>
-        Change the directory where work will be done defaults to '.binwips' folder in current directory
-        Use -Clean to clean this directory after building
-        Dir will be created if it doesn't already exist.
-
-    -Clean [<SwitchParameter>]
-        Clean the scratch directory before building
-        As compared to -KeepScratchDir which removes scratch dir *after* build.
-
-    -KeepScratchDir [<SwitchParameter>]
-        After build don't remove the scratch dir.
-        As compared to -Clean which removes all files in scratch dir *before* build.
-
-    -Force [<SwitchParameter>]
-        Overrite -OutFile if it already exists
-
     -Resources <String[]>
         List of files to include with the app
                     - If -NoEmbedResources is specified then files are embedded in the exe.
@@ -236,30 +228,35 @@ PARAMETERS
     -Library [<SwitchParameter>]
         Output to a .NET .dll instead of an .exe
 
+    -Platform <String>
+        The platform to target
+
+    -Architecture <String>
+        The architecture to target
+
+    -CscArgumentList <String[]>
+        Additional C# Compiler parameters you want to pass (e.g. references)
+
     <CommonParameters>
         This cmdlet supports the common parameters: Verbose, Debug,
         ErrorAction, ErrorVariable, WarningAction, WarningVariable,
         OutBuffer, PipelineVariable, and OutVariable. For more information, see
         about_CommonParameters (https://go.microsoft.com/fwlink/?LinkID=113216).
-```
 
-## Libraries
+    -------------------------- EXAMPLE 1 --------------------------
 
-If you want to produce a library (`dll`) instead you can do so
-by using the `-Library` parameter:
+    PS > New-BinWips -ScriptBlock {Get-Process}
 
-```PowerShell
-New-BinWips -InFile "path/to/myScript.ps1" -Library
-```
+    Creates a file in the current directory named PSBinary.exe which runs get-process
 
-Libraries look a little different than you might expect coming from C#, but they
-just take a `param string[] args` parameter similar to the Main method of a c#
-program. The `param` modifier is supplied in case no parameters are passed.
-Calling in C# would look like
 
-```c#
 
-PSBinary.Invoke("-String 1 'Some Text'", "-ScriptBlock \"{Write-Host 'Inception'}\"", "-Switch1 -Array \"Arrays?\",\"Of Course\"");
+
+    -------------------------- EXAMPLE 2 --------------------------
+
+    PS > New-BinWips MyScript.ps1
+
+    Creates an exe in the current directory named MyScript.exe
 ```
 
 ## Embedding Resources
@@ -293,17 +290,15 @@ BinWips will throw a terminating error. All files will be read in and embedded
 to the `.exe`. To use the resources in your script use the following syntax:
 
 ```powershell
-$myImageContent = Get-PSBinaryResource ".\MyImage.png"
-$myTextContent = Get-PSBinaryResource "c:\foo\MyText.txt"
-$myDll = Get-PSBinaryResource "c:\Windows\ImportantFolder\MyRequiredLibrary.dll"
+$myImageContent = Get-PSBinaryResource "MyImage.png"
+$myTextContent = Get-PSBinaryResource "MyText.txt"
+$myDll = Get-PSBinaryResource "MyRequiredLibrary.dll"
 ```
 
 A few important notes:
 
-- When you get a binary resource your are getting it’s content, not a path to a
-  file, and not a `File` object. You can use the `-AsFile` parameter if you need
-  a file reference, in which case the embedded resource will be written to a
-  temp file (this is slower as content needs to first be written to disk).
+- The file names are case sensitive and do not include the path (filename only).
+  
 - You can’t use `Get-Content` or `Get-Item` cmdlets with these files because
   they do not exist as files when deployed
 
@@ -313,34 +308,6 @@ to the `-OutDir` if they do not already exist at that location. If all resources
 are in the same directory as the script, or they already exist on the machine
 you want to deploy to. You don’t need to include them as resources, you can just
 access them as you normally would in your PowerShell script.
-
-## Check if an application is a BinWips executable
-
-Built in functionality is provided for checking if an assembly (`exe` or `dll`)
-was built with BinWips via the `Test-BinWips` command:
-
-```powershell
-Test-BinWips PSBinary.exe
-```
-
-If you don’t have the BinWips module installed on a machine you can use the
-following:
-
-```powershell
-$Path = 'Path to assembly in question'
-# We gotta do some trickery to safely load this file
-# https://stackoverflow.com/questions/3832351/disposing-assembly
-# https://www.powershellmagazine.com/2014/03/17/pstip-reading-file-content-as-a-byte-array/
-$Path = Resolve-Path $Path
-$bytes = [System.IO.File]::ReadAllBytes($Path)
-$asm = [System.Reflection.Assembly]::Load($bytes)
-$attrItems = $asm.GetCustomAttributes($false)
-foreach($attr in $attrItems) {
-  if($attr.TypeId.Name -eq 'BinWipsAttribute'){
-     Write-Host "Assembly is a BinWips executeable"
-	}
-}
-```
 
 ## Advanced Usage
 

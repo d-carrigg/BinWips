@@ -40,7 +40,7 @@ namespace {#Namespace#} {
 
          // call PWSH to execute the script passing in the args
          var psi = new ProcessStartInfo(@"pwsh.exe");
-         psi.Arguments = "-NoProfile -NoLogo -WindowStyle Hidden -EncodedCommand " + encodedCommand;
+         psi.Arguments = "-NoProfile -NoLogo -EncodedCommand " + encodedCommand;
          //psi.RedirectStandardInput = true;
          var process = Process.Start(psi);
          process.EnableRaisingEvents = true;
