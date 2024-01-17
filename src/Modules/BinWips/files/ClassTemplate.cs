@@ -75,7 +75,7 @@ namespace {#Namespace#} {
             var encodedCommand = EncodeBase64(wrappedScript);
 
             // call PWSH to execute the script passing in the args
-            var psi = new ProcessStartInfo(@"pwsh.exe");
+            var psi = new ProcessStartInfo(@"pwsh");
             psi.Arguments = "-NoProfile -NoLogo -EncodedCommand " + encodedCommand;
             //psi.RedirectStandardInput = true;
             var process = Process.Start(psi);
