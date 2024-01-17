@@ -3,8 +3,8 @@
 # Download both and unzip so that the files are underneath new folders  src/Modules/BinWips/files/bflat/linux and  src/Modules/BinWips/files/bflat/windows
 $linUrl = "https://github.com/bflattened/bflat/releases/download/v8.0.1/bflat-8.0.1-linux-glibc-x64.tar.gz"
 $winUrl = " https://github.com/bflattened/bflat/releases/download/v8.0.1/bflat-8.0.1-windows-x64.zip"
-$linOut = Resolve-Path "$env:TEMP/bflat-linux.tar.gz"
-$winOut =  Resolve-Path "$env:TEMP/bflat-windows.zip"
+$linOut = Resolve-Path "./bflat-linux.tar.gz"
+$winOut =  Resolve-Path "./bflat-windows.zip"
 $linDir =  Resolve-Path "$PSScriptRoot/../src/Modules/BinWips/files/bflat/linux"
 $winDir =  Resolve-Path "$PSScriptRoot/../src/Modules/BinWips/files/bflat/windows"
 
