@@ -5,6 +5,8 @@ function Remove-BinWipsToken {
         Remove all instances of -Key from source.
     #>
     [CmdletBinding()]
+    [OutputType([string])]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Justification='This function does not change state, it only removes text from a string')]
     param (
         # String to replace content from
         [parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]

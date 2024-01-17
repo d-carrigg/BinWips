@@ -10,8 +10,7 @@ namespace BinWips
         public static string GetResource(string path)
         {
             var client = new NamedPipeClientStream("BinWipsPipe{#BinWipsPipeGuid#}");
-            client.Connect();
-             
+            client.Connect();             
             StreamReader reader = new StreamReader(client);
             StreamWriter writer = new StreamWriter(client);
 

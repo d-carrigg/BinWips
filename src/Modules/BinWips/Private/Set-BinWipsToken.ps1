@@ -16,6 +16,7 @@
         General notes
     #>
     [cmdletbinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Justification='This function does not change state, it only removes text from a string')]
     param (
         # String to replace content from
         [parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -34,15 +35,18 @@
         [switch]
         $Required
     )
-    if($Required -and ($Value -eq $null)){
-        throw "Required property not inclued for key $Key"
-    } elseif(($Value -eq $null) -and (!$Required))
-    {
-        write-warning "Value for BinWipsToken: $Key was null so it will be removed. To throw an error, use the -Required paramter."
-        $Value = " "
+    process {
+        if($Required -and ($null -eq $Value)){
+            throw "Required property not inclued for key $Key"
+        } elseif(($null -eq $Value) -and (!$Required))
+        {
+            write-warning "Value for BinWipsToken: $Key was null so it will be removed. To throw an error, use the -Required paramter."
+            $Value = " "
+        }
+        
+        Write-Verbose "Replacing $key with $value"
+        # TODO: Make regex and use that to prevent accidental replacements (allow escape sequences)
+        return ($source.Replace("{#$key#}", $value))
     }
-    
-    Write-Verbose "Replacing $key with $value"
-    # TODO: Make regex and use that to prevent accidental replacements (allow escape sequences)
-    return ($source.Replace("{#$key#}", $value))
+   
 }

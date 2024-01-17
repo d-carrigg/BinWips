@@ -1,4 +1,5 @@
-﻿function New-BinWips
+﻿
+function New-BinWips
 {
    <#
     .SYNOPSIS
@@ -14,9 +15,9 @@
 
        Creates an exe in the current directory named MyScript.exe
     #>
-   [CmdletBinding()]
-   [Alias()]
+   [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
    [OutputType([int])]
+   [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', '', Justification = 'BinWips is not plural')]
    Param
    (
       # The powershell command to convert into a program
@@ -234,10 +235,7 @@
          }
          
       } 
-      # Create directories
-      [System.IO.Directory]::CreateDirectory($ScratchDir)
-      [System.IO.Directory]::CreateDirectory($OutDir)	
-
+ 
 
       if (!$hasClassTemplate -and $Library)
       {
@@ -282,10 +280,18 @@
          $Architecture = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()
       }
 
-      [System.IO.Directory]::CreateDirectory($ScratchDir)
-      [System.IO.Directory]::CreateDirectory($OutDir)
+      if ($PSCmdlet.ShouldProcess('Create Scratch Directory'))
+      {
+         [System.IO.Directory]::CreateDirectory($ScratchDir) | Out-Null
+        
+      }
+      if ($PSCmdlet.ShouldProcess('Create Output Directory'))
+      {
+         [System.IO.Directory]::CreateDirectory($OutDir) | Out-Null
+      }
 
-      $args = @{
+
+      $funcArgs = @{
          Script             = $psScript
          Namespace          = $Namespace
          ClassName          = $ClassName
@@ -307,7 +313,7 @@
          Architecture       = $Architecture
       }     
 
-      Build-Bflat @args
+      Build-Bflat @funcArgs
       
    }
    End

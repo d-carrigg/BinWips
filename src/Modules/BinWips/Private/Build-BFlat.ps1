@@ -172,15 +172,18 @@
       }
     
       $cscArgs = @("build",
-         "--out $OutFile", 
-         "--target $target",
+         "--out", "$OutFile", 
+         "--target", "$target",
          # "--no-debug-info",
          # "--no-stacktrace-data",
-         "--os $($Platform.ToLower())",
-         "--arch $($Architecture.ToLower())",
-         "-i Main"
+         "--os", "$($Platform.ToLower())",
+         "--arch", "$($Architecture.ToLower())",
+         "-i", "Main"
       )
-      $cscArgs += $CscArgumentList
+      if($null -ne $CscArgumentList -and $CscArgumentList.Length -gt 0){
+         $cscArgs += $CscArgumentList
+      }
+      
    
      
       # TODO: Handle Resources
@@ -193,7 +196,8 @@
          foreach ($r in $Resources)
          {
             #https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-options/resource-compiler-option
-            $cscArgs += "--resource $r"
+            $cscArgs += "--resource"
+            $cscArgs += $r
          }
       }
      
@@ -209,7 +213,7 @@
       $guid = [guid]::NewGuid().ToString()
       $Tokens['BinWipsPipeGuid'] = $guid
 
-      $args = @{
+      $funcArgs = @{
          Script             = $Script
          Namespace          = $Namespace
          ClassName          = $ClassName
@@ -227,7 +231,7 @@
          ScratchDir         = $ScratchDir
       }
 
-      Write-BinWipsExe @args
+      Write-BinWipsExe @funcArgs
 
    }
    End

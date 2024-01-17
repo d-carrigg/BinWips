@@ -14,7 +14,7 @@ function Write-BinWipsExe
 
        Creates an exe in the current directory named MyScript.exe
     #>
-   [CmdletBinding()]
+   [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
    [Alias()]
    [OutputType([int])]
    Param
@@ -127,103 +127,144 @@ function Write-BinWipsExe
       [string[]]
       $CompilerArgs
    )
- 
-   $hasClassAttributes = $PSBoundParameters.ContainsKey('ClassAttributes')
-   $hasAssemblyAttributes = $PSBoundParameters.ContainsKey('AssemblyAttributes')
-   $runtimeSetupScript = Get-Content -Raw "$PSScriptRoot\..\files\Setup-Runtime.ps1"
 
-   $runtimeSetupScript = $runtimeSetupScript | Set-BinWipsToken -Key AssemblyPath -Value ($OutFile.TrimStart('.')) -Required 
-
-   if ($Tokens)
+   process
    {
-      $Tokens.GetEnumerator() | ForEach-Object {
-         $runtimeSetupScript = $runtimeSetupScript | Set-BinWipsToken -Key $_.Key -Value $_.Value 
-      } 
-   }
 
-   Write-Verbose $runtimeSetupScript
-   $runtimeSetupScript | Out-File "$ScratchDir\Setup-Runtime.ps1" -Encoding unicode -Force:$Force
-   $encodedRuntimeSetup = [Convert]::ToBase64String(([System.Text.Encoding]::Unicode.GetBytes($runtimeSetupScript)))
- 
-
-   # 3. Base64 encode script for easy handling (no dealing with quotes)
-   # https://stackoverflow.com/questions/15414678/how-to-decode-a-base64-string
-   $encodedScript = [Convert]::ToBase64String(([System.Text.Encoding]::Unicode.GetBytes($psScript)))
+      $hasClassAttributes = $PSBoundParameters.ContainsKey('ClassAttributes')
+      $hasAssemblyAttributes = $PSBoundParameters.ContainsKey('AssemblyAttributes')
+      $runtimeSetupScript = Get-Content -Raw "$PSScriptRoot\..\files\Setup-Runtime.ps1"
    
-   # 4. Insert script and replace tokens in class template
-   $funtionName = [System.IO.Path]::GetFileNameWithoutExtension($OutFile)
-   $csProgram = $ClassTemplate | Set-BinWipsToken -Key Script -Value $encodedScript `
-   | Set-BinWipsToken -Key RuntimeSetup -Value $encodedRuntimeSetup -Required `
-   | Set-BinWipsToken -Key ClassName -Value $ClassName -Required `
-   | Set-BinWipsToken -Key Namespace -Value $Namespace -Required `
-   | Set-BinWipsToken -Key BinWipsVersion -Value "0.1"
-   | Set-BinWipsToken -Key FunctionName -Value $funtionName
-
-
+      $runtimeSetupScript = $runtimeSetupScript | Set-BinWipsToken -Key AssemblyPath -Value ($OutFile.TrimStart('.')) -Required 
    
-   if ($hasAssemblyAttributes)
-   {
-      # TODO: preformat assembly attributes
-      Write-Verbose "Applying Assembly Attribuytes"
-      $att = ""
-      $AssemblyAttributes | % {
-            $att += "$_`r`n"
-      }
-      if($att -eq $null)
+      if ($Tokens)
       {
-         Write-Error "Failed to build assembly attributes"
+         $Tokens.GetEnumerator() | ForEach-Object {
+            $runtimeSetupScript = $runtimeSetupScript | Set-BinWipsToken -Key $_.Key -Value $_.Value 
+         } 
       }
-      $csProgram = $csProgram | Set-BinWipsToken -Key AssemblyAttributes -Value $att
-   }
-   else {
-      $csProgram = $csProgram | Remove-BinWipsToken -Key AssemblyAttributes
-   }
-
-   if ($hasClassAttributes)
-   {
-      Write-Verbose "Applying class attributes"
-      $att = ""
-      $ClassAttributes | % {
-            $att += "$_`r`n"
+   
+      Write-Verbose $runtimeSetupScript
+      if($PSCmdlet.ShouldProcess('Create Runtime Setup Script')) {
+         $runtimeSetupScript | Out-File "$ScratchDir\Setup-Runtime.ps1" -Encoding unicode -Force:$Force
       }
-      if($att -eq $null)
+      $encodedRuntimeSetup = [Convert]::ToBase64String(([System.Text.Encoding]::Unicode.GetBytes($runtimeSetupScript)))
+    
+   
+      # 3. Base64 encode script for easy handling (no dealing with quotes)
+      # https://stackoverflow.com/questions/15414678/how-to-decode-a-base64-string
+      $encodedScript = [Convert]::ToBase64String(([System.Text.Encoding]::Unicode.GetBytes($psScript)))
+      
+      # 4. Insert script and replace tokens in class template
+      $funtionName = [System.IO.Path]::GetFileNameWithoutExtension($OutFile)
+      $csProgram = $ClassTemplate | Set-BinWipsToken -Key Script -Value $encodedScript `
+      | Set-BinWipsToken -Key RuntimeSetup -Value $encodedRuntimeSetup -Required `
+      | Set-BinWipsToken -Key ClassName -Value $ClassName -Required `
+      | Set-BinWipsToken -Key Namespace -Value $Namespace -Required `
+      | Set-BinWipsToken -Key BinWipsVersion -Value "0.1"
+      | Set-BinWipsToken -Key FunctionName -Value $funtionName
+   
+   
+      
+      if ($hasAssemblyAttributes)
       {
-         Write-Error "Failed to build class attributes"
+         # TODO: preformat assembly attributes
+         Write-Verbose "Applying Assembly Attribuytes"
+         $att = ""
+         $AssemblyAttributes | ForEach-Object {
+            $att += "$_`r`n"
+         }
+         if ($att -eq $null)
+         {
+            Write-Error "Failed to build assembly attributes"
+         }
+         $csProgram = $csProgram | Set-BinWipsToken -Key AssemblyAttributes -Value $att
       }
-      $csProgram = $csProgram | Set-BinWipsToken -Key ClassAttributes -Value $att
-   }
-   else {
-      $csProgram = $csProgram | Remove-BinWipsToken -Key ClassAttributes
-   }
-   if ($Tokens)
-   {
-      $Tokens.GetEnumerator() | ForEach-Object {
-         $csProgram = $csProgram | Set-BinWipsToken -Key $_.Key -Value $_.Value 
-      } 
-   }
+      else
+      {
+         $csProgram = $csProgram | Remove-BinWipsToken -Key AssemblyAttributes
+      }
+   
+      if ($hasClassAttributes)
+      {
+         Write-Verbose "Applying class attributes"
+         $att = ""
+         $ClassAttributes | ForEach-Object {
+            $att += "$_`r`n"
+         }
+         if ($att -eq $null)
+         {
+            Write-Error "Failed to build class attributes"
+         }
+         $csProgram = $csProgram | Set-BinWipsToken -Key ClassAttributes -Value $att
+      }
+      else
+      {
+         $csProgram = $csProgram | Remove-BinWipsToken -Key ClassAttributes
+      }
+      if ($Tokens)
+      {
+         $Tokens.GetEnumerator() | ForEach-Object {
+            $csProgram = $csProgram | Set-BinWipsToken -Key $_.Key -Value $_.Value 
+         } 
+      }
+   
+   
+      # 5. Output class + additional files to .cs files in scratch dir
+      Write-Verbose "Writing to $ScratchDir"
+      if($PSCmdlet.ShouldProcess('Create C# Source File')){
+         $csProgram | Out-File "$ScratchDir/PSBinary.cs" -Encoding unicode -Force:$Force
+      }
+      if($PSCmdlet.ShouldProcess('Create BinWiPS Attribute File')){
+         $attributesTemplate | Out-File "$ScratchDir/BinWipsAttr.cs" -Encoding unicode -Force:$Force
+      }
+     
+   
+   
+      
+      $buildCmd = "$CompilerPath $CompilerArgs"
+      Write-Verbose $buildCmd
+      if ($PSCmdlet.ShouldProcess('Create Binary'))
+      {
+         #$results = Invoke-Expression $buildCmd
+
+         # Use [System.Diagnostics.Process]::Start() and redirect input to avoid Invoke-Expression
+         $psi = [System.Diagnostics.ProcessStartInfo]::new($CompilerPath)
+         
+         $CompilerArgs | ForEach-Object {
+            $psi.ArgumentList.Add($_)
+         }
+  
 
 
-   # 5. Output class + additional files to .cs files in scratch dir
-   Write-Verbose "Writing to $ScratchDir"
-   $csProgram | Out-File "$ScratchDir/PSBinary.cs" -Encoding unicode -Force:$Force
+         $psi.RedirectStandardOutput = $true
+         $psi.RedirectStandardError = $true
+         $process = [System.Diagnostics.Process]::Start($psi)
+         $process.WaitForExit()
+         $results = @($process.StandardOutput.ReadToEnd(), $process.StandardError.ReadToEnd())
+         
+         if ($results -like '*Error*')
+         {
+           throw $results
+         }
+         elseif ($null -ne $results)
+         {
+            Write-Output $results
+         }
+      }
+      else
+      {
+         Write-Verbose "Not building because ShouldProcess is false"
+         return
+      }
+     
+   
+      # 7.
+      if ($Cleanup)
+      {
+         Remove-Item $ScratchDir -Recurse
+      }
+      
+   }
  
-   $attributesTemplate | Out-File "$ScratchDir/BinWipsAttr.cs" -Encoding unicode -Force:$Force
-
-
-   
-   $buildCmd = "$CompilerPath $CompilerArgs"
-   Write-Verbose $buildCmd
-   $results = Invoke-Expression $buildCmd
-   if ($results -like '*Error*'){
-      Write-Error $results
-   } elseif($null -ne $results) {
-      Write-Host $results
-   }
-
-   # 7.
-   if ($Cleanup)
-   {
-      Remove-Item $ScratchDir -Recurse
-   }
-   
 }
