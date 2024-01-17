@@ -293,17 +293,15 @@ BinWips will throw a terminating error. All files will be read in and embedded
 to the `.exe`. To use the resources in your script use the following syntax:
 
 ```powershell
-$myImageContent = Get-PSBinaryResource ".\MyImage.png"
-$myTextContent = Get-PSBinaryResource "c:\foo\MyText.txt"
-$myDll = Get-PSBinaryResource "c:\Windows\ImportantFolder\MyRequiredLibrary.dll"
+$myImageContent = Get-PSBinaryResource "MyImage.png"
+$myTextContent = Get-PSBinaryResource "MyText.txt"
+$myDll = Get-PSBinaryResource "MyRequiredLibrary.dll"
 ```
 
 A few important notes:
 
-- When you get a binary resource your are getting it’s content, not a path to a
-  file, and not a `File` object. You can use the `-AsFile` parameter if you need
-  a file reference, in which case the embedded resource will be written to a
-  temp file (this is slower as content needs to first be written to disk).
+- The file names are case sensitive and do not include the path (filename only). 
+  
 - You can’t use `Get-Content` or `Get-Item` cmdlets with these files because
   they do not exist as files when deployed
 
