@@ -3,6 +3,7 @@
 Create .NET applications from PowerShell scripts and inline code
 blocks with control over the generated `.cs` and `.exe` files and any additional resources. Target linux and windows on x86, x64, and arm64.
 
+
 > MyScript.ps1 -> MyScript.exe
 
 ## Getting Started
@@ -97,25 +98,26 @@ REMARKS
 Detailed help for this module is included via the `Get-Help` cmdlet. Run
 `Get-Help New-BinWips -Detailed` for more information.
 
-```
+```text
 NAME
     New-BinWips
-
+    
 SYNOPSIS
     Creates a new PowerShell binary.
-
-
+    
+    
 SYNTAX
-    New-BinWips [-ScriptBlock] <Object> [-Namespace <String>] [-ClassName <Object>] [-OutFile <String>]
-    [-AssemblyAttributes <String[]>] [-NoDefaultAttributes] [-ClassAttributes <Hashtable>] [-ClassTemplate <String>]
-    [-AttributesTemplate <String>] [-Tokens <Hashtable>] [-CscArgumentList <String[]>] [-OutDir <String>] [-ScratchDir
-    <String>] [-Clean] [-KeepScratchDir] [-Force] [-Resources <String[]>] [-NoEmbedResources] [-Library]
+    New-BinWips [-ScriptBlock] <Object> [-OutDir <String>] [-ScratchDir <String>] [-OutFile <String>] [-Cleanup] [-Force]    
+    [-Namespace <String>] [-ClassName <Object>] [-Target <String>] [-AssemblyAttributes <String[]>] [-ClassAttributes        
+    <Hashtable>] [-ClassTemplate <String>] [-AttributesTemplate <String>] [-Tokens <Hashtable>] [-Resources <String[]>]      
+    [-NoEmbedResources] [-Library] [-Platform <String>] [-Architecture <String>] [-CscArgumentList <String[]>]
     [<CommonParameters>]
 
-    New-BinWips [-InFile] <String[]> [-Namespace <String>] [-ClassName <Object>] [-OutFile <String>] [-AssemblyAttributes
-    <String[]>] [-NoDefaultAttributes] [-ClassAttributes <Hashtable>] [-ClassTemplate <String>] [-AttributesTemplate
-    <String>] [-Tokens <Hashtable>] [-CscArgumentList <String[]>] [-OutDir <String>] [-ScratchDir <String>] [-Clean]
-    [-KeepScratchDir] [-Force] [-Resources <String[]>] [-NoEmbedResources] [-Library] [<CommonParameters>]
+    New-BinWips [-InFile] <String[]> [-OutDir <String>] [-ScratchDir <String>] [-OutFile <String>] [-Cleanup] [-Force]       
+    [-Namespace <String>] [-ClassName <Object>] [-Target <String>] [-AssemblyAttributes <String[]>] [-ClassAttributes        
+    <Hashtable>] [-ClassTemplate <String>] [-AttributesTemplate <String>] [-Tokens <Hashtable>] [-Resources <String[]>]      
+    [-NoEmbedResources] [-Library] [-Platform <String>] [-Architecture <String>] [-CscArgumentList <String[]>]
+    [<CommonParameters>]
 
 
 DESCRIPTION
@@ -131,6 +133,26 @@ PARAMETERS
         Source Script file(s), order is important
         Files added in order entered
         Exe name is defaulted to last file in array
+
+    -OutDir <String>
+        Directory to place output in, defaults to current directory
+        Dir will be created if it doesn't already exist.
+
+    -ScratchDir <String>
+        Change the directory where work will be done defaults to 'obj' folder in current directory
+        Use -Clean to clean this directory before building
+        Dir will be created if it doesn't already exist.
+
+    -OutFile <String>
+        Name of the .exe to generate. Defaults to the -InFile (replaced with .exe) or
+        PSBinary.exe if a script block is inlined
+
+    -Cleanup [<SwitchParameter>]
+        Clean the scratch directory before building
+        As compared to -KeepScratchDir which removes scratch dir *after* build.
+
+    -Force [<SwitchParameter>]
+        Overrite -OutFile if it already exists
 
     -Namespace <String>
         Namespace for the generated program.
@@ -148,9 +170,7 @@ PARAMETERS
         must be a valid c# class name and cannot be equal to -Namespace
         Defaults to Program
 
-    -OutFile <String>
-        Name of the .exe to generate. Defaults to the -InFile (replaced with .exe) or
-        PSBinary.exe if a script block is inlined
+    -Target <String>
 
     -AssemblyAttributes <String[]>
         Hashtable of assembly attributes to apply to the assembly level.
@@ -158,18 +178,11 @@ PARAMETERS
         https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/attributes/global
                     - custom attributes can also be aplied.
                     - Invalid attributes will throw a c# compiler exception
-                    - Attributes are applied in addition to the defaults unless -NoDefaultAttributes
-
-    -NoDefaultAttributes [<SwitchParameter>]
-        Exclude default attributes from being applied to PSBinary.
-        Unless this is included some default attributes will be applied to the program.
-        So that other scripts/programs can identify it as a BinWips.
 
     -ClassAttributes <Hashtable>
         Hashtable of assembly attributes to apply to the class.
                     - Any valid c# class attribute can be applied
                     - Invalid attributes will throw a c# compiler exception
-                    - Attributes are applied in addition to the defaults unless -NoDefaultAttributes
 
     -ClassTemplate <String>
         Override the default class template.
@@ -194,29 +207,6 @@ PARAMETERS
         ---------------
         {#Script#} The script content to compile
 
-    -CscArgumentList <String[]>
-        Additional C# Compiler parameters you want to pass (e.g. references)
-
-    -OutDir <String>
-        Directory to place output in, defaults to current directory
-        Dir will be created if it doesn't already exist.
-
-    -ScratchDir <String>
-        Change the directory where work will be done defaults to '.binwips' folder in current directory
-        Use -Clean to clean this directory after building
-        Dir will be created if it doesn't already exist.
-
-    -Clean [<SwitchParameter>]
-        Clean the scratch directory before building
-        As compared to -KeepScratchDir which removes scratch dir *after* build.
-
-    -KeepScratchDir [<SwitchParameter>]
-        After build don't remove the scratch dir.
-        As compared to -Clean which removes all files in scratch dir *before* build.
-
-    -Force [<SwitchParameter>]
-        Overrite -OutFile if it already exists
-
     -Resources <String[]>
         List of files to include with the app
                     - If -NoEmbedResources is specified then files are embedded in the exe.
@@ -235,11 +225,38 @@ PARAMETERS
         Don't embed any resource specifed by -Resources
         instead they are copied to out dir if they don't already exist
 
+    -Library [<SwitchParameter>]
+        Output to a .NET .dll instead of an .exe
+
+    -Platform <String>
+        The platform to target
+
+    -Architecture <String>
+        The architecture to target
+
+    -CscArgumentList <String[]>
+        Additional C# Compiler parameters you want to pass (e.g. references)
+
     <CommonParameters>
         This cmdlet supports the common parameters: Verbose, Debug,
         ErrorAction, ErrorVariable, WarningAction, WarningVariable,
         OutBuffer, PipelineVariable, and OutVariable. For more information, see
         about_CommonParameters (https://go.microsoft.com/fwlink/?LinkID=113216).
+
+    -------------------------- EXAMPLE 1 --------------------------
+
+    PS > New-BinWips -ScriptBlock {Get-Process}
+
+    Creates a file in the current directory named PSBinary.exe which runs get-process
+
+
+
+
+    -------------------------- EXAMPLE 2 --------------------------
+
+    PS > New-BinWips MyScript.ps1
+
+    Creates an exe in the current directory named MyScript.exe
 ```
 
 ## Embedding Resources
