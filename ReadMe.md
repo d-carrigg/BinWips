@@ -23,6 +23,13 @@ Import-Module BinWips
 > to generate the C# code. This is a dependency of the module and will be
 > downloaded (one time) automatically if not detected in the path.
 
+To install from the source code (not recommended):
+
+```powershell
+# git clone or download the source code from the releases page
+Import-Module /path/to/BinWips/src/Modules/BinWips
+```
+
 Create a simple program from an inline script block:
 
 ```powershell
