@@ -50,7 +50,25 @@ function New-BinWips
 
       Override the Class Template used for the C# program that runs the script. This example would simply run the script in pwsh.exe
       without passing in arguments or setting up embedded resources.
-     
+   .EXAMPLE
+      New-BinWips -ScriptBlock  {echo "Only Runs on Win x64"} -Platform Windows -Architecture x64
+      
+      Creates a program which targets Windows x64. Valid Options are Windows/Linux and x86/x64/arm64.
+      By default BinWips will target the current platform and architecture.
+   .EXAMPLE
+      New-BinWips -ScriptBlock  {
+            [CmdletBinding()]
+            param(
+                [Parameter(Mandatory=$true)]
+                [string]$foo
+            )
+            Add-Type -AssemblyName System.Windows.Forms
+            $form = New-Object System.Windows.Forms.Form
+            $form.Text = "Hello World"
+            $form.ShowDialog()
+        } -Platform Windows -Architecture x64
+      
+      Creates a program that shows a window on Windows x64.
     #>
    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
    [OutputType([int])]
@@ -306,7 +324,7 @@ function New-BinWips
       {
          $Platform = 'Linux'
       }
-      else
+      elseif(!$PSBoundParameters.ContainsKey('Platform'))
       {
          throw "Unsported platform"
       }

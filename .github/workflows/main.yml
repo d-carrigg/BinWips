@@ -47,3 +47,7 @@ jobs:
             token: ${{ secrets.GITHUB_TOKEN }}
             target: packages
             path: src/Modules/BinWips
+
+
+# See: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-powershell
+# https://github.com/marketplace/actions/publish-powershell
