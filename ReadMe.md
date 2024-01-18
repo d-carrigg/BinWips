@@ -36,12 +36,11 @@ Create a simple program from an inline script block:
 New-BinWips -ScriptBlock {echo "Hello World!"}
 ```
 
-This will generate a program named `PSBinary.exe` (or just `PSBinary` on linux)
-in the current directory. Confirm everything worked by running:
+This will generate a program named `PSBinary.exe` in the current directory.
+Confirm everything worked by running:
 
 ```powershell
 .\PSBinary.exe
-# .\PSBinary on linux
 ```
 
 You should see the following output:
@@ -57,7 +56,7 @@ New-BinWips -InFile "path/to/myScript.ps1"
 ```
 
 An executable will be generated in the current directory with the name
-`myScript.exe` (or `myscript` on linux).
+`myScript.exe`.
 
 > :spiral_notepad: Note: By default BinWips compiles to the platform and
 > architecture of the machine it is run on. You can override this behavior with
@@ -450,7 +449,7 @@ Tags: Named Params, Switches
 #>
 ```
 
-## Trouble Shooting
+## Troubleshoting
 
 ### Error: DllNotFound_Linux, objwriter, objwriter.so
 
