@@ -19,7 +19,7 @@ Describe 'New-BinWips' {
 
     It 'Given a script block, should create a .exe that runs the script block' -Tag 'Basic' {
         
-        New-BinWips -ScriptBlock { Write-Host "Hello World" } -ScratchDir $script:scratchDir -OutFile $script:outFile
+        New-BinWips -ScriptBlock { Write-Host "Hello World" } -ScratchDir $script:scratchDir -OutFile $script:outFile -Verbose
 
         $script:outFile | Should -Exist
         $result = & $script:outFile

@@ -32,6 +32,7 @@ jobs:
         with:
           name: ubuntu-Unit-Tests
           path: Unit.Tests.xml
+        if: ${{ always() }}
   publish-module:
       name: Publish Module
       runs-on: ubuntu-latest
