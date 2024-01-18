@@ -35,6 +35,7 @@ jobs:
   publish-module:
       name: Publish Module
       runs-on: ubuntu-latest
+      needs: pester-test
       steps:
         - name: Check out repository code
           uses: actions/checkout@v4
