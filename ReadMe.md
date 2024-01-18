@@ -15,7 +15,7 @@ New-BinWips -ScriptBlock {echo "Hello World!"} -OutFile "HelloWorld.exe"
 Install the module with:
 
 ```powershell
-Install-Module /BinWips/src/Modules/BinWips -AllowPrerelease
+Install-Module BinWips -AllowPrerelease
 Import-Module BinWips
 ```
 
