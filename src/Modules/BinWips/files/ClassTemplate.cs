@@ -40,27 +40,15 @@ namespace {#Namespace#} {
             // call PWSH to execute the script passing in the args
             var psi = new ProcessStartInfo(@"pwsh");
             psi.Arguments = "-NoProfile -NoLogo -EncodedCommand " + encodedCommand;
-            //psi.RedirectStandardInput = true;
+
             var process = Process.Start(psi);
-            process.EnableRaisingEvents = true;
-
             process.WaitForExit();
-
-
         }
-        static string DecodeBase64(string encoded)
-        {
-            var decodedBytes = Convert.FromBase64String(encoded);
-            var text = System.Text.Encoding.Unicode.GetString(decodedBytes);
-            return text;
-        }
+        static string DecodeBase64(string encoded) 
+            => System.Text.Encoding.Unicode.GetString(Convert.FromBase64String(encoded));
 
         static string EncodeBase64(string text)
-        {
-            var bytes = System.Text.Encoding.Unicode.GetBytes(text);
-            var encoded = Convert.ToBase64String(bytes);
-            return encoded;
-        }
+         => Convert.ToBase64String(System.Text.Encoding.Unicode.GetBytes(text));
 
         static void StartServer()
         {
@@ -87,7 +75,9 @@ namespace {#Namespace#} {
                                 writer.Flush();
                             }
                         }
-                    } catch(Exception ex){
+                    }
+                    catch (Exception ex)
+                    {
                         // invalid resource
                         writer.WriteLine("Invalid Resource");
                         writer.WriteLine(ex.Message);
