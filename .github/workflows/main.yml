@@ -38,6 +38,6 @@ jobs:
       - name: Publish PowerShell Module to github packages
         uses: natescherer/publish-powershell-action@v1
         with:
-          apikey: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           target: packages
           path: src/Modules/BinWips
