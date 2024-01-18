@@ -424,7 +424,7 @@ Testing is done through Pester. To run the tests, clone the repo and run
 Invoke-Pester -Script ./tests/BinWips.Tests.ps1
 
 <#
-Tags: Named Params, Switches
+Tags: Basic, MultiFile, Named Params, Switches, ScriptBlockParameters, ClassTemplate, CustomNamespace, CustomClassName, Resources
 #>
 ```
 
