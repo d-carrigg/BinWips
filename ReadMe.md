@@ -62,15 +62,10 @@ New-BinWips -InFile "path/to/myScript.ps1", "path/to/myOtherScript.ps1"
 
 You can always override the name of the generated program with the `-OutFile` parameter.
 
-```powershell
-An executable will be generated in the current directory with the name
-`myScript.exe`.
-
 > :spiral_notepad: Note: By default BinWips compiles to the platform and
 > architecture of the machine it is run on. You can override this behavior with
 > the `-Platform` and `-Architecture` parameters. See the
 > [Parameters](#Parameters) section for more information.
-
 
 BinWips programs can take parameters just like the PowerShell scripts they are
 based on.
