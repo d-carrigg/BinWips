@@ -328,7 +328,7 @@ function New-BinWips
       }
 
       # Download Bflat if needed
-      Get-BFlat
+      Get-BinWipsBFlat
 
 
       $funcArgs = @{

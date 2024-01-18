@@ -1,4 +1,4 @@
-﻿function Get-BFlat
+﻿function Get-BinWipsBFlat
 {
     [CmdletBinding()]
     param()
@@ -16,7 +16,7 @@
     }
 
      
-    $moduleRoot = Split-Path( Split-Path -Path $PSScriptRoot -Parent) -Parent
+    $moduleRoot =  Split-Path -Path $PSScriptRoot -Parent
     # Locate the compiler
     if ($null -ne (Get-Command "bflat" -ErrorAction SilentlyContinue) ) 
     { 
@@ -42,7 +42,7 @@
     [System.IO.Directory]::CreateDirectory($path) | Out-Null
 
     # Check if the latest release is already downloaded
-    Write-Verbose "Downloading Bflat from github"
+    Write-Verbose "BFlat not found, downloading from github"
 
     $apiUrl = "https://api.github.com/repos/bflattened/bflat/releases/latest"       
     $response = Invoke-RestMethod -Uri $apiUrl
@@ -51,9 +51,9 @@
     $url = $asset.browser_download_url
 
     $downloadPath = Join-Path $path "bflat.$archiveType"
-    $outPath = Join-Path $path "bflat"
+    Write-Verbose "Downloading $url to $downloadPath"
     Invoke-WebRequest -Uri $url -OutFile $downloadPath 
-
+ 
     if ($archiveType -eq "zip")
     {
         Expand-Archive -Path $downloadPath -DestinationPath $path
@@ -63,7 +63,7 @@
         tar -xzf $downloadPath -C $path
     }
 
-    Write-Verbose "Bflat downloaded to $outPath"
+    Write-Verbose "Bflat installed at $path"
 
 
 }

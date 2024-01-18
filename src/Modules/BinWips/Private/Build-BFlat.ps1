@@ -171,7 +171,7 @@
       }
 
       # Locate the compiler
-      $moduleRoot = Split-Path( Split-Path -Path $PSScriptRoot -Parent) -Parent
+      $moduleRoot = Split-Path -Path $PSScriptRoot -Parent
       if ([string]::IsNullOrWhiteSpace($dotNetPath) -eq $false -and $dotNetPath -ne "INFO: Could not find files for the given pattern(s).")
       {
          #Write-Verbose "Found bflat at $dotNetPath"
