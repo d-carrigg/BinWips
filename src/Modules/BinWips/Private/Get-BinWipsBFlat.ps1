@@ -4,7 +4,7 @@
     param()
 
     $platform = "windows"
-    $arch = "x64"
+    $arch = [System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture
     $archiveType = "zip"
 
     
@@ -13,6 +13,8 @@
      
         $platform = "linux-glibc"
         $archiveType = "tar.gz"
+    } elseif ($IsMacOS){
+        throw "MacOS is not supported"
     }
 
      

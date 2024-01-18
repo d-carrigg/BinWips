@@ -36,20 +36,21 @@ function New-BinWips
       New-BinWips -ScriptBlock {
          Write-host "done"
       } -ClassTemplate @"
-      
-      
-      // use tokens to replace values in the template, see -Tokens for more info
-      namespace {#Namespace#} {
-         public class MyClass {
-            public static void Main(string[] args) {
-               //.. Custom Host class implementation
-              System.Diagnostics.Process.Run("pwsh.exe", "-EncodedCommand {#Script#}")
-            }
-         }
-      }
+        // use tokens to replace values in the template, see -Tokens for more info
+        namespace {#Namespace#} {
+           public class MyClass {
+              public static void Main(string[] args) {
+                 //.. Custom Host class implementation
+                 var x = "{#RuntimeSetip#}"; // ignored but required to be in template
+                 var y = "{#Script#}"; // ignored but required to be in template
+                System.Diagnostics.Process.Start("pwsh.exe", "-Command \"Write-host 'Ignore Script'\"");
+              }
+           }
+        }
+"@
 
-      Override the Class Template used for the C# program that runs the script. This example would simply run the script in pwsh.exe
-      without passing in arguments or setting up embedded resources.
+      Override the Class Template used for the C# program that runs the script. This example would ignore the passed in scripts
+      and print "Ignore Script" to the console.
    .EXAMPLE
       New-BinWips -ScriptBlock  {echo "Only Runs on Win x64"} -Platform Windows -Architecture x64
       
@@ -114,11 +115,6 @@ function New-BinWips
       # As compared to -KeepScratchDir which removes scratch dir *after* build. 
       [switch]
       $Cleanup,
-
-      
-      # Overrite -OutFile if it already exists
-      [switch]
-      $Force, 
 
       # Namespace for the generated program. 
       # This parameter is trumped by -Tokens, so placing a value here will be overriden by
@@ -324,7 +320,7 @@ function New-BinWips
       {
          $Platform = 'Linux'
       }
-      elseif(!$PSBoundParameters.ContainsKey('Platform'))
+      elseif (!$PSBoundParameters.ContainsKey('Platform'))
       {
          throw "Unsported platform"
       }

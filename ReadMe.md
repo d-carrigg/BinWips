@@ -29,11 +29,12 @@ Create a simple program from an inline script block:
 New-BinWips -ScriptBlock {echo "Hello World!"}
 ```
 
-This will generate a program named `PSBinary.exe` in the current directory.
-Confirm everything worked by running:
+This will generate a program named `PSBinary.exe` (or just `PSBinary` on linux)
+in the current directory. Confirm everything worked by running:
 
 ```powershell
 .\PSBinary.exe
+# .\PSBinary on linux
 ```
 
 You should see the following output:
@@ -49,7 +50,7 @@ New-BinWips -InFile "path/to/myScript.ps1"
 ```
 
 An executable will be generated in the current directory with the name
-`myScript.exe`.
+`myScript.exe` (or `myscript` on linux).
 
 > :spiral_notepad: Note: By default BinWips compiles to the platform and
 > architecture of the machine it is run on. You can override this behavior with
@@ -76,8 +77,7 @@ New-BinWips -InFile "MyScript.ps1"
 # echo "Param was $myParam"
 ```
 
-If you generate a `.exe` the arguments work the same as they would if you wrote
-a script. E.g.
+Arguments work the same as they would if you wrote a script. E.g.
 
 ```powershell
 .\PSBinary.exe -String1 "Some Text" -ScriptBlock "{Write-Host 'Inception'}" -Switch1 -Array "Arrays?","Of Course"
@@ -112,7 +112,10 @@ REMARKS
 ## All New-BinWips Parameters
 
 Detailed help for this module is included via the `Get-Help` cmdlet. Run
-`Get-Help New-BinWips -Detailed` for more information.
+`Get-Help New-BinWips -Detailed` for more information. Examples are included in
+the help. You can also check out the
+[/tests/BinWips.Tests.ps1](/tests/BinWips.Tests.ps1) file for examples of how to
+use the module.
 
 ```text
 NAME

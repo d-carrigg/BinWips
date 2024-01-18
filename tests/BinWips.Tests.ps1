@@ -8,9 +8,9 @@
 
 
 AfterAll {
-   # Cleanup
-   Remove-Item -Path $script:outFile -ErrorAction SilentlyContinue
-   Remove-Item $script:scratchDir -Recurse -ErrorAction SilentlyContinue
+    # Cleanup
+    Remove-Item -Path $script:outFile -ErrorAction SilentlyContinue
+    Remove-Item $script:scratchDir -Recurse -ErrorAction SilentlyContinue
 }
 
 
@@ -27,7 +27,7 @@ Describe 'New-BinWips' {
 
     }
 
-    It 'Given a script file, should create a .exe that runs the script'   {
+    It 'Given a script file, should create a .exe that runs the script' {
         New-BinWips -InFile "$PSScriptRoot\files\HelloWorld.ps1" -ScratchDir $script:scratchDir -OutFile $script:outFile
 
         $script:outFile | Should -Exist
@@ -52,11 +52,11 @@ Describe 'New-BinWips' {
         $result | Should -Be "bar"
     }
 
-    It 'Given named parameters, should accept the named parameters' -Tag "Named Params"  {
+    It 'Given named parameters, should accept the named parameters' -Tag "Named Params" {
         $sb = {
             [CmdletBinding()]
             param(
-                [Parameter(Mandatory=$true)]
+                [Parameter(Mandatory = $true)]
                 [string]$foo,
                 $baz
             )
@@ -75,7 +75,8 @@ Describe 'New-BinWips' {
             param(
                 [switch]$baz
             )
-            if($baz){
+            if ($baz)
+            {
                 Write-Output "Switch was true"
             }
         }
@@ -89,7 +90,7 @@ Describe 'New-BinWips' {
         $sb = {
             [CmdletBinding()]
             param(
-                [Parameter(Mandatory=$true)]
+                [Parameter(Mandatory = $true)]
                 [scriptblock]$baz
             )
             & $baz
@@ -100,45 +101,71 @@ Describe 'New-BinWips' {
         $result | Should -Be "Hello World"
     }
 
-   It 'Given resources, should embed those resources and make them accessible in the script' -Tag "Resources" {
-    $sb = {
-        $content =  Get-BinWipsResource "EmbeddedResource.txt"
-        write-host $content
+    It 'Given resources, should embed those resources and make them accessible in the script' -Tag "Resources" {
+        $sb = {
+            $content = Get-BinWipsResource "EmbeddedResource.txt"
+            Write-Host $content
+        }
+        New-BinWips -ScriptBlock $sb -ScratchDir $script:scratchDir -OutFile $script:outFile -Resources @('tests/files/EmbeddedResource.txt')
+        $script:outFile | Should -Exist
+        $result = & $script:outFile -baz
+        $result | Should -Be "This is an embedded resource."
     }
-    New-BinWips -ScriptBlock $sb -ScratchDir $script:scratchDir -OutFile $script:outFile -Resources @('tests/files/EmbeddedResource.txt')
-    $script:outFile | Should -Exist
-    $result = & $script:outFile -baz
-    $result | Should -Be "This is an embedded resource."
-   }
 
-   It 'Given a custom class name, should use that class name' -Tag "CustomClassName" {
-    $sb = {
-        [CmdletBinding()]
-        param(
-            [Parameter(Mandatory=$true)]
-            [string]$foo
-        )
-        Write-Output "$foo"
+    It 'Given a custom class name, should use that class name' -Tag "CustomClassName" {
+        $sb = {
+            [CmdletBinding()]
+            param(
+                [Parameter(Mandatory = $true)]
+                [string]$foo
+            )
+            Write-Output "$foo"
+        }
+        New-BinWips -ScriptBlock $sb -ScratchDir $script:scratchDir -OutFile $script:outFile -ClassName "MyClass"
+        $script:outFile | Should -Exist
+        $csContent = Get-Content $script:scratchDir/PSBinary.cs -Raw
+        $csContent | Should -BeLike "*class MyClass*"
     }
-    New-BinWips -ScriptBlock $sb -ScratchDir $script:scratchDir -OutFile $script:outFile -ClassName "MyClass"
-    $script:outFile | Should -Exist
-    $csContent = Get-Content $script:scratchDir/PSBinary.cs -Raw
-    $csContent | Should -BeLike "*class MyClass*"
-   }
 
-   It 'Given a custom namespace, should use that namespace' -Tag "CustomNamespace" {
-    $sb = {
-        [CmdletBinding()]
-        param(
-            [Parameter(Mandatory=$true)]
-            [string]$foo
-        )
-        Write-Output "$foo"
+    It 'Given a custom namespace, should use that namespace' -Tag "CustomNamespace" {
+        $sb = {
+            [CmdletBinding()]
+            param(
+                [Parameter(Mandatory = $true)]
+                [string]$foo
+            )
+            Write-Output "$foo"
+        }
+        New-BinWips -ScriptBlock $sb -ScratchDir $script:scratchDir -OutFile $script:outFile -Namespace "MyNamespace"
+        $script:outFile | Should -Exist
+        $csContent = Get-Content $script:scratchDir/PSBinary.cs -Raw
+        $csContent | Should -BeLike "*namespace MyNamespace*"
     }
-    New-BinWips -ScriptBlock $sb -ScratchDir $script:scratchDir -OutFile $script:outFile -Namespace "MyNamespace"
-    $script:outFile | Should -Exist
-    $csContent = Get-Content $script:scratchDir/PSBinary.cs -Raw
-    $csContent | Should -BeLike "*namespace MyNamespace*"
-   }
-   
+
+    It 'Given a custom class template, uses that template' -Tag "ClassTemplate" { 
+        $sb = {
+            throw "Should not be called"
+        }  
+        $classTemplate = @"
+        // use tokens to replace values in the template, see -Tokens for more info
+        namespace {#Namespace#} {
+           public class MyClass {
+              public static void Main(string[] args) {
+                 //.. Custom Host class implementation
+                 var x = "{#RuntimeSetip#}"; // ignored but required to be in template
+                 var y = "{#Script#}"; // ignored but required to be in template
+                System.Diagnostics.Process.Start("pwsh.exe", "-Command \"Write-host 'Ignore Script'\"");
+              }
+           }
+        }
+"@
+
+        New-BinWips -ScriptBlock $sb -ClassTemplate $classTemplate -ScratchDir $script:scratchDir `
+            -OutFile $script:outFile
+        $script:outFile | Should -Exist
+        
+        $script:outFile | Should -Exist
+        $result = & $script:outFile -baz
+        $result | Should -Be "Ignore Script"
+    }
 }
