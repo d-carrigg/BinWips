@@ -14,10 +14,8 @@ New-BinWips -ScriptBlock {echo "Hello World!"}
 Install the module with:
 
 ```powershell
-# TODO: Publish so this works: Install-Module BinWips
-# For now, git clone the repo
-git clone https://github.com/d-carrigg/BinWips.git
-Install-Module /BinWips/src/Modules/BinWips
+Install-Module /BinWips/src/Modules/BinWips -AllowPrerelease
+Import-Module BinWips
 ```
 
 > Note: BinWips uses the [bflat](https://github.com/bflattened/bflat) compiler
