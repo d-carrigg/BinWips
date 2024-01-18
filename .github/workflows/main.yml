@@ -3,8 +3,7 @@ name: Test PowerShell on Ubuntu
 on:
   push:
     branches:
-      - main 
-      - release/*
+      - master
   pull_request:
     branches: [ master ]
 
