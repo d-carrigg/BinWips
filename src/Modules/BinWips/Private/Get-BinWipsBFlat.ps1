@@ -4,7 +4,7 @@
     param()
 
     $platform = "windows"
-    $arch = "x64"
+    $arch = [System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture
     $archiveType = "zip"
 
     
@@ -13,11 +13,14 @@
      
         $platform = "linux-glibc"
         $archiveType = "tar.gz"
+    } elseif ($IsMacOS){
+        throw "MacOS is not supported"
     }
 
      
     $moduleRoot =  Split-Path -Path $PSScriptRoot -Parent
     # Locate the compiler
+    # https://stackoverflow.com/questions/11242368/test-if-executable-is-in-path-in-powershell
     if ($null -ne (Get-Command "bflat" -ErrorAction SilentlyContinue) ) 
     { 
         Write-Verbose "Found bflat on path"

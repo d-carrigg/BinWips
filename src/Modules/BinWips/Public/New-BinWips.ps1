@@ -36,21 +36,42 @@ function New-BinWips
       New-BinWips -ScriptBlock {
          Write-host "done"
       } -ClassTemplate @"
-      
-      
-      // use tokens to replace values in the template, see -Tokens for more info
-      namespace {#Namespace#} {
-         public class MyClass {
-            public static void Main(string[] args) {
-               //.. Custom Host class implementation
-              System.Diagnostics.Process.Run("pwsh.exe", "-EncodedCommand {#Script#}")
-            }
-         }
-      }
+        // use tokens to replace values in the template, see -Tokens for more info
+        namespace {#Namespace#} {
+           public class MyClass {
+              public static void Main(string[] args) {
+                 //.. Custom Host class implementation
+                 var x = "{#RuntimeSetip#}"; // ignored but required to be in template
+                 var y = "{#Script#}"; // ignored but required to be in template
+                 var ext = ".exe";
+                 var p = System.Diagnostics.Process.Start("pwsh", "-NoProfile -NoLogo -Command \"Write-host 'Ignore Script'\"");
+                 p.WaitForExit();
+              }
+           }
+        }
+"@
 
-      Override the Class Template used for the C# program that runs the script. This example would simply run the script in pwsh.exe
-      without passing in arguments or setting up embedded resources.
-     
+      Override the Class Template used for the C# program that runs the script. This example would ignore the passed in scripts
+      and print "Ignore Script" to the console.
+   .EXAMPLE
+      New-BinWips -ScriptBlock  {echo "Only Runs on Win x64"} -Platform Windows -Architecture x64
+      
+      Creates a program which targets Windows x64. Valid Options are Windows/Linux and x86/x64/arm64.
+      By default BinWips will target the current platform and architecture.
+   .EXAMPLE
+      New-BinWips -ScriptBlock  {
+            [CmdletBinding()]
+            param(
+                [Parameter(Mandatory=$true)]
+                [string]$foo
+            )
+            Add-Type -AssemblyName System.Windows.Forms
+            $form = New-Object System.Windows.Forms.Form
+            $form.Text = "Hello World"
+            $form.ShowDialog()
+        } -Platform Windows -Architecture x64
+      
+      Creates a program that shows a window on Windows x64.
     #>
    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
    [OutputType([int])]
@@ -96,11 +117,6 @@ function New-BinWips
       # As compared to -KeepScratchDir which removes scratch dir *after* build. 
       [switch]
       $Cleanup,
-
-      
-      # Overrite -OutFile if it already exists
-      [switch]
-      $Force, 
 
       # Namespace for the generated program. 
       # This parameter is trumped by -Tokens, so placing a value here will be overriden by
@@ -202,9 +218,9 @@ function New-BinWips
       [ValidateSet('x86', 'x64', 'arm64')]
       $Architecture,
 
-      # Additional C# Compiler parameters you want to pass (e.g. references)
+      # Additional parameters to pass to the bflat compiler
       [string[]]
-      $CscArgumentList
+      $ExtraArguments
    )
 
    Begin
@@ -250,13 +266,13 @@ function New-BinWips
       }
       if (!$hasScratchDir)
       {
-         $ScratchDir = "$currentDir\.binwips"
+         $ScratchDir = "$currentDir/.binwips"
       }
       if (!$hasOutFile)
       {
          if ($inline)
          {
-            $OutFile = "$OutDir\PSBinary.$outExt"
+            $OutFile = "$OutDir/PSBinary.$outExt"
          }
          elseif ($multipleFiles)
          {
@@ -272,15 +288,15 @@ function New-BinWips
 
       if (!$hasClassTemplate -and $Library)
       {
-         $ClassTemplate = Get-Content -Raw "$PSScriptRoot\..\files\LibraryClassTemplate.cs"
+         $ClassTemplate = Get-Content -Raw "$PSScriptRoot/../files/LibraryClassTemplate.cs"
       }
       elseif (!$hasClassTemplate)
       {
-         $ClassTemplate = Get-Content -Raw "$PSScriptRoot\..\files\ClassTemplate.cs"
+         $ClassTemplate = Get-Content -Raw "$PSScriptRoot/../files/ClassTemplate.cs"
       }
       if (!$hasAttributesTemplate)
       {
-         $AttributesTemplate = Get-Content -Raw "$PSScriptRoot\..\files\AttributesTemplate.cs"
+         $AttributesTemplate = Get-Content -Raw "$PSScriptRoot/../files/AttributesTemplate.cs"
       }
 
       if ($inline)
@@ -306,7 +322,7 @@ function New-BinWips
       {
          $Platform = 'Linux'
       }
-      else
+      elseif (!$PSBoundParameters.ContainsKey('Platform'))
       {
          throw "Unsported platform"
       }
@@ -341,7 +357,7 @@ function New-BinWips
          ClassTemplate      = $ClassTemplate
          AttributesTemplate = $AttributesTemplate
          Tokens             = $Tokens
-         CscArgumentList    = $CscArgumentList
+         CscArgumentList    = $ExtraArguments
          OutDir             = $OutDir
          ScratchDir         = $ScratchDir
          Cleanup            = $Cleanup

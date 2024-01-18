@@ -1,11 +1,12 @@
 # BinWips: Binary Written in PowerShell
 
-Create .NET applications from PowerShell scripts and inline code
-blocks with control over the generated `.cs` and `.exe` files and any additional resources. Target linux and windows on x86, x64, and arm64.
+Create .NET applications from PowerShell scripts and inline code blocks with
+control over the generated `.cs` and `.exe` files and any additional resources.
+Build for linux and windows on x86, x64, and arm64 architectures.
 
 ```powershell
-New-BinWips -ScriptBlock {echo "Hello World!"}
-.\PSBinary.exe 
+New-BinWips -ScriptBlock {echo "Hello World!"} -OutFile "HelloWorld.exe"
+.\HelloWorld.exe
 # Hello World!
 ```
 
@@ -14,13 +15,20 @@ New-BinWips -ScriptBlock {echo "Hello World!"}
 Install the module with:
 
 ```powershell
-Install-Module /BinWips/src/Modules/BinWips -AllowPrerelease
+Install-Module BinWips -AllowPrerelease
 Import-Module BinWips
 ```
 
 > Note: BinWips uses the [bflat](https://github.com/bflattened/bflat) compiler
 > to generate the C# code. This is a dependency of the module and will be
 > downloaded (one time) automatically if not detected in the path.
+
+To install from the source code (not recommended):
+
+```powershell
+# git clone or download the source code from the releases page
+Import-Module /path/to/BinWips/src/Modules/BinWips
+```
 
 Create a simple program from an inline script block:
 
@@ -50,9 +58,13 @@ New-BinWips -InFile "path/to/myScript.ps1"
 An executable will be generated in the current directory with the name
 `myScript.exe`.
 
-## Parameters
+> :spiral_notepad: Note: By default BinWips compiles to the platform and
+> architecture of the machine it is run on. You can override this behavior with
+> the `-Platform` and `-Architecture` parameters. See the
+> [Parameters](#Parameters) section for more information.
 
-BinWips programs can take parameters just like the PowerShell scripts they are based on.
+BinWips programs can take parameters just like the PowerShell scripts they are
+based on.
 
 ```powershell
 # Note the escaped variable `$myParam
@@ -68,14 +80,16 @@ New-BinWips -InFile "MyScript.ps1"
 # echo "Param was $myParam"
 ```
 
-If you generate a `.exe` the arguments work the same as they would if you wrote
-a script. E.g.
+Arguments work the same as they would if you wrote a script. E.g.
 
 ```powershell
 .\PSBinary.exe -String1 "Some Text" -ScriptBlock "{Write-Host 'Inception'}" -Switch1 -Array "Arrays?","Of Course"
 ```
 
-Parameter validation works, tab completion does not. You can use `.\PSBinary.exe help` to get help. For your module. This will produce PowerShell style help for your program. No additional work is required on your part, this is done automatically.
+Parameter validation works, tab completion does not. You can use
+`.\PSBinary.exe help` to get help. For your module. This will produce PowerShell
+style help for your program. No additional work is required on your part, this
+is done automatically.
 
 ```text
 NAME
@@ -98,37 +112,41 @@ REMARKS
     None
 ```
 
-## All New-BinWips Parameters
+### Other examples
+
+Some other examples of BinWips programs you can create:
+
+```powershell
+# Creates a program that shows a window on Windows x64.
+New-BinWips -ScriptBlock  {
+            [CmdletBinding()]
+            param(
+                [Parameter(Mandatory=$true)]
+                [string]$foo
+            )
+            Add-Type -AssemblyName System.Windows.Forms
+            $form = New-Object System.Windows.Forms.Form
+            $form.Text = "Hello World"
+            $form.ShowDialog()
+        } -Platform Windows -Architecture x64
+
+```
+
+## Parameters
 
 Detailed help for this module is included via the `Get-Help` cmdlet. Run
-`Get-Help New-BinWips -Detailed` for more information.
+`Get-Help New-BinWips -Detailed` for more information. Examples are included in
+the help. You can also check out the
+[/tests/BinWips.Tests.ps1](/tests/BinWips.Tests.ps1) file for examples of how to
+use the module.
 
 ```text
-NAME
-    New-BinWips
-    
-SYNOPSIS
-    Creates a new PowerShell binary.
-    
-    
 SYNTAX
-    New-BinWips [-ScriptBlock] <Object> [-OutDir <String>] [-ScratchDir <String>] [-OutFile <String>] [-Cleanup] [-Force]    
-    [-Namespace <String>] [-ClassName <Object>] [-Target <String>] [-AssemblyAttributes <String[]>] [-ClassAttributes        
-    <Hashtable>] [-ClassTemplate <String>] [-AttributesTemplate <String>] [-Tokens <Hashtable>] [-Resources <String[]>]      
-    [-NoEmbedResources] [-Library] [-Platform <String>] [-Architecture <String>] [-CscArgumentList <String[]>]
-    [<CommonParameters>]
+    New-BinWips [-ScriptBlock] <Object> [-OutDir <String>] [-ScratchDir <String>] [-OutFile <String>] [-Cleanup] [-Namespace <String>] [-ClassName <Object>] [-AssemblyAttributes <String[]>] [-ClassAttributes <String[]>] [-ClassTemplate <String>]
+    [-AttributesTemplate <String>] [-Tokens <Hashtable>] [-Resources <String[]>] [-NoEmbedResources] [-Platform <String>] [-Architecture <String>] [-ExtraArguments <String[]>] [-WhatIf] [-Confirm] [<CommonParameters>]
 
-    New-BinWips [-InFile] <String[]> [-OutDir <String>] [-ScratchDir <String>] [-OutFile <String>] [-Cleanup] [-Force]       
-    [-Namespace <String>] [-ClassName <Object>] [-Target <String>] [-AssemblyAttributes <String[]>] [-ClassAttributes        
-    <Hashtable>] [-ClassTemplate <String>] [-AttributesTemplate <String>] [-Tokens <Hashtable>] [-Resources <String[]>]      
-    [-NoEmbedResources] [-Library] [-Platform <String>] [-Architecture <String>] [-CscArgumentList <String[]>]
-    [<CommonParameters>]
-
-
-DESCRIPTION
-    Generates a .EXE from a script.
-
-
+    New-BinWips [-InFile] <String[]> [-OutDir <String>] [-ScratchDir <String>] [-OutFile <String>] [-Cleanup] [-Namespace <String>] [-ClassName <Object>] [-AssemblyAttributes <String[]>] [-ClassAttributes <String[]>] [-ClassTemplate <String>]
+    [-AttributesTemplate <String>] [-Tokens <Hashtable>] [-Resources <String[]>] [-NoEmbedResources] [-Platform <String>] [-Architecture <String>] [-ExtraArguments <String[]>] [-WhatIf] [-Confirm] [<CommonParameters>]
 PARAMETERS
     -ScriptBlock <Object>
         The powershell command to convert into a program
@@ -156,9 +174,6 @@ PARAMETERS
         Clean the scratch directory before building
         As compared to -KeepScratchDir which removes scratch dir *after* build.
 
-    -Force [<SwitchParameter>]
-        Overrite -OutFile if it already exists
-
     -Namespace <String>
         Namespace for the generated program.
         This parameter is trumped by -Tokens, so placing a value here will be overriden by
@@ -175,17 +190,14 @@ PARAMETERS
         must be a valid c# class name and cannot be equal to -Namespace
         Defaults to Program
 
-    -Target <String>
-
     -AssemblyAttributes <String[]>
-        Hashtable of assembly attributes to apply to the assembly level.
-                    - list of defaults here:
-        https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/attributes/global
+        List of assembly attributes to apply to the assembly level.
+                    - list of defaults here: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/attributes/global
                     - custom attributes can also be aplied.
                     - Invalid attributes will throw a c# compiler exception
 
-    -ClassAttributes <Hashtable>
-        Hashtable of assembly attributes to apply to the class.
+    -ClassAttributes <String[]>
+        List of assembly attributes to apply to the class.
                     - Any valid c# class attribute can be applied
                     - Invalid attributes will throw a c# compiler exception
 
@@ -230,38 +242,24 @@ PARAMETERS
         Don't embed any resource specifed by -Resources
         instead they are copied to out dir if they don't already exist
 
-    -Library [<SwitchParameter>]
-        Output to a .NET .dll instead of an .exe
-
     -Platform <String>
         The platform to target
 
     -Architecture <String>
         The architecture to target
 
-    -CscArgumentList <String[]>
-        Additional C# Compiler parameters you want to pass (e.g. references)
+    -ExtraArguments <String[]>
+        Additional parameters to pass to the bflat compiler
+
+    -WhatIf [<SwitchParameter>]
+
+    -Confirm [<SwitchParameter>]
 
     <CommonParameters>
         This cmdlet supports the common parameters: Verbose, Debug,
         ErrorAction, ErrorVariable, WarningAction, WarningVariable,
         OutBuffer, PipelineVariable, and OutVariable. For more information, see
         about_CommonParameters (https://go.microsoft.com/fwlink/?LinkID=113216).
-
-    -------------------------- EXAMPLE 1 --------------------------
-
-    PS > New-BinWips -ScriptBlock {Get-Process}
-
-    Creates a file in the current directory named PSBinary.exe which runs get-process
-
-
-
-
-    -------------------------- EXAMPLE 2 --------------------------
-
-    PS > New-BinWips MyScript.ps1
-
-    Creates an exe in the current directory named MyScript.exe
 ```
 
 ## Embedding Resources
@@ -303,7 +301,6 @@ $myDll = Get-PSBinaryResource "MyRequiredLibrary.dll"
 A few important notes:
 
 - The file names are case sensitive and do not include the path (filename only).
-  
 - You can’t use `Get-Content` or `Get-Item` cmdlets with these files because
   they do not exist as files when deployed
 
@@ -326,12 +323,14 @@ application as a BinWips application (how-to is included in this section).
 
 ### Class Tempalates
 
-When BinWips generates a .NET program it uses a class template to setup a new powershell instance and run your scripts. You pass in a custom template as a string using
-`-ClassTemplate` parameter. BinWips supports tokens in the class template which
-are replaced with values at runtime. Tokens are strings which begin with `{#`
-and end with `#}`. To override the BinWips version you could pass in
-`-Tokens @{BinWipsVersion='1.0.0'}`. See the below example `-ClassTemplate` for
-basic usage. This template would generate a console program.
+When BinWips generates a .NET program it uses a class template to setup a new
+powershell instance and run your scripts. You pass in a custom template as a
+string using `-ClassTemplate` parameter. BinWips supports tokens in the class
+template which are replaced with values at runtime. Tokens are strings which
+begin with `{#` and end with `#}`. To override the BinWips version you could
+pass in `-Tokens @{BinWipsVersion='1.0.0'}`. See the below example
+`-ClassTemplate` for basic usage. This template would generate a console
+program.
 
 ```c#
 // Generaed by BinWips {#BinWipsVersion#}
@@ -344,9 +343,9 @@ using System.Diagnostics;
 [assembly: BinWips("{#BinWipsVersion#}")]
 {#AssemblyAttributes#}
 namespace {#Namespace#} {
-         
+
     {#ClassAttributes#}
-    class {#ClassName#} 
+    class {#ClassName#}
     {
         public static void Main(string[] args)
         {
@@ -411,46 +410,26 @@ Tags: Named Params, Switches
 #>
 ```
 
+## Troubleshoting
+
+### Error: DllNotFound_Linux, objwriter, objwriter.so
+
+This error can occur if libc++-dev is not installed. To install it run:
+
+```bash
+sudo apt install libc++-dev
+```
+
 ## TODO List
 
-Order doesn’t matter.
+Order not important.
 
-- [x] Basic Executeable
-- [x] Assembly Attributes
-- [x] ClassAttributes
-- [x] Multiple scripts support
-- [x] Parameters
-- [ ] Improve Params for Libraries if Possible (any way to strongly type the
-      args? or params array at least?) -- source gen?
-- [x] Different Template for Libraries
-- [ ] Allow Method Name Modification for libraries
-- [x] Attributes Template Parameter
-- [x] CSC Argument List
-- [ ] Identify C# Compiler Errors (catch them)
-- [ ] Framework targeting
-- [x] Linux support (anything special needed)?
-- [x] Interactive apps (investigate if anything special needs to be done to
-      support adding user input at runtime)
-  - [ ] It does, need to redirect the PS host input to console input, will this
-        require me to implement a fully custom PS host?
-- [ ] Clean
-- [ ] Docs Section on how binwips works
-- [ ] KeepScratchDir
-- [ ] Force
-- [x] Resources
-- [x] Get-PSBinaryResource
-- [ ] BinWips PS Provider
-- [x] More Tests (and switch to pester)
-- [ ] Finish Documentation
-- [ ] Finish ReadMe
-- [ ] Ability to package modules with the exe (Each Function is a verb so `Verb-Noun` becomes `exe_name verb parameters`)
-- [ ] Windows/GUIS
-- [ ] Help and Verison # Support (--help and --version or a verb/something along those lines)
+- [ ] Ability to package modules with the exe (Each Function is a verb so
+      `Verb-Noun` becomes `exe_name verb parameters`)
+- [ ] Help and Verison # Support (--help and --version or a verb/something along
+      those lines)
   - [x] Help
   - [ ] Version
-- [ ] Is there a way to pass variables back to the host terminal? So if we 
-      did something like -ErrorVariable or -OutVariable we could pass that back 
-      if the host terminal was PWSH. Maybe a way with remoting (check if parent proc is pwsh, if so use remoting to pass back). 
 
 ## Limitations
 
