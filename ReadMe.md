@@ -109,6 +109,26 @@ REMARKS
     None
 ```
 
+### Other examples
+
+Some other examples of BinWips programs you can create:
+
+```powershell
+# Creates a program that shows a window on Windows x64.
+New-BinWips -ScriptBlock  {
+            [CmdletBinding()]
+            param(
+                [Parameter(Mandatory=$true)]
+                [string]$foo
+            )
+            Add-Type -AssemblyName System.Windows.Forms
+            $form = New-Object System.Windows.Forms.Form
+            $form.Text = "Hello World"
+            $form.ShowDialog()
+        } -Platform Windows -Architecture x64
+       
+```
+
 ## All New-BinWips Parameters
 
 Detailed help for this module is included via the `Get-Help` cmdlet. Run
@@ -479,6 +499,7 @@ There are some things that cannot be accomplished by the BinWips module.
 2. You should be aware of any security risks for the .NET Framework version you
    target
 3. Assemblies are not signed so they are not tamper proof
+
 
 ## Inspiration and References
 
