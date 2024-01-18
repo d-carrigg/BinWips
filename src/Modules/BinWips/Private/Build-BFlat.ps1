@@ -235,21 +235,25 @@
 
       if ($References)
       {
+         $cscArgs += "--reference"
          foreach ($r in $References)
          {
-            $cscArgs += "--reference"
             $cscArgs += $r
          }
       }
      
+ 
+
       # 2. Read in script file if needed
 
  
       # 6. Run C# compiler over those files and produce an exe in the out dir
-      $cscArgs += @(
-         "$ScratchDir/PSBinary.cs", 
-         "$ScratchDir/BinWipsAttr.cs"
-      )
+      $cscArgs +=  "$(Resolve-Path "$ScratchDir/PSBinary.cs")"
+      $cscArgs +=  "$(Resolve-Path "$ScratchDir/BinWipsAttr.cs")"
+      # $cscArgs += @(
+      #    "$ScratchDir/PSBinary.cs", 
+      #    "$ScratchDir/BinWipsAttr.cs"
+      # )
 
       $guid = [guid]::NewGuid().ToString()
       $Tokens['BinWipsPipeGuid'] = $guid

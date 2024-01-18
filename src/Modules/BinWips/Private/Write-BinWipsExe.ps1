@@ -237,6 +237,8 @@ function Write-BinWipsExe
          $CompilerArgs | ForEach-Object {
             $psi.ArgumentList.Add($_)
          }
+ 
+ 
   
 
 

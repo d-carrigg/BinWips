@@ -188,10 +188,10 @@ function New-BinWips
       $Tokens = @{},
 
       <#
-        List of .NET assemblies to reference. 
+        List of .NET assemblies for the host .exe to reference. These references will not be accessible from within the powershell script.
       #>
       [string[]]
-      $References,
+      $HostReferences,
 
       <# List of files to include with the app 
              - If -NoEmbedResources is specified then files are embedded in the exe.
@@ -372,7 +372,7 @@ function New-BinWips
          NoEmbedResources   = $NoEmbedResources
          Platform           = $Platform
          Architecture       = $Architecture
-         References = $References
+         References         = $HostReferences
       }     
 
       Build-Bflat @funcArgs
