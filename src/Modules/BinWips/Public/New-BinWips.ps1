@@ -218,9 +218,9 @@ function New-BinWips
       [ValidateSet('x86', 'x64', 'arm64')]
       $Architecture,
 
-      # Additional C# Compiler parameters you want to pass (e.g. references)
+      # Additional parameters to pass to the bflat compiler
       [string[]]
-      $CscArgumentList
+      $ExtraArguments
    )
 
    Begin
@@ -357,7 +357,7 @@ function New-BinWips
          ClassTemplate      = $ClassTemplate
          AttributesTemplate = $AttributesTemplate
          Tokens             = $Tokens
-         CscArgumentList    = $CscArgumentList
+         CscArgumentList    = $ExtraArguments
          OutDir             = $OutDir
          ScratchDir         = $ScratchDir
          Cleanup            = $Cleanup
