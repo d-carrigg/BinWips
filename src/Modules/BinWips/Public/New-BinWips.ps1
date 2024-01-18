@@ -265,13 +265,13 @@ function New-BinWips
       }
       if (!$hasScratchDir)
       {
-         $ScratchDir = "$currentDir\.binwips"
+         $ScratchDir = "$currentDir/.binwips"
       }
       if (!$hasOutFile)
       {
          if ($inline)
          {
-            $OutFile = "$OutDir\PSBinary.$outExt"
+            $OutFile = "$OutDir/PSBinary.$outExt"
          }
          elseif ($multipleFiles)
          {
@@ -287,15 +287,15 @@ function New-BinWips
 
       if (!$hasClassTemplate -and $Library)
       {
-         $ClassTemplate = Get-Content -Raw "$PSScriptRoot\..\files\LibraryClassTemplate.cs"
+         $ClassTemplate = Get-Content -Raw "$PSScriptRoot/../files/LibraryClassTemplate.cs"
       }
       elseif (!$hasClassTemplate)
       {
-         $ClassTemplate = Get-Content -Raw "$PSScriptRoot\..\files\ClassTemplate.cs"
+         $ClassTemplate = Get-Content -Raw "$PSScriptRoot/../files/ClassTemplate.cs"
       }
       if (!$hasAttributesTemplate)
       {
-         $AttributesTemplate = Get-Content -Raw "$PSScriptRoot\..\files\AttributesTemplate.cs"
+         $AttributesTemplate = Get-Content -Raw "$PSScriptRoot/../files/AttributesTemplate.cs"
       }
 
       if ($inline)
