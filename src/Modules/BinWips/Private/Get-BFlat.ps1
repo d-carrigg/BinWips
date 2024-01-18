@@ -38,7 +38,7 @@
         $archiveType = "tar.gz"
     }
 
-    $path = "$PSScriptRoot/../files/bflat/$platform"
+    $path = " $moduleRoot/files/bflat/$platform"
     [System.IO.Directory]::CreateDirectory($path) | Out-Null
 
     # Check if the latest release is already downloaded
