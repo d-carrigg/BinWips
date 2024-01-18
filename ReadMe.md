@@ -47,11 +47,23 @@ New-BinWips -ScriptBlock {
 # Hello BinWips!
 ```
 
-As well as, programs that take parameters:
+As well as, programs that take parameters (simple and complex):
 
 ```powershell
 New-BinWips -ScriptBlock {
-    param($myParam)
+    param(
+        $myParam,
+
+        [int]
+        $MyIntParam,
+
+        [switch]
+        $MySwitchParam,
+
+        [ValidateSet("Option1", "Option2")]
+        [Parameter()]
+        $MyValidateSetParam
+    )
     echo "Param was $myParam"
 }
 
