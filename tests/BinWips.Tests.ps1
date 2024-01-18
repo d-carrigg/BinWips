@@ -87,4 +87,6 @@ Describe 'New-BinWips' {
     $result = & $script:outFile -baz
     $result | Should -Be "This is an embedded resource."
    }
+
+   It 'Given'
 }
