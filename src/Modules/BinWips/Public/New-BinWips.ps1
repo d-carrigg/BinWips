@@ -43,8 +43,9 @@ function New-BinWips
                  //.. Custom Host class implementation
                  var x = "{#RuntimeSetip#}"; // ignored but required to be in template
                  var y = "{#Script#}"; // ignored but required to be in template
-                var p = System.Diagnostics.Process.Start("pwsh.exe", "-NoProfile -NoLogo -Command \"Write-host 'Ignore Script'\"");
-                p.WaitForExit();
+                 var ext = ".exe";
+                 var p = System.Diagnostics.Process.Start("pwsh", "-NoProfile -NoLogo -Command \"Write-host 'Ignore Script'\"");
+                 p.WaitForExit();
               }
            }
         }
