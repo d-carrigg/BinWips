@@ -5,8 +5,8 @@ control over the generated `.cs` and `.exe` files and any additional resources.
 Build for linux and windows on x86, x64, and arm64 architectures.
 
 ```powershell
-New-BinWips -ScriptBlock {echo "Hello World!"}
-.\PSBinary.exe
+New-BinWips -ScriptBlock {echo "Hello World!"} -OutFile "HelloWorld.exe"
+.\HelloWorld.exe
 # Hello World!
 ```
 
