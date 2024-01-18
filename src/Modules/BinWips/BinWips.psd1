@@ -30,7 +30,7 @@ CompanyName = 'dcarrigg'
 Copyright = '(c) 2021 dcarrigg. All rights reserved.'
 
 # Description of the functionality provided by this module
-Description = 'Binary Written in PowerShell. Convert PowerShell scripts into .NET Applications'
+Description = 'Binary Written in PowerShell. Convert PowerShell scripts into .NET Applications/executables.'
 
 # Minimum version of the PowerShell engine required by this module
 PowerShellVersion = '5.0'
