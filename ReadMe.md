@@ -62,10 +62,7 @@ An executable will be generated in the current directory with the name
 > :spiral_notepad: Note: By default BinWips compiles to the platform and
 > architecture of the machine it is run on. You can override this behavior with
 > the `-Platform` and `-Architecture` parameters. See the
-> [All New-BinWips Parameters](#All-New-BinWips-Parameters) section for more
-> information.
-
-## Parameters
+> [Parameters](#Parameters) section for more information.
 
 BinWips programs can take parameters just like the PowerShell scripts they are
 based on.
@@ -133,10 +130,10 @@ New-BinWips -ScriptBlock  {
             $form.Text = "Hello World"
             $form.ShowDialog()
         } -Platform Windows -Architecture x64
-       
+
 ```
 
-## All New-BinWips Parameters
+## Parameters
 
 Detailed help for this module is included via the `Get-Help` cmdlet. Run
 `Get-Help New-BinWips -Detailed` for more information. Examples are included in
