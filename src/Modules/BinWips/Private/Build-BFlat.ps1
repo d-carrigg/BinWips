@@ -184,15 +184,11 @@
    }
    Process
    {
-      if($IsWindows){
-         $dotNetPath = where.exe bflat.exe
-      } else {
-         $dotNetPath = which bflat
-      }
+      $dotNetPath = (get-command bflat -ErrorAction SilentlyContinue).Source
 
       # Locate the compiler
       $moduleRoot = Split-Path -Path $PSScriptRoot -Parent
-      if ([string]::IsNullOrWhiteSpace($dotNetPath) -eq $false -and $dotNetPath -ne "INFO: Could not find files for the given pattern(s).")
+      if ([string]::IsNullOrWhiteSpace($dotNetPath) -eq $false)
       {
          #Write-Verbose "Found bflat at $dotNetPath"
       }
@@ -212,8 +208,7 @@
       $cscArgs = @("build",
          "--out", "$OutFile", 
          "--target", "$target",
-         "--no-debug-info",
-         # "--no-stacktrace-data",
+         "--no-debug-info", # Don't create a .pdb
          "--os", "$($Platform.ToLower())",
          "--arch", "$($Architecture.ToLower())",
          "-i", "Main"
@@ -256,12 +251,7 @@
          }
       }
      
- 
-
-      # 2. Read in script file if needed
-
- 
-      # 6. Run C# compiler over those files and produce an exe in the out dir
+      # Run C# compiler over those files and produce an exe in the out dir
       $cscArgs +=  "$ScratchDir/PSBinary.cs"
       $cscArgs +=  "$ScratchDir/BinWipsAttr.cs"
 
