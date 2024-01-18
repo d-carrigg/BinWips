@@ -84,14 +84,6 @@ New-BinWips -ScriptBlock {
 
 When generating a program from a script file, the script file can take parameters as well, if you pass in multiple script files, the program parameters are generated from the first script file.
 
-```powershell
-
-Arguments work the same as they would if you wrote a script. E.g.
-
-```powershell
-.\PSBinary.exe -String1 "Some Text" -ScriptBlock "{Write-Host 'Inception'}" -Switch1 -Array "Arrays?","Of Course"
-```
-
 Parameter validation works, tab completion does not. You can use
 `.\PSBinary.exe help` to get help. For your module. This will produce PowerShell
 style help for your program. No additional work is required on your part, this
