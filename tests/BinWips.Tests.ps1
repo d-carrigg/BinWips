@@ -95,7 +95,7 @@ Describe 'New-BinWips' {
         }
         New-BinWips -ScriptBlock $sb -ScratchDir $script:scratchDir -OutFile $script:outFile
         $script:outFile | Should -Exist
-        $result = & $script:outFile -baz '{ Write-Output "Hello World" }'
+        $result = & $script:outFile -baz "{ Write-Host 'Hello World' }"
         $result | Should -Be "Hello World"
     }
 
