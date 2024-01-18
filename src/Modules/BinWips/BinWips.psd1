@@ -104,7 +104,7 @@ PrivateData = @{
         ProjectUri = 'https://github.com/d-carrigg/BinWips'
 
         # A URL to an icon representing this module.
-        # IconUri = ''
+        IconUri = 'https://github.com/d-carrigg/BinWips/blob/release/v1/marketing/Icon.png?raw=true'
 
         # ReleaseNotes of this module
         # ReleaseNotes = ''
