@@ -20,6 +20,10 @@ git clone https://github.com/d-carrigg/BinWips.git
 Install-Module /BinWips/src/Modules/BinWips
 ```
 
+> Note: BinWips uses the [bflat](https://github.com/bflattened/bflat) compiler
+> to generate the C# code. This is a dependency of the module and will be
+> downloaded (one time) automatically if not detected in the path.
+
 Create a simple program from an inline script block:
 
 ```powershell
