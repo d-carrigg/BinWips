@@ -192,7 +192,7 @@
       $cscArgs = @("build",
          "--out", "$OutFile", 
          "--target", "$target",
-         # "--no-debug-info",
+         "--no-debug-info",
          # "--no-stacktrace-data",
          "--os", "$($Platform.ToLower())",
          "--arch", "$($Architecture.ToLower())",

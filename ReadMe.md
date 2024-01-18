@@ -458,47 +458,14 @@ sudo apt install libc++-dev
 
 ## TODO List
 
-Order doesn’t matter.
+Order not important.
 
-- [x] Basic Executeable
-- [x] Assembly Attributes
-- [x] ClassAttributes
-- [x] Multiple scripts support
-- [x] Parameters
-- [ ] Improve Params for Libraries if Possible (any way to strongly type the
-      args? or params array at least?) -- source gen?
-- [x] Different Template for Libraries
-- [ ] Allow Method Name Modification for libraries
-- [x] Attributes Template Parameter
-- [x] CSC Argument List
-- [ ] Identify C# Compiler Errors (catch them)
-- [ ] Framework targeting
-- [x] Linux support (anything special needed)?
-- [x] Interactive apps (investigate if anything special needs to be done to
-      support adding user input at runtime)
-  - [ ] It does, need to redirect the PS host input to console input, will this
-        require me to implement a fully custom PS host?
-- [ ] Clean
-- [ ] Docs Section on how binwips works
-- [ ] KeepScratchDir
-- [ ] Force
-- [x] Resources
-- [x] Get-PSBinaryResource
-- [ ] BinWips PS Provider
-- [x] More Tests (and switch to pester)
-- [ ] Finish Documentation
-- [ ] Finish ReadMe
 - [ ] Ability to package modules with the exe (Each Function is a verb so
       `Verb-Noun` becomes `exe_name verb parameters`)
-- [ ] Windows/GUIS
 - [ ] Help and Verison # Support (--help and --version or a verb/something along
       those lines)
   - [x] Help
   - [ ] Version
-- [ ] Is there a way to pass variables back to the host terminal? So if we did
-      something like -ErrorVariable or -OutVariable we could pass that back if
-      the host terminal was PWSH. Maybe a way with remoting (check if parent
-      proc is pwsh, if so use remoting to pass back).
 
 ## Limitations
 
