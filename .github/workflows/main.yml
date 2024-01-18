@@ -23,9 +23,6 @@ jobs:
         shell: pwsh
         run: |
           Invoke-ScriptAnalyzer -Path ./src -Recurse -Severity Error,Warning -EnableExit
-      - name: Download BFlat
-        shell: pwsh
-        run: ./tools/download-bflat.ps1
       - name: Perform a Pester test from the Tests.ps1 file
         shell: pwsh
         run: |
@@ -35,14 +32,15 @@ jobs:
         with:
           name: ubuntu-Unit-Tests
           path: Unit.Tests.xml
-      - name: Calc size of modules
-        shell: pwsh
-        run: |
-          $size = Get-ChildItem -Path ./src/Modules/BinWips -Recurse | Measure-Object -Property Length -Sum
-          Write-Host "Size of BinWips module is $($size.Sum / 1MB) MB"
-      # - name: Publish PowerShell Module to github packages
-      #   uses: natescherer/publish-powershell-action@v1
-      #   with:
-      #     token: ${{ secrets.GITHUB_TOKEN }}
-      #     target: packages
-      #     path: src/Modules/BinWips
+  publish-module:
+      name: Publish Module
+      runs-on: ubuntu-latest
+      steps:
+        - name: Check out repository code
+          uses: actions/checkout@v4
+        - name: Publish PowerShell Module to github packages
+          uses: natescherer/publish-powershell-action@v1
+          with:
+            token: ${{ secrets.GITHUB_TOKEN }}
+            target: packages
+            path: src/Modules/BinWips

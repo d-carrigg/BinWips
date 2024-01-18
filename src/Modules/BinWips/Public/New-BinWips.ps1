@@ -327,6 +327,9 @@ function New-BinWips
          [System.IO.Directory]::CreateDirectory($OutDir) | Out-Null
       }
 
+      # Download Bflat if needed
+      Get-BFlat
+
 
       $funcArgs = @{
          Script             = $psScript

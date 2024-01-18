@@ -164,11 +164,27 @@
    }
    Process
    {
-      # Locate the compiler
       if($IsWindows){
-         $dotNetPath = Resolve-Path "$PSScriptRoot\..\files\bflat\windows\bflat.exe"
+         $dotNetPath = where.exe bflat.exe
       } else {
+         $dotNetPath = which bflat
+      }
+      # Locate the compiler
+      if ([string]::IsNullOrWhiteSpace($dotNetPath) -eq $false -and $dotNetPath -ne "INFO: Could not find files for the given pattern(s).")
+      {
+         #Write-Verbose "Found bflat at $dotNetPath"
+      }
+      elseif ($IsWindows)
+      {
+         $dotNetPath = Resolve-Path "$PSScriptRoot\..\files\bflat\windows\bflat.exe"
+      }
+      else
+      {
          $dotNetPath = Resolve-Path "$PSScriptRoot\..\files\bflat\linux\bflat"
+      }
+
+      if(!(Test-Path $dotNetPath)){
+         throw "Could not find bflat at $dotNetPath"
       }
     
       $cscArgs = @("build",
@@ -180,7 +196,8 @@
          "--arch", "$($Architecture.ToLower())",
          "-i", "Main"
       )
-      if($null -ne $CscArgumentList -and $CscArgumentList.Length -gt 0){
+      if ($null -ne $CscArgumentList -and $CscArgumentList.Length -gt 0)
+      {
          $cscArgs += $CscArgumentList
       }
       
