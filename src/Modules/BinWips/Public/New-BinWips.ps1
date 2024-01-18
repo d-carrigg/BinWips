@@ -319,12 +319,12 @@ function New-BinWips
 
       if ($PSCmdlet.ShouldProcess('Create Scratch Directory'))
       {
-         [System.IO.Directory]::CreateDirectory($ScratchDir) | Out-Null
+         New-Item -ItemType Directory -Path $ScratchDir -Force | Out-Null
         
       }
       if ($PSCmdlet.ShouldProcess('Create Output Directory'))
       {
-         [System.IO.Directory]::CreateDirectory($OutDir) | Out-Null
+         New-Item -ItemType Directory -Path $OutDir -Force | Out-Null
       }
 
       # Download Bflat if needed

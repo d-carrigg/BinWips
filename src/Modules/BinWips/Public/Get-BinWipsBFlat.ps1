@@ -38,8 +38,9 @@
     }
  
 
-    $path = " $moduleRoot/files/bflat/$platform"
-    [System.IO.Directory]::CreateDirectory($path) | Out-Null
+    $path = "$moduleRoot/files/bflat/$platform"
+    New-Item -ItemType Directory -Path $path -Force | Out-Null
+    
 
     # Check if the latest release is already downloaded
     Write-Verbose "BFlat not found, downloading from github"
@@ -52,7 +53,7 @@
 
     $downloadPath = Join-Path $path "bflat.$archiveType"
     Write-Verbose "Downloading $url to $downloadPath"
-    Invoke-WebRequest -Uri $url -OutFile $downloadPath 
+    Invoke-WebRequest -Uri $url -OutFile $downloadPath
  
     if ($archiveType -eq "zip")
     {
