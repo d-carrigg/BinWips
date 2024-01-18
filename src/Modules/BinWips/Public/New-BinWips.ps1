@@ -3,9 +3,11 @@ function New-BinWips
 {
    <#
     .SYNOPSIS
-       Creates a new PowerShell binary.
+       Creates a new .exe from a script block or script file.
     .DESCRIPTION
-       Generates a .EXE from a script.
+       Generates a .EXE from a script. Support for parameters, interactive programs,
+       cross-platform compiling, resource embedding. See examples for more information.
+       Use Get-Help BinWips -Online to open the read me on github. 
     .EXAMPLE
        New-BinWips -ScriptBlock {Write-Host "Hello, World!"}
        # ./PSBinary.exe 
@@ -24,6 +26,16 @@ function New-BinWips
       # ./PSBinary.exe -foo "bar"
       
       Creates a program which accepts a parameter and writes it to the console
+   .EXAMPLE
+      New-BinWips -ScriptBlock {
+         $input = Read-Host "What's your name?"
+         Write-Host "Hello, $input!"
+      }
+      # ./PSBinary.exe
+      # What's your name?: BinWips
+      # Hello, BinWips!
+
+      Create an interactive program (Read-Host works the same).
    .EXAMPLE
       New-BinWips -ScriptBlock {
          $fileContent = Get-PsBinaryResource "MyFile.txt"
@@ -72,9 +84,10 @@ function New-BinWips
         } -Platform Windows -Architecture x64
       
       Creates a program that shows a window on Windows x64.
+   .LINK
+        https://github.com/d-carrigg/BinWips
     #>
    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
-   [OutputType([int])]
    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', '', Justification = 'BinWips is not plural')]
    Param
    (
