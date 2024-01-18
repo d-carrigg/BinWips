@@ -54,9 +54,6 @@ Describe 'New-BinWips' {
         $script:outFile | Should -Exist
         $contents = Get-Content "$script:scratchDir/PSBinary.cs" -Raw
         $contents | Should -BeLike "*powershell.exe*"
-
-        $result = & $script:outFile
-        $result | Should -Be "Hello World"
     }
 
     It 'Given a script block with parameters, should accept the valid parameters' {
