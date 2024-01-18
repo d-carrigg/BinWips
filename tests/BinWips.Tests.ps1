@@ -13,8 +13,8 @@ Describe 'New-BinWips' {
     
     AfterEach {
         # Cleanup
-        #Remove-Item -Path $script:outFile -ErrorAction SilentlyContinue
-        #Remove-Item $script:scratchDir -Recurse -ErrorAction SilentlyContinue
+        Remove-Item -Path $script:outFile -ErrorAction SilentlyContinue
+        Remove-Item $script:scratchDir -Recurse -ErrorAction SilentlyContinue
     }
 
 
@@ -200,7 +200,7 @@ Describe 'New-BinWips' {
         
         New-BinWips -ScriptBlock $sb -ScratchDir $script:scratchDir -OutFile $script:outFile `
              -ClassTemplate $classTemplate `
-             -HostReferences @($newtonsoftPath) -Verbose
+             -HostReferences @($newtonsoftPath)
         
         # So Long as the program compiles and runs, we're golden
         $script:outFile | Should -Exist

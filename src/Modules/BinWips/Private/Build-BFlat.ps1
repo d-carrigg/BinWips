@@ -248,12 +248,8 @@
 
  
       # 6. Run C# compiler over those files and produce an exe in the out dir
-      $cscArgs +=  "$(Resolve-Path "$ScratchDir/PSBinary.cs")"
-      $cscArgs +=  "$(Resolve-Path "$ScratchDir/BinWipsAttr.cs")"
-      # $cscArgs += @(
-      #    "$ScratchDir/PSBinary.cs", 
-      #    "$ScratchDir/BinWipsAttr.cs"
-      # )
+      $cscArgs +=  "$ScratchDir/PSBinary.cs"
+      $cscArgs +=  "$ScratchDir/BinWipsAttr.cs"
 
       $guid = [guid]::NewGuid().ToString()
       $Tokens['BinWipsPipeGuid'] = $guid

@@ -250,7 +250,7 @@ function Write-BinWipsExe
          
          if ($results -like '*Error*')
          {
-           throw $results
+            Write-Output $results
          }
          elseif ($null -ne $results)
          {
