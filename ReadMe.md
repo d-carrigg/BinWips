@@ -30,15 +30,17 @@ To install from the source code (not recommended):
 Import-Module /path/to/BinWips/src/Modules/BinWips
 ```
 
-Create a simple program from an inline script block to create a program with the default name `PSBinary.exe`:
+Create a simple program from an inline script block to create a program with the
+default name `PSBinary.exe`:
 
 ```powershell
 New-BinWips -ScriptBlock {echo "Hello World!"}
 
 # Run: ./PSBinary.exe
-# Output: 
+# Output:
 # Hello World!
 ```
+
 Interactive programs are supported:
 
 ```powershell
@@ -52,7 +54,11 @@ New-BinWips -ScriptBlock {
 # Hello BinWips!
 ```
 
-You can also generate programs from script files. The files will be loaded in the order they are passed in. The first filename will be used as the name of the generated program. For example, if you have two files `myScript.ps1` and `myOtherScript.ps1` and you want to generate a program called `myScript.exe` you would run:
+You can also generate programs from script files. The files will be loaded in
+the order they are passed in. The first filename will be used as the name of the
+generated program. For example, if you have two files `myScript.ps1` and
+`myOtherScript.ps1` and you want to generate a program called `myScript.exe` you
+would run:
 
 ```powershell
 New-BinWips -InFile "path/to/myScript.ps1", "path/to/myOtherScript.ps1"
@@ -60,7 +66,8 @@ New-BinWips -InFile "path/to/myScript.ps1", "path/to/myOtherScript.ps1"
 # Run: ./myScript.exe
 ```
 
-You can always override the name of the generated program with the `-OutFile` parameter.
+You can always override the name of the generated program with the `-OutFile`
+parameter.
 
 > :spiral_notepad: Note: By default BinWips compiles to the platform and
 > architecture of the machine it is run on. You can override this behavior with
@@ -82,7 +89,9 @@ New-BinWips -ScriptBlock {
 # Param was Hello World!
 ```
 
-When generating a program from a script file, the script file can take parameters as well, if you pass in multiple script files, the program parameters are generated from the first script file.
+When generating a program from a script file, the script file can take
+parameters as well, if you pass in multiple script files, the program parameters
+are generated from the first script file.
 
 Parameter validation works, tab completion does not. You can use
 `.\PSBinary.exe help` to get help. For your module. This will produce PowerShell
@@ -401,18 +410,32 @@ class template. The following tokens are replaced by default. Any tokens marked
 as required must be included in the class template or an exception will be
 thrown.
 
-| Token Name     | Required | Description                                         |
-| -------------- | -------- | --------------------------------------------------- |
-| BinWipsVersion | Yes      | The version of BinWips used to generate the program |
-| Script         | Yes      | The script to run, encoded as a base64 string       |
-| RuntimeSetup   | Yes      | The runtime setup script, encoded as a base64 string |
-| ClassName      | Yes      | The name of the class to generate                   |
-| Namespace      | Yes      | The namespace to use                                |
-| BinWipsVersion | No       | The version of BinWips used to generate the program |
-| FunctionName   | No       | The name of the function to display when showing help documentation |
+| Token Name      | Required | Description                                                                                 |
+| --------------- | -------- | ------------------------------------------------------------------------------------------- |
+| BinWipsVersion  | Yes      | The version of BinWips used to generate the program                                         |
+| Script          | Yes      | The script to run, encoded as a base64 string                                               |
+| RuntimeSetup    | Yes      | The runtime setup script, encoded as a base64 string                                        |
+| ClassName       | Yes      | The name of the class to generate                                                           |
+| Namespace       | Yes      | The namespace to use                                                                        |
+| BinWipsVersion  | No       | The version of BinWips used to generate the program                                         |
+| FunctionName    | No       | The name of the function to display when showing help documentation                         |
 | BinWipsPipeGuid | No       | The guid used to identify the pipe between the generated program and the powershell process |
 
-When creating a custom class template you can use any of the above tokens. You can also define additional tokens, enabling template reuse.
+When creating a custom class template you can use any of the above tokens. You
+can also define additional tokens, enabling template reuse.
+
+## References
+
+If you're C# class template needs to reference other assemblies you can use the
+`-HostReferences` parameter. This parameter takes an array of strings which are
+paths to assemblies to reference. For example, if you want to reference
+`Newtonsoft.Json.dll` you would use the following syntax:
+
+```powershell
+New-BinWips -InFile "MyScript.ps1" -HostReferences "C:\Path\To\Newtonsoft.Json.dll"
+```
+
+BinWips will throw an error if the assembly does not exist or if you do not have a matching reference for each assembly you reference in your class template.
 
 ## Testing
 
