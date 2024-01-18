@@ -203,12 +203,19 @@
          $cscArgs += $CscArgumentList
       }
       
-   
-     
-      # TODO: Handle Resources
       if ($Resources -and $NoEmbedResources)
       {
-         # TODO: Copy resources to out dir
+         # Copy resources to out dir
+         foreach ($r in $Resources)
+         {
+            $rName = Split-Path -Path $r -Leaf
+            $outPath = Join-Path -Path $OutDir -ChildPath $rName
+            if (!(Test-Path $outPath))
+            {
+               Copy-Item -Path $r -Destination $outPath
+            }
+         }
+
       }
       elseif ($Resources)
       {
