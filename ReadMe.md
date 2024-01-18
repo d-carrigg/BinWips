@@ -52,11 +52,17 @@ New-BinWips -ScriptBlock {
 # Hello BinWips!
 ```
 
-You can also generate programs from script files:
+You can also generate programs from script files. The files will be loaded in the order they are passed in. The first filename will be used as the name of the generated program. For example, if you have two files `myScript.ps1` and `myOtherScript.ps1` and you want to generate a program called `myScript.exe` you would run:
 
 ```powershell
-New-BinWips -InFile "path/to/myScript.ps1"
+New-BinWips -InFile "path/to/myScript.ps1", "path/to/myOtherScript.ps1"
+
+# Run: ./myScript.exe
 ```
+
+You can always override the name of the generated program with the `-OutFile` parameter.
+
+```powershell
 
 An executable will be generated in the current directory with the name
 `myScript.exe`.
@@ -70,18 +76,20 @@ BinWips programs can take parameters just like the PowerShell scripts they are
 based on.
 
 ```powershell
-# Note the escaped variable `$myParam
+# If we don't escape (`) the $ then PowerShell will may to expand it before passing it BinWips
 New-BinWips -ScriptBlock {
     param($myParam)
     echo "Param was `$myParam"
 }
 
-# Also works with scripts
-New-BinWips -InFile "MyScript.ps1"
-## Content of MyScript.ps1
-# param($myParam)
-# echo "Param was $myParam"
+# Run: ./PSBinary.exe -myParam "Hello World!"
+# Output:
+# Param was Hello World!
 ```
+
+When generating a program from a script file, the script file can take parameters as well, if you pass in multiple script files, the program parameters are generated from the first script file.
+
+```powershell
 
 Arguments work the same as they would if you wrote a script. E.g.
 
