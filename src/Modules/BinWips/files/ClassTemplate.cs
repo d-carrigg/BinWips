@@ -23,9 +23,9 @@ namespace {#Namespace#} {
             var runtimeSetup = DecodeBase64("{#RuntimeSetup#}");
             var funcName = "{#FunctionName#}";
             var ending = "";
-            if (args.Length == 1 && args[0] == "help")
+            if (AreArgsHelp(args))
             {
-                ending = $"Get-Help -Detailed {funcName}";
+                ending = $"Get-Help -Detailed {funcName}; Write-host 'Created with BinWips v{#BinWipsVersion#}'";
             }
             else
             {
@@ -44,7 +44,14 @@ namespace {#Namespace#} {
             var process = Process.Start(psi);
             process.WaitForExit();
         }
-        static string DecodeBase64(string encoded) 
+
+        static bool AreArgsHelp(string[] args)
+        {
+            if (args.Length != 1) return false;
+            string lower = args[0].ToLower();
+            return lower == "help" || lower == "-h" || lower == "--help";
+        }
+        static string DecodeBase64(string encoded)
             => System.Text.Encoding.Unicode.GetString(Convert.FromBase64String(encoded));
 
         static string EncodeBase64(string text)

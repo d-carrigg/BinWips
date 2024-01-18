@@ -49,6 +49,8 @@ function Write-BinWipsExe
       [string]
       $OutFile,
 
+      
+
       <# Hashtable of assembly attributes to apply to the assembly level.
              - list of defaults here: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/attributes/global
              - custom attributes can also be aplied.
@@ -157,11 +159,12 @@ function Write-BinWipsExe
       
       # 4. Insert script and replace tokens in class template
       $funtionName = [System.IO.Path]::GetFileNameWithoutExtension($OutFile)
+      $binWipsVersion = $MyInvocation.MyCommand.ScriptBlock.Module.Version
       $csProgram = $ClassTemplate | Set-BinWipsToken -Key Script -Value $encodedScript `
       | Set-BinWipsToken -Key RuntimeSetup -Value $encodedRuntimeSetup -Required `
       | Set-BinWipsToken -Key ClassName -Value $ClassName -Required `
       | Set-BinWipsToken -Key Namespace -Value $Namespace -Required `
-      | Set-BinWipsToken -Key BinWipsVersion -Value "0.1"
+      | Set-BinWipsToken -Key BinWipsVersion -Value $binWipsVersion
       | Set-BinWipsToken -Key FunctionName -Value $funtionName
    
    

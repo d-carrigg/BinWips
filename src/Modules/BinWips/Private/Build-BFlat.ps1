@@ -123,6 +123,12 @@
       [switch]
       $Force, 
 
+      <#
+        List of .NET assemblies to reference. 
+      #>
+      [string[]]
+      $References,
+
       <# List of files to include with the app 
              - If -NoEmbedResources is specified then files are embedded in the exe.
                 - Files are copied to out dir with exe if they don't already exist
@@ -223,6 +229,15 @@
          {
             #https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-options/resource-compiler-option
             $cscArgs += "--resource"
+            $cscArgs += $r
+         }
+      }
+
+      if ($References)
+      {
+         foreach ($r in $References)
+         {
+            $cscArgs += "--reference"
             $cscArgs += $r
          }
       }

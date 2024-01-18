@@ -187,6 +187,12 @@ function New-BinWips
       [hashtable]
       $Tokens = @{},
 
+      <#
+        List of .NET assemblies to reference. 
+      #>
+      [string[]]
+      $References,
+
       <# List of files to include with the app 
              - If -NoEmbedResources is specified then files are embedded in the exe.
                 - Files are copied to out dir with exe if they don't already exist
@@ -366,6 +372,7 @@ function New-BinWips
          NoEmbedResources   = $NoEmbedResources
          Platform           = $Platform
          Architecture       = $Architecture
+         References = $References
       }     
 
       Build-Bflat @funcArgs
