@@ -1,11 +1,12 @@
 # BinWips: Binary Written in PowerShell
 
-Create .NET applications from PowerShell scripts and inline code
-blocks with control over the generated `.cs` and `.exe` files and any additional resources. Target linux and windows on x86, x64, and arm64.
+Create .NET applications from PowerShell scripts and inline code blocks with
+control over the generated `.cs` and `.exe` files and any additional resources.
+Build for linux and windows on x86, x64, and arm64 architectures.
 
 ```powershell
 New-BinWips -ScriptBlock {echo "Hello World!"}
-.\PSBinary.exe 
+.\PSBinary.exe
 # Hello World!
 ```
 
@@ -50,9 +51,16 @@ New-BinWips -InFile "path/to/myScript.ps1"
 An executable will be generated in the current directory with the name
 `myScript.exe`.
 
+> :spiral_notepad: Note: By default BinWips compiles to the platform and
+> architecture of the machine it is run on. You can override this behavior with
+> the `-Platform` and `-Architecture` parameters. See the
+> [All New-BinWips Parameters](#All-New-BinWips-Parameters) section for more
+> information.
+
 ## Parameters
 
-BinWips programs can take parameters just like the PowerShell scripts they are based on.
+BinWips programs can take parameters just like the PowerShell scripts they are
+based on.
 
 ```powershell
 # Note the escaped variable `$myParam
@@ -75,7 +83,10 @@ a script. E.g.
 .\PSBinary.exe -String1 "Some Text" -ScriptBlock "{Write-Host 'Inception'}" -Switch1 -Array "Arrays?","Of Course"
 ```
 
-Parameter validation works, tab completion does not. You can use `.\PSBinary.exe help` to get help. For your module. This will produce PowerShell style help for your program. No additional work is required on your part, this is done automatically.
+Parameter validation works, tab completion does not. You can use
+`.\PSBinary.exe help` to get help. For your module. This will produce PowerShell
+style help for your program. No additional work is required on your part, this
+is done automatically.
 
 ```text
 NAME
@@ -106,21 +117,21 @@ Detailed help for this module is included via the `Get-Help` cmdlet. Run
 ```text
 NAME
     New-BinWips
-    
+
 SYNOPSIS
     Creates a new PowerShell binary.
-    
-    
+
+
 SYNTAX
-    New-BinWips [-ScriptBlock] <Object> [-OutDir <String>] [-ScratchDir <String>] [-OutFile <String>] [-Cleanup] [-Force]    
-    [-Namespace <String>] [-ClassName <Object>] [-Target <String>] [-AssemblyAttributes <String[]>] [-ClassAttributes        
-    <Hashtable>] [-ClassTemplate <String>] [-AttributesTemplate <String>] [-Tokens <Hashtable>] [-Resources <String[]>]      
+    New-BinWips [-ScriptBlock] <Object> [-OutDir <String>] [-ScratchDir <String>] [-OutFile <String>] [-Cleanup] [-Force]
+    [-Namespace <String>] [-ClassName <Object>] [-Target <String>] [-AssemblyAttributes <String[]>] [-ClassAttributes
+    <Hashtable>] [-ClassTemplate <String>] [-AttributesTemplate <String>] [-Tokens <Hashtable>] [-Resources <String[]>]
     [-NoEmbedResources] [-Library] [-Platform <String>] [-Architecture <String>] [-CscArgumentList <String[]>]
     [<CommonParameters>]
 
-    New-BinWips [-InFile] <String[]> [-OutDir <String>] [-ScratchDir <String>] [-OutFile <String>] [-Cleanup] [-Force]       
-    [-Namespace <String>] [-ClassName <Object>] [-Target <String>] [-AssemblyAttributes <String[]>] [-ClassAttributes        
-    <Hashtable>] [-ClassTemplate <String>] [-AttributesTemplate <String>] [-Tokens <Hashtable>] [-Resources <String[]>]      
+    New-BinWips [-InFile] <String[]> [-OutDir <String>] [-ScratchDir <String>] [-OutFile <String>] [-Cleanup] [-Force]
+    [-Namespace <String>] [-ClassName <Object>] [-Target <String>] [-AssemblyAttributes <String[]>] [-ClassAttributes
+    <Hashtable>] [-ClassTemplate <String>] [-AttributesTemplate <String>] [-Tokens <Hashtable>] [-Resources <String[]>]
     [-NoEmbedResources] [-Library] [-Platform <String>] [-Architecture <String>] [-CscArgumentList <String[]>]
     [<CommonParameters>]
 
@@ -303,7 +314,6 @@ $myDll = Get-PSBinaryResource "MyRequiredLibrary.dll"
 A few important notes:
 
 - The file names are case sensitive and do not include the path (filename only).
-  
 - You can’t use `Get-Content` or `Get-Item` cmdlets with these files because
   they do not exist as files when deployed
 
@@ -326,12 +336,14 @@ application as a BinWips application (how-to is included in this section).
 
 ### Class Tempalates
 
-When BinWips generates a .NET program it uses a class template to setup a new powershell instance and run your scripts. You pass in a custom template as a string using
-`-ClassTemplate` parameter. BinWips supports tokens in the class template which
-are replaced with values at runtime. Tokens are strings which begin with `{#`
-and end with `#}`. To override the BinWips version you could pass in
-`-Tokens @{BinWipsVersion='1.0.0'}`. See the below example `-ClassTemplate` for
-basic usage. This template would generate a console program.
+When BinWips generates a .NET program it uses a class template to setup a new
+powershell instance and run your scripts. You pass in a custom template as a
+string using `-ClassTemplate` parameter. BinWips supports tokens in the class
+template which are replaced with values at runtime. Tokens are strings which
+begin with `{#` and end with `#}`. To override the BinWips version you could
+pass in `-Tokens @{BinWipsVersion='1.0.0'}`. See the below example
+`-ClassTemplate` for basic usage. This template would generate a console
+program.
 
 ```c#
 // Generaed by BinWips {#BinWipsVersion#}
@@ -344,9 +356,9 @@ using System.Diagnostics;
 [assembly: BinWips("{#BinWipsVersion#}")]
 {#AssemblyAttributes#}
 namespace {#Namespace#} {
-         
+
     {#ClassAttributes#}
-    class {#ClassName#} 
+    class {#ClassName#}
     {
         public static void Main(string[] args)
         {
@@ -443,14 +455,17 @@ Order doesn’t matter.
 - [x] More Tests (and switch to pester)
 - [ ] Finish Documentation
 - [ ] Finish ReadMe
-- [ ] Ability to package modules with the exe (Each Function is a verb so `Verb-Noun` becomes `exe_name verb parameters`)
+- [ ] Ability to package modules with the exe (Each Function is a verb so
+      `Verb-Noun` becomes `exe_name verb parameters`)
 - [ ] Windows/GUIS
-- [ ] Help and Verison # Support (--help and --version or a verb/something along those lines)
+- [ ] Help and Verison # Support (--help and --version or a verb/something along
+      those lines)
   - [x] Help
   - [ ] Version
-- [ ] Is there a way to pass variables back to the host terminal? So if we 
-      did something like -ErrorVariable or -OutVariable we could pass that back 
-      if the host terminal was PWSH. Maybe a way with remoting (check if parent proc is pwsh, if so use remoting to pass back). 
+- [ ] Is there a way to pass variables back to the host terminal? So if we did
+      something like -ErrorVariable or -OutVariable we could pass that back if
+      the host terminal was PWSH. Maybe a way with remoting (check if parent
+      proc is pwsh, if so use remoting to pass back).
 
 ## Limitations
 
