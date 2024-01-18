@@ -3,19 +3,12 @@
     [CmdletBinding()]
     param()
 
-    if ($IsWindows)
-    {
-        $dotNetPath = where.exe bflat.exe
-    }
-    else
-    {
-        $dotNetPath = which bflat
-    }
-    $moduleRoot = Split-Path -Path $PSScriptRoot -Parent
+     
+    $moduleRoot = Split-Path( Split-Path -Path $PSScriptRoot -Parent) -Parent
     # Locate the compiler
-    if ([string]::IsNullOrWhiteSpace($dotNetPath) -eq $false -and $dotNetPath -ne "INFO: Could not find files for the given pattern(s).")
-    {
-        Write-Verbose "Found bflat at $dotNetPath"
+    if ($null -ne (Get-Command "bflat" -ErrorAction SilentlyContinue) ) 
+    { 
+        Write-Verbose "Found bflat on path"
         return
     }
     elseif ($IsWindows)
@@ -26,7 +19,8 @@
     {
         $dotNetPath = "$moduleRoot/files/bflat/linux/bflat"
     }
-    if(Test-Path $dotNetPath){
+    if (Test-Path $dotNetPath)
+    {
         Write-Verbose "Found bflat at $dotNetPath"
         return
     }
