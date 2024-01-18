@@ -35,9 +35,14 @@ jobs:
         with:
           name: ubuntu-Unit-Tests
           path: Unit.Tests.xml
-      - name: Publish PowerShell Module to github packages
-        uses: natescherer/publish-powershell-action@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          target: packages
-          path: src/Modules/BinWips
+      - name: Calc size of modules
+        shell: pwsh
+        run: |
+          $size = Get-ChildItem -Path ./src/Modules/BinWips -Recurse | Measure-Object -Property Length -Sum
+          Write-Host "Size of BinWips module is $($size.Sum / 1MB) MB"
+      # - name: Publish PowerShell Module to github packages
+      #   uses: natescherer/publish-powershell-action@v1
+      #   with:
+      #     token: ${{ secrets.GITHUB_TOKEN }}
+      #     target: packages
+      #     path: src/Modules/BinWips
