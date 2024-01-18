@@ -120,10 +120,6 @@ function New-BinWips
       $ClassName = "Program",
 
 
-
-      [string]
-      $Target,
-
       <# List of assembly attributes to apply to the assembly level.
              - list of defaults here: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/attributes/global
              - custom attributes can also be aplied.
@@ -294,7 +290,10 @@ function New-BinWips
       }
       else
       { 
-         $psScript = Get-Content $InFile -Raw
+         # read in content from each input file and merge them into 1 string
+         $psScript = $InFile | ForEach-Object { Get-Content -Raw $_ } | Out-String
+
+         
       }
 
       # If Platform and Architecture are not specified, use the current platform and architecture
