@@ -11,6 +11,7 @@
     {
         $dotNetPath = which bflat
     }
+    $moduleRoot = Split-Path -Path $PSScriptRoot -Parent
     # Locate the compiler
     if ([string]::IsNullOrWhiteSpace($dotNetPath) -eq $false -and $dotNetPath -ne "INFO: Could not find files for the given pattern(s).")
     {
@@ -19,11 +20,11 @@
     }
     elseif ($IsWindows)
     {
-        $dotNetPath = Resolve-Path "$PSScriptRoot\..\files\bflat\windows\bflat.exe"
+        $dotNetPath = "$moduleRoot/files/bflat/windows/bflat.exe"
     }
     else
     {
-        $dotNetPath = Resolve-Path "$PSScriptRoot\..\files\bflat\linux\bflat"
+        $dotNetPath = "$moduleRoot/files/bflat/linux/bflat"
     }
     if(Test-Path $dotNetPath){
         Write-Verbose "Found bflat at $dotNetPath"
@@ -43,7 +44,7 @@
         $archiveType = "tar.gz"
     }
 
-    $path = "$PSScriptRoot\..\files\bflat\$platform"
+    $path = "$PSScriptRoot/../files/bflat/$platform"
     [System.IO.Directory]::CreateDirectory($path) | Out-Null
 
     # Check if the latest release is already downloaded

@@ -169,18 +169,20 @@
       } else {
          $dotNetPath = which bflat
       }
+
       # Locate the compiler
+      $moduleRoot = Split-Path -Path $PSScriptRoot -Parent
       if ([string]::IsNullOrWhiteSpace($dotNetPath) -eq $false -and $dotNetPath -ne "INFO: Could not find files for the given pattern(s).")
       {
          #Write-Verbose "Found bflat at $dotNetPath"
       }
       elseif ($IsWindows)
       {
-         $dotNetPath = Resolve-Path "$PSScriptRoot\..\files\bflat\windows\bflat.exe"
+         $dotNetPath = "$moduleRoot/files/bflat/windows/bflat.exe"
       }
       else
       {
-         $dotNetPath = Resolve-Path "$PSScriptRoot\..\files\bflat\linux\bflat"
+         $dotNetPath = "$moduleRoot/files/bflat/linux/bflat"
       }
 
       if(!(Test-Path $dotNetPath)){
