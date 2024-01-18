@@ -446,6 +446,16 @@ Tags: Named Params, Switches
 #>
 ```
 
+## Trouble Shooting
+
+### Error: DllNotFound_Linux, objwriter, objwriter.so
+
+This error can occur if libc++-dev is not installed. To install it run:
+
+```bash
+sudo apt install libc++-dev
+```
+
 ## TODO List
 
 Order doesn’t matter.
@@ -499,7 +509,6 @@ There are some things that cannot be accomplished by the BinWips module.
 2. You should be aware of any security risks for the .NET Framework version you
    target
 3. Assemblies are not signed so they are not tamper proof
-
 
 ## Inspiration and References
 
