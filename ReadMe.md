@@ -19,9 +19,9 @@ Install-Module BinWips -AllowPrerelease
 Import-Module BinWips
 ```
 
-> Note: BinWips uses the [bflat](https://github.com/bflattened/bflat) compiler
-> to generate the C# code. This is a dependency of the module and will be
-> downloaded (one time) automatically if not detected in the path.
+> Note: BinWips uses [bflat](https://github.com/bflattened/bflat). This is a
+> dependency of the module and will be downloaded (one time) automatically if
+> not detected in the path.
 
 Create a simple program from an inline script block to create a program with the
 default name `PSBinary.exe`:
@@ -85,7 +85,8 @@ parameters as well, if you pass in multiple script files, the program parameters
 are generated from the first script file.
 
 Parameter validation works, tab completion does not. BinWips automatically adds
-support for getting help on the generated program by using `.\PSBinary.exe help`.
+support for getting help on the generated program by using
+`.\PSBinary.exe help`.
 
 ```text
 NAME
@@ -415,7 +416,8 @@ paths to assemblies to reference. For example, if you want to reference
 New-BinWips -InFile "MyScript.ps1" -HostReferences "C:\Path\To\Newtonsoft.Json.dll"
 ```
 
-BinWips will throw an error if the assembly does not exist or if you do not have a matching reference for each assembly you reference in your class template.
+BinWips will throw an error if the assembly does not exist or if you do not have
+a matching reference for each assembly you reference in your class template.
 
 ## Testing
 
