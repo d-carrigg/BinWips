@@ -182,7 +182,7 @@
       }
       else
       {
-         $dotNetPath = "$moduleRoot/files/bflat/linux/bflat"
+         $dotNetPath = "$moduleRoot/files/bflat/linux-glibc/bflat"
       }
 
       if(!(Test-Path $dotNetPath)){

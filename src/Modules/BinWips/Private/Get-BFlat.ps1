@@ -3,29 +3,6 @@
     [CmdletBinding()]
     param()
 
-     
-    $moduleRoot = Split-Path( Split-Path -Path $PSScriptRoot -Parent) -Parent
-    # Locate the compiler
-    if ($null -ne (Get-Command "bflat" -ErrorAction SilentlyContinue) ) 
-    { 
-        Write-Verbose "Found bflat on path"
-        return
-    }
-    elseif ($IsWindows)
-    {
-        $dotNetPath = "$moduleRoot/files/bflat/windows/bflat.exe"
-    }
-    else
-    {
-        $dotNetPath = "$moduleRoot/files/bflat/linux/bflat"
-    }
-    if (Test-Path $dotNetPath)
-    {
-        Write-Verbose "Found bflat at $dotNetPath"
-        return
-    }
- 
-
     $platform = "windows"
     $arch = "x64"
     $archiveType = "zip"
@@ -37,6 +14,29 @@
         $platform = "linux-glibc"
         $archiveType = "tar.gz"
     }
+
+     
+    $moduleRoot = Split-Path( Split-Path -Path $PSScriptRoot -Parent) -Parent
+    # Locate the compiler
+    if ($null -ne (Get-Command "bflat" -ErrorAction SilentlyContinue) ) 
+    { 
+        Write-Verbose "Found bflat on path"
+        return
+    }
+    elseif ($IsWindows)
+    {
+        $dotNetPath = "$moduleRoot/files/bflat/$platform/bflat.exe"
+    }
+    else
+    {
+        $dotNetPath = "$moduleRoot/files/bflat/$platform/bflat"
+    }
+    if (Test-Path $dotNetPath)
+    {
+        Write-Verbose "Found bflat at $dotNetPath"
+        return
+    }
+ 
 
     $path = " $moduleRoot/files/bflat/$platform"
     [System.IO.Directory]::CreateDirectory($path) | Out-Null
