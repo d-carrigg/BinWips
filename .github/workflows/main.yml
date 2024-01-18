@@ -15,6 +15,10 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
+      - name : Check module manifest
+        shell: pwsh
+        run: |
+          Test-ModuleManifest -Path ./src/Modules/BinWips/BinWips.psd1
       - name: Run PS Script Analyzer
         shell: pwsh
         run: |

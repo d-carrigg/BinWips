@@ -7,13 +7,50 @@ function New-BinWips
     .DESCRIPTION
        Generates a .EXE from a script.
     .EXAMPLE
-       New-BinWips -ScriptBlock {Get-Process}
+       New-BinWips -ScriptBlock {Write-Host "Hello, World!"}
+       # ./PSBinary.exe 
+       # Hello, World!
        
-       Creates a file in the current directory named PSBinary.exe which runs get-process
+       Creates a file in the current directory named PSBinary.exe which writes "Hello, World!" to the console
     .EXAMPLE
        New-BinWips MyScript.ps1
-
+       # ./MyScript.exe
        Creates an exe in the current directory named MyScript.exe
+   .EXAMPLE
+      New-BinWips -ScriptBlock {
+         param($foo)
+         Write-Output "$foo"
+      }
+      # ./PSBinary.exe -foo "bar"
+      
+      Creates a program which accepts a parameter and writes it to the console
+   .EXAMPLE
+      New-BinWips -ScriptBlock {
+         $fileContent = Get-PsBinaryResource "MyFile.txt"
+         $fileContent += Get-PsBinaryResource "MyOtherFile.txt"
+         Write-Output $fileContent
+      } -Resources "MyFile.txt", "MyOtherFile.txt" -OutFile "MyProgram.exe"
+
+      Embeddes the files MyFile.txt and MyOtherFile.txt into the exe and makes them accessible via Get-PsBinaryResource.
+   .EXAMPLE 
+      New-BinWips -ScriptBlock {
+         Write-host "done"
+      } -ClassTemplate @"
+      
+      
+      // use tokens to replace values in the template, see -Tokens for more info
+      namespace {#Namespace#} {
+         public class MyClass {
+            public static void Main(string[] args) {
+               //.. Custom Host class implementation
+              System.Diagnostics.Process.Run("pwsh.exe", "-EncodedCommand {#Script#}")
+            }
+         }
+      }
+
+      Override the Class Template used for the C# program that runs the script. This example would simply run the script in pwsh.exe
+      without passing in arguments or setting up embedded resources.
+     
     #>
    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
    [OutputType([int])]
@@ -87,7 +124,7 @@ function New-BinWips
       [string]
       $Target,
 
-      <# Hashtable of assembly attributes to apply to the assembly level.
+      <# List of assembly attributes to apply to the assembly level.
              - list of defaults here: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/attributes/global
              - custom attributes can also be aplied.
              - Invalid attributes will throw a c# compiler exception
@@ -96,11 +133,11 @@ function New-BinWips
       $AssemblyAttributes,
 
 
-      <# Hashtable of assembly attributes to apply to the class.
+      <# List of assembly attributes to apply to the class.
              - Any valid c# class attribute can be applied
              - Invalid attributes will throw a c# compiler exception
         #>
-      [hashtable]
+      [string[]]
       $ClassAttributes,
         
 
