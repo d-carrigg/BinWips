@@ -46,6 +46,19 @@ Describe 'New-BinWips' {
         $result | Should -Be "Shared-Function from MutliFile1.ps1"
     }
 
+    
+    It 'Given a PowerShellEdition, should use that edition' -Tag "PowerShellEdition" {
+        New-BinWips -ScriptBlock { Write-Host "Hello World" } -ScratchDir $script:scratchDir -OutFile $script:outFile -PowerShellEdition Desktop
+
+        # read the PSBinary.exe and make sure it contains "powershell.exe"
+        $script:outFile | Should -Exist
+        $contents = Get-Content "$script:scratchDir/PSBinary.cs" -Raw
+        $contents | Should -BeLike "*powershell.exe*"
+
+        $result = & $script:outFile
+        $result | Should -Be "Hello World"
+    }
+
     It 'Given a script block with parameters, should accept the valid parameters' {
         New-BinWips -ScriptBlock { param($foo) Write-Output "$foo" } -ScratchDir $script:scratchDir -OutFile $script:outFile
 
@@ -207,4 +220,5 @@ Describe 'New-BinWips' {
         $result = & $script:outFile
         $result | Should -Be "Ignore Script"
     }
+
 }

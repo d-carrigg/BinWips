@@ -127,7 +127,20 @@ function Write-BinWipsExe
       $CompilerPath,
 
       [string[]]
-      $CompilerArgs
+      $CompilerArgs,
+
+      <#
+        Which edition of PowerShell to target (PowerShell Core vs Windows PowerShell). 
+        If not specified, defaults to the edition of PowerShell that is running the cmdlet.
+        So if this function is run from pwsh, it will default to PowerShell Core.
+        If this function is run from powershell.exe, it will default to Windows PowerShell.
+
+        PowerShellEdition='Desktop' is only supported on Windows PowerShell 5.1 and newer. 
+        If you try to use  PowerShellEdition='Desktop' and Platform='Linux', an error will be thrown. 
+      #>
+      [string]
+      [ValidateSet('Core', 'Desktop')]
+      $PowerShellEdition = $PSEdition
    )
 
    process
@@ -138,6 +151,13 @@ function Write-BinWipsExe
       $runtimeSetupScript = Get-Content -Raw "$PSScriptRoot\..\files\Setup-Runtime.ps1"
    
       $runtimeSetupScript = $runtimeSetupScript | Set-BinWipsToken -Key AssemblyPath -Value ($OutFile.TrimStart('.')) -Required 
+
+      $powerShellPath = "pwsh"
+      $powershellArgs = "-NoProfile -NoLogo -EncodedCommand" # a space + the encoded command will be appended later
+      if ($PowerShellEdition -eq 'Desktop')
+      {
+         $powerShellPath = "powershell.exe"
+      }
    
       if ($Tokens)
       {
@@ -147,7 +167,8 @@ function Write-BinWipsExe
       }
    
       Write-Verbose $runtimeSetupScript
-      if($PSCmdlet.ShouldProcess('Create Runtime Setup Script')) {
+      if ($PSCmdlet.ShouldProcess('Create Runtime Setup Script'))
+      {
          $runtimeSetupScript | Out-File "$ScratchDir\Setup-Runtime.ps1" -Encoding unicode -Force:$Force
       }
       $encodedRuntimeSetup = [Convert]::ToBase64String(([System.Text.Encoding]::Unicode.GetBytes($runtimeSetupScript)))
@@ -165,7 +186,9 @@ function Write-BinWipsExe
       | Set-BinWipsToken -Key ClassName -Value $ClassName -Required `
       | Set-BinWipsToken -Key Namespace -Value $Namespace -Required `
       | Set-BinWipsToken -Key BinWipsVersion -Value $binWipsVersion
-      | Set-BinWipsToken -Key FunctionName -Value $funtionName
+      | Set-BinWipsToken -Key FunctionName -Value $funtionName `
+      | Set-BinWipsToken -Key PowerShellPath -Value $powerShellPath `
+      | Set-BinWipsToken -Key PowerShellArguments -Value $powershellArgs
    
    
       
@@ -215,10 +238,12 @@ function Write-BinWipsExe
    
       # 5. Output class + additional files to .cs files in scratch dir
       Write-Verbose "Writing to $ScratchDir"
-      if($PSCmdlet.ShouldProcess('Create C# Source File')){
+      if ($PSCmdlet.ShouldProcess('Create C# Source File'))
+      {
          $csProgram | Out-File "$ScratchDir/PSBinary.cs" -Encoding unicode -Force:$Force
       }
-      if($PSCmdlet.ShouldProcess('Create BinWiPS Attribute File')){
+      if ($PSCmdlet.ShouldProcess('Create BinWiPS Attribute File'))
+      {
          $attributesTemplate | Out-File "$ScratchDir/BinWipsAttr.cs" -Encoding unicode -Force:$Force
       }
      

@@ -38,8 +38,9 @@ namespace {#Namespace#} {
             var encodedCommand = EncodeBase64(wrappedScript);
 
             // call PWSH to execute the script passing in the args
-            var psi = new ProcessStartInfo(@"pwsh");
-            psi.Arguments = "-NoProfile -NoLogo -EncodedCommand " + encodedCommand;
+            var psi = new ProcessStartInfo(@"{#PowerShellPath#}");
+            // e.g -NoProfile -NoLogo -EncodedCommand
+            psi.Arguments = "{#PowerShellArguments#}" + " " + encodedCommand;
 
             var process = Process.Start(psi);
             process.WaitForExit();

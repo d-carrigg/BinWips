@@ -33,7 +33,7 @@ Copyright = '(c) 2021 dcarrigg. All rights reserved.'
 Description = 'Binary Written in PowerShell. Convert PowerShell scripts into .NET Applications'
 
 # Minimum version of the PowerShell engine required by this module
-PowerShellVersion = '6.0'
+PowerShellVersion = '5.0'
 
 # Name of the PowerShell host required by this module
 # PowerShellHostName = ''
@@ -95,7 +95,7 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        Tags = @('Desktop','PSEdition_Core', 'Windows', 'Linux', 'Compiler', 'Executable', 'Binary', 'Application')
+        Tags = @('PSEdition_Desktop','PSEdition_Core', 'Windows', 'Linux', 'Compiler', 'Executable', 'Binary', 'Application')
 
         # A URL to the license for this module.
         LicenseUri = 'https://github.com/d-carrigg/BinWips/blob/master/LICENSE.txt'

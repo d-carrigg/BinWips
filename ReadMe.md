@@ -214,7 +214,7 @@ PARAMETERS
     
     -HostReferences <String[]>
         List of .NET assemblies for the host .exe to reference. These references will not be accessible from within the powershell script.
-        
+
     -Resources <String[]>
         List of files to include with the app
                     - If -NoEmbedResources is specified then files are embedded in the exe.
@@ -242,6 +242,18 @@ PARAMETERS
     -ExtraArguments <String[]>
         Additional parameters to pass to the bflat compiler
 
+    -PowerShellEdition <String>
+        Which edition of PowerShell to target:
+         - Core: PowerShell Core (pwsh)
+         - Desktop: Windows PowerShell (powershell.exe)
+
+        If not specified, defaults to the edition of PowerShell that is running the cmdlet.
+        So if this function is run from pwsh, it will default to PowerShell Core.
+        If this function is run from powershell.exe, it will default to Windows PowerShell.
+
+        PowerShellEdition='Desktop' is only supported on Windows PowerShell 5.1 and newer.
+        If you try to use  PowerShellEdition='Desktop' and Platform='Linux', an error will be thrown.
+    
     -WhatIf [<SwitchParameter>]
 
     -Confirm [<SwitchParameter>]

@@ -162,7 +162,21 @@
       $Architecture,
 
       [switch]
-      $Cleanup 
+      $Cleanup,
+
+        <#
+        Which edition of PowerShell to target (PowerShell Core vs Windows PowerShell). 
+        If not specified, defaults to the edition of PowerShell that is running the cmdlet.
+        So if this function is run from pwsh, it will default to PowerShell Core.
+        If this function is run from powershell.exe, it will default to Windows PowerShell.
+
+        PowerShellEdition='Desktop' is only supported on Windows PowerShell 5.1 and newer. 
+        If you try to use  PowerShellEdition='Desktop' and Platform='Linux', an error will be thrown. 
+      #>
+      [string]
+      [ValidateSet('Core', 'Desktop')]
+      $PowerShellEdition
+      
    )
 
    Begin
@@ -270,6 +284,7 @@
          CompilerPath       = $dotNetPath
          CompilerArgs       = $cscArgs
          ScratchDir         = $ScratchDir
+         PowerShellEdition  = $PowerShellEdition
       }
 
       Write-BinWipsExe @funcArgs
