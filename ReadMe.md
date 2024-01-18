@@ -317,9 +317,7 @@ You can fully customize the generated output by replacing the class template and
 you can run additional preprocessing before the compiler is invoked. If the
 built in customization options don't meet your needs this section will guide you
 through full customization of the compiled output. This section requires
-knowledge of C#. Additionally, unless you include the default BinWips attribute
-in your attributes/class template you will not be able to detect your
-application as a BinWips application (how-to is included in this section).
+knowledge of C#.
 
 ### Class Tempalates
 
@@ -397,6 +395,26 @@ namespace {#Namespace#} {
     }
 }
 ```
+
+### Tokens
+
+BinWips uses tokens in the format of `{#TokenName#}` to replace values in the
+class template. The following tokens are replaced by default. Any tokens marked
+as required must be included in the class template or an exception will be
+thrown.
+
+| Token Name     | Required | Description                                         |
+| -------------- | -------- | --------------------------------------------------- |
+| BinWipsVersion | Yes      | The version of BinWips used to generate the program |
+| Script         | Yes      | The script to run, encoded as a base64 string       |
+| RuntimeSetup   | Yes      | The runtime setup script, encoded as a base64 string |
+| ClassName      | Yes      | The name of the class to generate                   |
+| Namespace      | Yes      | The namespace to use                                |
+| BinWipsVersion | No       | The version of BinWips used to generate the program |
+| FunctionName   | No       | The name of the function to display when showing help documentation |
+| BinWipsPipeGuid | No       | The guid used to identify the pipe between the generated program and the powershell process |
+
+When creating a custom class template you can use any of the above tokens. You can also define additional tokens, enabling template reuse.
 
 ## Testing
 
