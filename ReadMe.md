@@ -141,31 +141,12 @@ the help. You can also check out the
 use the module.
 
 ```text
-NAME
-    New-BinWips
-
-SYNOPSIS
-    Creates a new PowerShell binary.
-
-
 SYNTAX
-    New-BinWips [-ScriptBlock] <Object> [-OutDir <String>] [-ScratchDir <String>] [-OutFile <String>] [-Cleanup] [-Force]
-    [-Namespace <String>] [-ClassName <Object>] [-Target <String>] [-AssemblyAttributes <String[]>] [-ClassAttributes
-    <Hashtable>] [-ClassTemplate <String>] [-AttributesTemplate <String>] [-Tokens <Hashtable>] [-Resources <String[]>]
-    [-NoEmbedResources] [-Library] [-Platform <String>] [-Architecture <String>] [-CscArgumentList <String[]>]
-    [<CommonParameters>]
+    New-BinWips [-ScriptBlock] <Object> [-OutDir <String>] [-ScratchDir <String>] [-OutFile <String>] [-Cleanup] [-Namespace <String>] [-ClassName <Object>] [-AssemblyAttributes <String[]>] [-ClassAttributes <String[]>] [-ClassTemplate <String>]
+    [-AttributesTemplate <String>] [-Tokens <Hashtable>] [-Resources <String[]>] [-NoEmbedResources] [-Platform <String>] [-Architecture <String>] [-ExtraArguments <String[]>] [-WhatIf] [-Confirm] [<CommonParameters>]
 
-    New-BinWips [-InFile] <String[]> [-OutDir <String>] [-ScratchDir <String>] [-OutFile <String>] [-Cleanup] [-Force]
-    [-Namespace <String>] [-ClassName <Object>] [-Target <String>] [-AssemblyAttributes <String[]>] [-ClassAttributes
-    <Hashtable>] [-ClassTemplate <String>] [-AttributesTemplate <String>] [-Tokens <Hashtable>] [-Resources <String[]>]
-    [-NoEmbedResources] [-Library] [-Platform <String>] [-Architecture <String>] [-CscArgumentList <String[]>]
-    [<CommonParameters>]
-
-
-DESCRIPTION
-    Generates a .EXE from a script.
-
-
+    New-BinWips [-InFile] <String[]> [-OutDir <String>] [-ScratchDir <String>] [-OutFile <String>] [-Cleanup] [-Namespace <String>] [-ClassName <Object>] [-AssemblyAttributes <String[]>] [-ClassAttributes <String[]>] [-ClassTemplate <String>]
+    [-AttributesTemplate <String>] [-Tokens <Hashtable>] [-Resources <String[]>] [-NoEmbedResources] [-Platform <String>] [-Architecture <String>] [-ExtraArguments <String[]>] [-WhatIf] [-Confirm] [<CommonParameters>]
 PARAMETERS
     -ScriptBlock <Object>
         The powershell command to convert into a program
@@ -193,9 +174,6 @@ PARAMETERS
         Clean the scratch directory before building
         As compared to -KeepScratchDir which removes scratch dir *after* build.
 
-    -Force [<SwitchParameter>]
-        Overrite -OutFile if it already exists
-
     -Namespace <String>
         Namespace for the generated program.
         This parameter is trumped by -Tokens, so placing a value here will be overriden by
@@ -212,17 +190,14 @@ PARAMETERS
         must be a valid c# class name and cannot be equal to -Namespace
         Defaults to Program
 
-    -Target <String>
-
     -AssemblyAttributes <String[]>
-        Hashtable of assembly attributes to apply to the assembly level.
-                    - list of defaults here:
-        https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/attributes/global
+        List of assembly attributes to apply to the assembly level.
+                    - list of defaults here: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/attributes/global
                     - custom attributes can also be aplied.
                     - Invalid attributes will throw a c# compiler exception
 
-    -ClassAttributes <Hashtable>
-        Hashtable of assembly attributes to apply to the class.
+    -ClassAttributes <String[]>
+        List of assembly attributes to apply to the class.
                     - Any valid c# class attribute can be applied
                     - Invalid attributes will throw a c# compiler exception
 
@@ -267,38 +242,24 @@ PARAMETERS
         Don't embed any resource specifed by -Resources
         instead they are copied to out dir if they don't already exist
 
-    -Library [<SwitchParameter>]
-        Output to a .NET .dll instead of an .exe
-
     -Platform <String>
         The platform to target
 
     -Architecture <String>
         The architecture to target
 
-    -CscArgumentList <String[]>
-        Additional C# Compiler parameters you want to pass (e.g. references)
+    -ExtraArguments <String[]>
+        Additional parameters to pass to the bflat compiler
+
+    -WhatIf [<SwitchParameter>]
+
+    -Confirm [<SwitchParameter>]
 
     <CommonParameters>
         This cmdlet supports the common parameters: Verbose, Debug,
         ErrorAction, ErrorVariable, WarningAction, WarningVariable,
         OutBuffer, PipelineVariable, and OutVariable. For more information, see
         about_CommonParameters (https://go.microsoft.com/fwlink/?LinkID=113216).
-
-    -------------------------- EXAMPLE 1 --------------------------
-
-    PS > New-BinWips -ScriptBlock {Get-Process}
-
-    Creates a file in the current directory named PSBinary.exe which runs get-process
-
-
-
-
-    -------------------------- EXAMPLE 2 --------------------------
-
-    PS > New-BinWips MyScript.ps1
-
-    Creates an exe in the current directory named MyScript.exe
 ```
 
 ## Embedding Resources
