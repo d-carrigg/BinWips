@@ -1,8 +1,13 @@
 # BinWips: Binary Written in PowerShell
 
-:construction: Warning: This repository is still under construction, see the [TODO List](#TODO-List) at the bottom to make sure the features you want are complete​
+Create .NET applications from PowerShell scripts and inline code
+blocks with control over the generated `.cs` and `.exe` files and any additional resources. Target linux and windows on x86, x64, and arm64.
 
-Create .NET applications and libraries from PowerShell scripts and inline code blocks. Control the generated `.cs`, `.exe` files and any additional resources. Generate .NET libraries (`.dll`s) which can be consumed by other .NET applications. Compilation targets include any valid platform for `.NET` application including `x86`,`x64` and MSIL (`Any CPU`). 
+```powershell
+New-BinWips -ScriptBlock {echo "Hello World!"}
+.\PSBinary.exe 
+# Hello World!
+```
 
 ## Getting Started
 
@@ -11,16 +16,22 @@ Install the module with:
 ```powershell
 # TODO: Publish so this works: Install-Module BinWips
 # For now, git clone the repo
-Install-Module /gitrepo/src/Modules/BinWips
+git clone https://github.com/d-carrigg/BinWips.git
+Install-Module /BinWips/src/Modules/BinWips
 ```
+
+> Note: BinWips uses the [bflat](https://github.com/bflattened/bflat) compiler
+> to generate the C# code. This is a dependency of the module and will be
+> downloaded (one time) automatically if not detected in the path.
 
 Create a simple program from an inline script block:
 
 ```powershell
-New-PSBinary -ScriptBlock {echo "Hello World!"}
+New-BinWips -ScriptBlock {echo "Hello World!"}
 ```
 
-This will generate a program named `PSBinary.exe` in the current directory. Confirm everything worked by running:
+This will generate a program named `PSBinary.exe` in the current directory.
+Confirm everything worked by running:
 
 ```powershell
 .\PSBinary.exe
@@ -35,63 +46,85 @@ Hello World!
 You can also generate programs from script files:
 
 ```powershell
-New-PSBinary -InFile "path/to/myScript.ps1"
+New-BinWips -InFile "path/to/myScript.ps1"
 ```
 
-An executable will be generated in the current directory with the name `myScript.exe`. If you want to produce a library (`dll`) instead you can do so by using the `-Library` parameter:
-
-```PowerShell
-New-PSBinary -InFile "path/to/myScript.ps1" -Library
-```
+An executable will be generated in the current directory with the name
+`myScript.exe`.
 
 ## Parameters
 
-BinWips assemblies (both `exe`s and `dll`s) can accept arguments from the caller.
+BinWips programs can take parameters just like the PowerShell scripts they are based on.
 
 ```powershell
 # Note the escaped variable `$myParam
-New-PSBinary -ScriptBlock {param($myParam); echo "Param was `$myParam"}
-# or 
-# assume MyScript.ps1 contains param($myParam)
-New-PSBinary -InFile "MyScript.ps1"
+New-BinWips -ScriptBlock {
+    param($myParam)
+    echo "Param was `$myParam"
+}
+
+# Also works with scripts
+New-BinWips -InFile "MyScript.ps1"
+## Content of MyScript.ps1
+# param($myParam)
+# echo "Param was $myParam"
 ```
 
-  If you generate a `.exe` the arguments work the same as they would if you wrote a script. E.g.
+If you generate a `.exe` the arguments work the same as they would if you wrote
+a script. E.g.
 
-```bash
+```powershell
 .\PSBinary.exe -String1 "Some Text" -ScriptBlock "{Write-Host 'Inception'}" -Switch1 -Array "Arrays?","Of Course"
 ```
 
-Libraries look a little different than you might expect coming from C#, but they just take a `param string[] args` parameter similar to the Main method of a c# program. The `param` modifier is supplied in case no parameters are passed. Calling in C# would look like
+Parameter validation works, tab completion does not. You can use `.\PSBinary.exe help` to get help. For your module. This will produce PowerShell style help for your program. No additional work is required on your part, this is done automatically.
 
-```c#
-// both of these work, note the escaping of special chars (",') where neccessary
-object result = PSBinary.Invoke("-String 1 'Some Text'", "-ScriptBlock \"{Write-Host 'Inception'}\"", "-Switch1 -Array \"Arrays?\",\"Of Course\"");
-object result = PSBinary.Invoke("-String1 \"Some Text\" -ScriptBlock \"{Write-Host 'Inception'}\" -Switch1 -Array \"Arrays?\",\"Of Course\")";
-```
-
-## Detailed Help
-Detailed help is included via the `Get-Help` cmdlet. Run `Get-Help New-PSBinary -Detailed` for more information.
-
-```
+```text
 NAME
-    New-PSBinary
-
-SYNOPSIS
-    Creates a new PowerShell binary.
-
+    PSBinary
 
 SYNTAX
-    New-PSBinary [-ScriptBlock] <Object> [-Namespace <String>] [-ClassName <Object>] [-OutFile <String>]
-    [-AssemblyAttributes <String[]>] [-NoDefaultAttributes] [-ClassAttributes <Hashtable>] [-ClassTemplate <String>]
-    [-AttributesTemplate <String>] [-Tokens <Hashtable>] [-CscArgumentList <String[]>] [-OutDir <String>] [-ScratchDir
-    <String>] [-Clean] [-KeepScratchDir] [-Force] [-Resources <String[]>] [-NoEmbedResources] [-Library]
+    PSBinary [-baz] [<CommonParameters>]
+
+
+PARAMETERS
+    -baz
+
+    <CommonParameters>
+        This cmdlet supports the common parameters: Verbose, Debug,
+        ErrorAction, ErrorVariable, WarningAction, WarningVariable,
+        OutBuffer, PipelineVariable, and OutVariable. For more information, see
+        about_CommonParameters (https://go.microsoft.com/fwlink/?LinkID=113216).
+
+REMARKS
+    None
+```
+
+## All New-BinWips Parameters
+
+Detailed help for this module is included via the `Get-Help` cmdlet. Run
+`Get-Help New-BinWips -Detailed` for more information.
+
+```text
+NAME
+    New-BinWips
+    
+SYNOPSIS
+    Creates a new PowerShell binary.
+    
+    
+SYNTAX
+    New-BinWips [-ScriptBlock] <Object> [-OutDir <String>] [-ScratchDir <String>] [-OutFile <String>] [-Cleanup] [-Force]    
+    [-Namespace <String>] [-ClassName <Object>] [-Target <String>] [-AssemblyAttributes <String[]>] [-ClassAttributes        
+    <Hashtable>] [-ClassTemplate <String>] [-AttributesTemplate <String>] [-Tokens <Hashtable>] [-Resources <String[]>]      
+    [-NoEmbedResources] [-Library] [-Platform <String>] [-Architecture <String>] [-CscArgumentList <String[]>]
     [<CommonParameters>]
 
-    New-PSBinary [-InFile] <String[]> [-Namespace <String>] [-ClassName <Object>] [-OutFile <String>] [-AssemblyAttributes
-    <String[]>] [-NoDefaultAttributes] [-ClassAttributes <Hashtable>] [-ClassTemplate <String>] [-AttributesTemplate
-    <String>] [-Tokens <Hashtable>] [-CscArgumentList <String[]>] [-OutDir <String>] [-ScratchDir <String>] [-Clean]
-    [-KeepScratchDir] [-Force] [-Resources <String[]>] [-NoEmbedResources] [-Library] [<CommonParameters>]
+    New-BinWips [-InFile] <String[]> [-OutDir <String>] [-ScratchDir <String>] [-OutFile <String>] [-Cleanup] [-Force]       
+    [-Namespace <String>] [-ClassName <Object>] [-Target <String>] [-AssemblyAttributes <String[]>] [-ClassAttributes        
+    <Hashtable>] [-ClassTemplate <String>] [-AttributesTemplate <String>] [-Tokens <Hashtable>] [-Resources <String[]>]      
+    [-NoEmbedResources] [-Library] [-Platform <String>] [-Architecture <String>] [-CscArgumentList <String[]>]
+    [<CommonParameters>]
 
 
 DESCRIPTION
@@ -107,6 +140,26 @@ PARAMETERS
         Source Script file(s), order is important
         Files added in order entered
         Exe name is defaulted to last file in array
+
+    -OutDir <String>
+        Directory to place output in, defaults to current directory
+        Dir will be created if it doesn't already exist.
+
+    -ScratchDir <String>
+        Change the directory where work will be done defaults to 'obj' folder in current directory
+        Use -Clean to clean this directory before building
+        Dir will be created if it doesn't already exist.
+
+    -OutFile <String>
+        Name of the .exe to generate. Defaults to the -InFile (replaced with .exe) or
+        PSBinary.exe if a script block is inlined
+
+    -Cleanup [<SwitchParameter>]
+        Clean the scratch directory before building
+        As compared to -KeepScratchDir which removes scratch dir *after* build.
+
+    -Force [<SwitchParameter>]
+        Overrite -OutFile if it already exists
 
     -Namespace <String>
         Namespace for the generated program.
@@ -124,9 +177,7 @@ PARAMETERS
         must be a valid c# class name and cannot be equal to -Namespace
         Defaults to Program
 
-    -OutFile <String>
-        Name of the .exe to generate. Defaults to the -InFile (replaced with .exe) or
-        PSBinary.exe if a script block is inlined
+    -Target <String>
 
     -AssemblyAttributes <String[]>
         Hashtable of assembly attributes to apply to the assembly level.
@@ -134,18 +185,11 @@ PARAMETERS
         https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/attributes/global
                     - custom attributes can also be aplied.
                     - Invalid attributes will throw a c# compiler exception
-                    - Attributes are applied in addition to the defaults unless -NoDefaultAttributes
-
-    -NoDefaultAttributes [<SwitchParameter>]
-        Exclude default attributes from being applied to PSBinary.
-        Unless this is included some default attributes will be applied to the program.
-        So that other scripts/programs can identify it as a BinWips.
 
     -ClassAttributes <Hashtable>
         Hashtable of assembly attributes to apply to the class.
                     - Any valid c# class attribute can be applied
                     - Invalid attributes will throw a c# compiler exception
-                    - Attributes are applied in addition to the defaults unless -NoDefaultAttributes
 
     -ClassTemplate <String>
         Override the default class template.
@@ -170,29 +214,6 @@ PARAMETERS
         ---------------
         {#Script#} The script content to compile
 
-    -CscArgumentList <String[]>
-        Additional C# Compiler parameters you want to pass (e.g. references)
-
-    -OutDir <String>
-        Directory to place output in, defaults to current directory
-        Dir will be created if it doesn't already exist.
-
-    -ScratchDir <String>
-        Change the directory where work will be done defaults to 'obj' folder in current directory
-        Use -Clean to clean this directory before building
-        Dir will be created if it doesn't already exist.
-
-    -Clean [<SwitchParameter>]
-        Clean the scratch directory before building
-        As compared to -KeepScratchDir which removes scratch dir *after* build.
-
-    -KeepScratchDir [<SwitchParameter>]
-        After build don't remove the scratch dir.
-        As compared to -Clean which removes all files in scratch dir *before* build.
-
-    -Force [<SwitchParameter>]
-        Overrite -OutFile if it already exists
-
     -Resources <String[]>
         List of files to include with the app
                     - If -NoEmbedResources is specified then files are embedded in the exe.
@@ -214,131 +235,154 @@ PARAMETERS
     -Library [<SwitchParameter>]
         Output to a .NET .dll instead of an .exe
 
+    -Platform <String>
+        The platform to target
+
+    -Architecture <String>
+        The architecture to target
+
+    -CscArgumentList <String[]>
+        Additional C# Compiler parameters you want to pass (e.g. references)
+
     <CommonParameters>
         This cmdlet supports the common parameters: Verbose, Debug,
         ErrorAction, ErrorVariable, WarningAction, WarningVariable,
         OutBuffer, PipelineVariable, and OutVariable. For more information, see
         about_CommonParameters (https://go.microsoft.com/fwlink/?LinkID=113216).
+
+    -------------------------- EXAMPLE 1 --------------------------
+
+    PS > New-BinWips -ScriptBlock {Get-Process}
+
+    Creates a file in the current directory named PSBinary.exe which runs get-process
+
+
+
+
+    -------------------------- EXAMPLE 2 --------------------------
+
+    PS > New-BinWips MyScript.ps1
+
+    Creates an exe in the current directory named MyScript.exe
 ```
-
-## Libraries
-
-Libraries work but documentation needs to be added to this section describing them in more detail. Use the `-Library` flag to generate a .dll.
-When a library is used a Class is generated with your dll name that has a `Invoke(string[] args)` method which returns an IEnumerable.
 
 ## Embedding Resources
 
-If you want to package additional files with your application you can uses the `-Resources` parameter. A resource can be any file (images, other `exe`s, `dll`s, etc) and are embedded in the generated .exe by default. In other words, the module will still generate a single file regardless of the number of resources you include.
+If you want to package additional files with your application you can uses the
+`-Resources` parameter. A resource can be any file (images, other `exe`s,
+`dll`s, etc) and are embedded in the generated .exe by default. In other words,
+the module will still generate a single file regardless of the number of
+resources you include.
 
-To include additional files, pass an array of file paths to the `-Resources` parameter. For example, if you want to include 3 files:
+To include additional files, pass an array of file paths to the `-Resources`
+parameter. For example, if you want to include 3 files:
 
 1. MyImage.png - located in the same directory as the script
 2. MyText.txt - located at c:\foo\MyText.txt
-3. MyRequiredLibrary.dll - located at c:\Windows\ImportantFolder\MyRequiredLibrary.dll
+3. MyRequiredLibrary.dll - located at
+   c:\Windows\ImportantFolder\MyRequiredLibrary.dll
 
 you would use the following syntax:
 
 ```powershell
-New-PSBinary -File MyScript.ps1 -Resources @(
+New-BinWips -File MyScript.ps1 -Resources @(
     '.\MyImage.png',
     'c:\foo\MyText.txt',
     'c:\Windows\ImportantFolder\MyRequiredLibrary.dll'
 )
 ```
 
-The files must both exist and you must have access to said files otherwise BinWips will throw a terminating error. All files will be read in and embedded to the `.exe`. To use the resources in your script use the following syntax:
+The files must both exist and you must have access to said files otherwise
+BinWips will throw a terminating error. All files will be read in and embedded
+to the `.exe`. To use the resources in your script use the following syntax:
 
 ```powershell
-$myImageContent = Get-PSBinaryResource ".\MyImage.png"
-$myTextContent = Get-PSBinaryResource "c:\foo\MyText.txt"
-$myDll = Get-PSBinaryResource "c:\Windows\ImportantFolder\MyRequiredLibrary.dll"
+$myImageContent = Get-PSBinaryResource "MyImage.png"
+$myTextContent = Get-PSBinaryResource "MyText.txt"
+$myDll = Get-PSBinaryResource "MyRequiredLibrary.dll"
 ```
 
 A few important notes:
 
-- When you get a binary resource your are getting it’s content, not a path to a file, and not a `File` object. You can use the `-AsFile` parameter if you need a file reference, in which case the embedded resource will be written to a temp file (this is slower as content needs to first be written to disk).
-- You can’t use `Get-Content` or `Get-Item` cmdlets with these  files because they do not exist as files when deployed
+- The file names are case sensitive and do not include the path (filename only).
+  
+- You can’t use `Get-Content` or `Get-Item` cmdlets with these files because
+  they do not exist as files when deployed
 
-If you want to deploy the resources next to the `exe` instead of embedding them, include the `-NoEmbedResources` option. In which case the files will be copied to the `-OutDir` if they do not already exist at that location. If all resources are in the same directory as the script, or they already exist on the machine you want to deploy to. You don’t need to include them as resources, you can just access them as you normally would in your PowerShell script.
-
-## Check if an application is a BinWips executable
-
-Built in functionality is provided for checking if an assembly (`exe` or `dll`) was built with BinWips via the `Test-PSBinary` command:
-
-```powershell
-Test-PSBinary PSBinary.exe
-```
-
- If you don’t have the BinWips module installed on a machine you can use the following:
-
-```powershell
-$Path = 'Path to assembly in question'
-# We gotta do some trickery to safely load this file
-# https://stackoverflow.com/questions/3832351/disposing-assembly
-# https://www.powershellmagazine.com/2014/03/17/pstip-reading-file-content-as-a-byte-array/
-$Path = Resolve-Path $Path
-$bytes = [System.IO.File]::ReadAllBytes($Path)
-$asm = [System.Reflection.Assembly]::Load($bytes)
-$attrItems = $asm.GetCustomAttributes($false)
-foreach($attr in $attrItems) {
-  if($attr.TypeId.Name -eq 'BinWipsAttribute'){
-     Write-Host "Assembly is a BinWips executeable"
-	}
-}
-```
+If you want to deploy the resources next to the `exe` instead of embedding them,
+include the `-NoEmbedResources` option. In which case the files will be copied
+to the `-OutDir` if they do not already exist at that location. If all resources
+are in the same directory as the script, or they already exist on the machine
+you want to deploy to. You don’t need to include them as resources, you can just
+access them as you normally would in your PowerShell script.
 
 ## Advanced Usage
 
-You can fully customize the generated output by replacing the class template and you can run additional preprocessing before the compiler is invoked. If the built in customization options don't meet your needs this section will guide you through full customization of the compiled output. This section requires knowledge of C#. Additionally, unless you include the default BinWips attribute in your attributes/class template you will not be able to detect your application as a BinWips application (how-to is included in this section). 
+You can fully customize the generated output by replacing the class template and
+you can run additional preprocessing before the compiler is invoked. If the
+built in customization options don't meet your needs this section will guide you
+through full customization of the compiled output. This section requires
+knowledge of C#. Additionally, unless you include the default BinWips attribute
+in your attributes/class template you will not be able to detect your
+application as a BinWips application (how-to is included in this section).
 
 ### Class Tempalates
 
-When BinWips generates a .NET program it uses a class template to create and run the PowerShell runspace. You pass in a custom template as a string 
-using `-ClassTemplate` parameter. BinWips supports tokens in the class template which are replaced with values at runtime. Tokens are strings which begin with `{#` and end with `#}`. To override the BinWips version you could pass in `-Tokens @{BinWipsVersion='1.0.0'}`. See the below example `-ClassTemplate`
-for basic usage. This template would generate a console program.
+When BinWips generates a .NET program it uses a class template to setup a new powershell instance and run your scripts. You pass in a custom template as a string using
+`-ClassTemplate` parameter. BinWips supports tokens in the class template which
+are replaced with values at runtime. Tokens are strings which begin with `{#`
+and end with `#}`. To override the BinWips version you could pass in
+`-Tokens @{BinWipsVersion='1.0.0'}`. See the below example `-ClassTemplate` for
+basic usage. This template would generate a console program.
 
 ```c#
 // Generaed by BinWips {#BinWipsVersion#}
 using System;
 using BinWips;
-using System.Management.Automation;
-using System.Linq;
+using System.Diagnostics;
 
 // attributes which can be used to identify this assembly as a BinWips
 // https://stackoverflow.com/questions/1936953/custom-assembly-attributes
 [assembly: BinWips("{#BinWipsVersion#}")]
 {#AssemblyAttributes#}
+namespace {#Namespace#} {
          
-         // main namespace
-
-         namespace {#Namespace#} {
-         
-               {#ClassAttributes#}
-               class {#ClassName#} {
-                  public static void Main(string[] args)
+    {#ClassAttributes#}
+    class {#ClassName#} 
+    {
+        public static void Main(string[] args)
         {
-            var powerShell = PowerShell.Create();
+
 
             // script is inserted in base64 so we need to decode it
             var runtimeSetup = DecodeBase64("{#RuntimeSetup#}");
-            var script = DecodeBase64("{#Script#}");
+            var funcName = "{#FunctionName#}";
 
-            // build runspace and execute it
-            // additional setup could be added 
-            // by default we do an out string so that
-            // console output looks nice 
-            powerShell
-                      .AddScript(runtimeSetup)
-                      .AddScript(script)
-                      .AddParameters(args)
-                      .AddCommand("Out-String");
-            var results = powerShell.Invoke();
-
-            // output the results
-            foreach (var result in results)
+            var ending = "";
+            if (args.Length == 1 && args[0] == "help")
             {
-                Console.WriteLine(result);
+                ending = $"Get-Help -Detailed {funcName}";
             }
+            else
+            {
+                ending = $"{funcName} {string.Join(" ", args)}";
+            }
+
+            var script = DecodeBase64("{#Script#}");
+            var wrappedScript = $"{runtimeSetup}\n\n function {funcName}\n {{\n {script}\n }}\n{ending}";
+
+
+            var encodedCommand = EncodeBase64(wrappedScript);
+
+            // call PWSH to execute the script passing in the args
+            var psi = new ProcessStartInfo(@"pwsh.exe");
+            psi.Arguments = "-NoProfile -NoLogo -WindowStyle Hidden -EncodedCommand " + encodedCommand;
+            //psi.RedirectStandardInput = true;
+            var process = Process.Start(psi);
+            process.EnableRaisingEvents = true;
+
+            process.WaitForExit();
+
         }
         static string DecodeBase64(string encoded)
         {
@@ -346,8 +390,27 @@ using System.Linq;
             var text = System.Text.Encoding.Unicode.GetString(decodedBytes);
             return text;
         }
+
+        static string EncodeBase64(string text)
+        {
+            var bytes = System.Text.Encoding.Unicode.GetBytes(text);
+            var encoded = Convert.ToBase64String(bytes);
+            return encoded;
+        }
     }
 }
+```
+
+## Testing
+
+Testing is done through Pester. To run the tests, clone the repo and run
+
+```powershell
+Invoke-Pester -Script ./tests/BinWips.Tests.ps1
+
+<#
+Tags: Named Params, Switches
+#>
 ```
 
 ## TODO List
@@ -358,22 +421,20 @@ Order doesn’t matter.
 - [x] Assembly Attributes
 - [x] ClassAttributes
 - [x] Multiple scripts support
-- [X] Parameters
-- [ ] Improve Params for Libraries if Possible (any way to strongly type the args? or params array at least?) -- source gen?
+- [x] Parameters
+- [ ] Improve Params for Libraries if Possible (any way to strongly type the
+      args? or params array at least?) -- source gen?
 - [x] Different Template for Libraries
 - [ ] Allow Method Name Modification for libraries
 - [x] Attributes Template Parameter
 - [x] CSC Argument List
 - [ ] Identify C# Compiler Errors (catch them)
 - [ ] Framework targeting
-  - [ ] Support to target and use new dotnet cli for builds, or include some form of dotnet cli in the module
-  - [ ] Allow for using the dotnet cli to build, or using the older .NET Framework csc (maybe have a switch for this)
-  - [ ] With the new dotnet build allow passing cli args and things like framework indenpendent (AOT)
-  - [ ] Gotta figure out best way to include the compiler or ensure it exists, don't really want to force people to install the .NET Framework SDK
-  - [ ] Maybe [bflat](https://github.com/bflattened/bflat) could be used to build the exe?
-- [ ] Linux support (anything special needed)?
-- [x] Interactive apps (investigate if anything special needs to be done to support adding user input at runtime)
-  - [ ] It does, need to redirect the PS host input to console input, will this require me to implement a fully custom PS host?
+- [x] Linux support (anything special needed)?
+- [x] Interactive apps (investigate if anything special needs to be done to
+      support adding user input at runtime)
+  - [ ] It does, need to redirect the PS host input to console input, will this
+        require me to implement a fully custom PS host?
 - [ ] Clean
 - [ ] Docs Section on how binwips works
 - [ ] KeepScratchDir
@@ -381,21 +442,32 @@ Order doesn’t matter.
 - [x] Resources
 - [x] Get-PSBinaryResource
 - [ ] BinWips PS Provider
-- [ ] More Tests (and switch to pester)
+- [x] More Tests (and switch to pester)
 - [ ] Finish Documentation
 - [ ] Finish ReadMe
+- [ ] Ability to package modules with the exe (Each Function is a verb so `Verb-Noun` becomes `exe_name verb parameters`)
+- [ ] Windows/GUIS
+- [ ] Help and Verison # Support (--help and --version or a verb/something along those lines)
+  - [x] Help
+  - [ ] Version
+- [ ] Is there a way to pass variables back to the host terminal? So if we 
+      did something like -ErrorVariable or -OutVariable we could pass that back 
+      if the host terminal was PWSH. Maybe a way with remoting (check if parent proc is pwsh, if so use remoting to pass back). 
 
 ## Limitations
 
 There are some things that cannot be accomplished by the BinWips module.
 
-1. See the [TODO List](#TODO-List) for a list of features that are not yet implemented
-2. You should be aware of any security risks for the .NET Framework version you target
-3. Assemblies are not signed so they are not tamper proof  
+1. See the [TODO List](#TODO-List) for a list of features that are not yet
+   implemented
+2. You should be aware of any security risks for the .NET Framework version you
+   target
+3. Assemblies are not signed so they are not tamper proof
 
 ## Inspiration and References
 
-The following links either provided inspiration for this module or were used as references when building it.
+The following links either provided inspiration for this module or were used as
+references when building it.
 
 - https://gallery.technet.microsoft.com/scriptcenter/PS2EXE-GUI-Convert-e7cb69d5
 - https://stackoverflow.com/questions/15414678/how-to-decode-a-base64-string
@@ -405,4 +477,3 @@ The following links either provided inspiration for this module or were used as 
 - [#PSTip Reading file content as a byte array – PowerShell Magazine](https://www.powershellmagazine.com/2014/03/17/pstip-reading-file-content-as-a-byte-array/)
 - [c# - Disposing assembly - Stack Overflow](https://stackoverflow.com/questions/3832351/disposing-assembly)
 - [How to Create a Console Shell - PowerShell | Microsoft Docs](https://docs.microsoft.com/en-us/powershell/scripting/developer/prog-guide/how-to-create-a-console-shell?view=powershell-7.1)
-

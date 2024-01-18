@@ -24,16 +24,16 @@ GUID = 'a67b9ad4-4aa5-4d3b-b9f2-6603ae7df2e9'
 Author = 'dcarrigg'
 
 # Company or vendor of this module
-CompanyName = 'Unknown'
+CompanyName = 'dcarrigg'
 
 # Copyright statement for this module
-Copyright = '(c) dcarrigg. All rights reserved.'
+Copyright = '(c) 2021 dcarrigg. All rights reserved.'
 
 # Description of the functionality provided by this module
-Description = 'Binary Written in PowerShell.'
+Description = 'Binary Written in PowerShell. Convert PowerShell scripts into .NET Applications'
 
 # Minimum version of the PowerShell engine required by this module
-PowerShellVersion = '3.0'
+PowerShellVersion = '6.0'
 
 # Name of the PowerShell host required by this module
 # PowerShellHostName = ''
@@ -69,16 +69,16 @@ PowerShellVersion = '3.0'
 # NestedModules = @()
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-FunctionsToExport = '*'
+FunctionsToExport = @('New-BinWips')
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
-CmdletsToExport = '*'
+CmdletsToExport = @()
 
 # Variables to export from this module
-VariablesToExport = '*'
+VariablesToExport = @()
 
 # Aliases to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no aliases to export.
-AliasesToExport = '*'
+AliasesToExport = @()
 
 # DSC resources to export from this module
 # DscResourcesToExport = @()
@@ -95,22 +95,22 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        # Tags = @()
+        Tags = @('Desktop','PSEdition_Core', 'Windows', 'Linux')
 
         # A URL to the license for this module.
-        # LicenseUri = ''
+        LicenseUri = 'https://github.com/d-carrigg/BinWips/blob/master/LICENSE.txt'
 
         # A URL to the main website for this project.
-        # ProjectUri = ''
+        ProjectUri = 'https://github.com/d-carrigg/BinWips'
 
         # A URL to an icon representing this module.
-        # IconUri = ''
+        IconUri = 'https://github.com/d-carrigg/BinWips/blob/release/v1/marketing/Icon.png?raw=true'
 
         # ReleaseNotes of this module
         # ReleaseNotes = ''
 
         # Prerelease string of this module
-        # Prerelease = ''
+        Prerelease = 'alpha'
 
         # Flag to indicate whether the module requires explicit user acceptance for install/update/save
         # RequireLicenseAcceptance = $false

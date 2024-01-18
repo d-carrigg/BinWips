@@ -4,6 +4,16 @@
 
 **/bin/
 **/obj/
+**/.binwips/
+**/*.pdb
+**/*.obj
+**/*.exe
+**/*.dll
 
 tests/ExampleRunspace/bin/
 tests/ExampleRunspace/obj/
+tests/out
+test/**.exe
+.idea/
+
+src/Modules/BinWips/files/bflat/**
