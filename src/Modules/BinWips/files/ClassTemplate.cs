@@ -16,44 +16,7 @@ namespace {#Namespace#} {
     {#ClassAttributes#}
     class {#ClassName#} 
     {
-        static void StartServer()
-        {
-            Task.Factory.StartNew(() =>
-            {
-
-                var server = new NamedPipeServerStream("BinWipsPipe{#BinWipsPipeGuid#}");
-                server.WaitForConnection();
-                StreamReader reader = new StreamReader(server);
-                StreamWriter writer = new StreamWriter(server);
-                while (true)
-                {
-                    var line = reader.ReadLine();
-                    try
-                    {
-                        var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-                        var resourcename = line;
-                        // get the text file resource from the assembly
-                        using (var stream = assembly.GetManifestResourceStream(resourcename))
-                        {
-                            using (var resourceReader = new System.IO.StreamReader(stream))
-                            {
-                                var text = resourceReader.ReadToEnd();
-                                writer.WriteLine(text);
-                                writer.Flush();
-                            }
-                        }
-                    } catch(Exception ex){
-                        // invalid resource
-                        writer.WriteLine("Invalid Resource");
-                        writer.WriteLine(ex.Message);
-                        writer.Flush();
-                    }
-
-
-                }
-            });
-        }
-
+        
         public static void Main(string[] args)
         {
             // script is inserted in base64 so we need to decode it
@@ -97,6 +60,43 @@ namespace {#Namespace#} {
             var bytes = System.Text.Encoding.Unicode.GetBytes(text);
             var encoded = Convert.ToBase64String(bytes);
             return encoded;
+        }
+
+        static void StartServer()
+        {
+            Task.Factory.StartNew(() =>
+            {
+                var server = new NamedPipeServerStream("BinWipsPipe{#BinWipsPipeGuid#}");
+                server.WaitForConnection();
+                StreamReader reader = new StreamReader(server);
+                StreamWriter writer = new StreamWriter(server);
+                while (true)
+                {
+                    var line = reader.ReadLine();
+                    try
+                    {
+                        var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+                        var resourcename = line;
+                        // get the resouce from the assembly
+                        using (var stream = assembly.GetManifestResourceStream(resourcename))
+                        {
+                            using (var resourceReader = new System.IO.StreamReader(stream))
+                            {
+                                var text = resourceReader.ReadToEnd();
+                                writer.WriteLine(text);
+                                writer.Flush();
+                            }
+                        }
+                    } catch(Exception ex){
+                        // invalid resource
+                        writer.WriteLine("Invalid Resource");
+                        writer.WriteLine(ex.Message);
+                        writer.Flush();
+                    }
+
+
+                }
+            });
         }
     }
 }
