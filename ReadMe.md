@@ -30,23 +30,26 @@ To install from the source code (not recommended):
 Import-Module /path/to/BinWips/src/Modules/BinWips
 ```
 
-Create a simple program from an inline script block:
+Create a simple program from an inline script block to create a program with the default name `PSBinary.exe`:
 
 ```powershell
 New-BinWips -ScriptBlock {echo "Hello World!"}
-```
 
-This will generate a program named `PSBinary.exe` in the current directory.
-Confirm everything worked by running:
+# Run: ./PSBinary.exe
+# Output: 
+# Hello World!
+```
+Interactive programs are supported:
 
 ```powershell
-.\PSBinary.exe
-```
+New-BinWips -ScriptBlock {
+    $name = Read-Host "What is your name?"
+    echo "Hello $name!"
+}
 
-You should see the following output:
-
-```text
-Hello World!
+# Output:
+# What is your name?: BinWips
+# Hello BinWips!
 ```
 
 You can also generate programs from script files:
