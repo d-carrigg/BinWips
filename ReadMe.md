@@ -54,6 +54,19 @@ New-BinWips -ScriptBlock {
 # Hello BinWips!
 ```
 
+As well as, programs that take parameters:
+
+```powershell
+New-BinWips -ScriptBlock {
+    param($myParam)
+    echo "Param was $myParam"
+}
+
+# Run: ./PSBinary.exe -myParam "Hello World!"
+# Output:
+# Param was Hello World!
+```
+
 You can also generate programs from script files. The files will be loaded in
 the order they are passed in. The first filename will be used as the name of the
 generated program. For example, if you have two files `myScript.ps1` and
@@ -73,21 +86,6 @@ parameter.
 > architecture of the machine it is run on. You can override this behavior with
 > the `-Platform` and `-Architecture` parameters. See the
 > [Parameters](#Parameters) section for more information.
-
-BinWips programs can take parameters just like the PowerShell scripts they are
-based on.
-
-```powershell
-# If we don't escape (`) the $ then PowerShell will may to expand it before passing it BinWips
-New-BinWips -ScriptBlock {
-    param($myParam)
-    echo "Param was `$myParam"
-}
-
-# Run: ./PSBinary.exe -myParam "Hello World!"
-# Output:
-# Param was Hello World!
-```
 
 When generating a program from a script file, the script file can take
 parameters as well, if you pass in multiple script files, the program parameters
