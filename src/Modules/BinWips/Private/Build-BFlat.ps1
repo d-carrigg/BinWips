@@ -123,6 +123,12 @@
       [switch]
       $Force, 
 
+      <#
+        List of .NET assemblies to reference. 
+      #>
+      [string[]]
+      $References,
+
       <# List of files to include with the app 
              - If -NoEmbedResources is specified then files are embedded in the exe.
                 - Files are copied to out dir with exe if they don't already exist
@@ -156,7 +162,21 @@
       $Architecture,
 
       [switch]
-      $Cleanup 
+      $Cleanup,
+
+        <#
+        Which edition of PowerShell to target (PowerShell Core vs Windows PowerShell). 
+        If not specified, defaults to the edition of PowerShell that is running the cmdlet.
+        So if this function is run from pwsh, it will default to PowerShell Core.
+        If this function is run from powershell.exe, it will default to Windows PowerShell.
+
+        PowerShellEdition='Desktop' is only supported on Windows PowerShell 5.1 and newer. 
+        If you try to use  PowerShellEdition='Desktop' and Platform='Linux', an error will be thrown. 
+      #>
+      [string]
+      [ValidateSet('Core', 'Desktop')]
+      $PowerShellEdition
+      
    )
 
    Begin
@@ -226,15 +246,24 @@
             $cscArgs += $r
          }
       }
+
+      if ($References)
+      {
+         $cscArgs += "--reference"
+         foreach ($r in $References)
+         {
+            $cscArgs += $r
+         }
+      }
      
+ 
+
       # 2. Read in script file if needed
 
  
       # 6. Run C# compiler over those files and produce an exe in the out dir
-      $cscArgs += @(
-         "$ScratchDir/PSBinary.cs", 
-         "$ScratchDir/BinWipsAttr.cs"
-      )
+      $cscArgs +=  "$ScratchDir/PSBinary.cs"
+      $cscArgs +=  "$ScratchDir/BinWipsAttr.cs"
 
       $guid = [guid]::NewGuid().ToString()
       $Tokens['BinWipsPipeGuid'] = $guid
@@ -255,6 +284,7 @@
          CompilerPath       = $dotNetPath
          CompilerArgs       = $cscArgs
          ScratchDir         = $ScratchDir
+         PowerShellEdition  = $PowerShellEdition
       }
 
       Write-BinWipsExe @funcArgs

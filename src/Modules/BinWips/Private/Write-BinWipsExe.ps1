@@ -49,6 +49,8 @@ function Write-BinWipsExe
       [string]
       $OutFile,
 
+      
+
       <# Hashtable of assembly attributes to apply to the assembly level.
              - list of defaults here: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/attributes/global
              - custom attributes can also be aplied.
@@ -125,7 +127,20 @@ function Write-BinWipsExe
       $CompilerPath,
 
       [string[]]
-      $CompilerArgs
+      $CompilerArgs,
+
+      <#
+        Which edition of PowerShell to target (PowerShell Core vs Windows PowerShell). 
+        If not specified, defaults to the edition of PowerShell that is running the cmdlet.
+        So if this function is run from pwsh, it will default to PowerShell Core.
+        If this function is run from powershell.exe, it will default to Windows PowerShell.
+
+        PowerShellEdition='Desktop' is only supported on Windows PowerShell 5.1 and newer. 
+        If you try to use  PowerShellEdition='Desktop' and Platform='Linux', an error will be thrown. 
+      #>
+      [string]
+      [ValidateSet('Core', 'Desktop')]
+      $PowerShellEdition = $PSEdition
    )
 
    process
@@ -136,6 +151,13 @@ function Write-BinWipsExe
       $runtimeSetupScript = Get-Content -Raw "$PSScriptRoot\..\files\Setup-Runtime.ps1"
    
       $runtimeSetupScript = $runtimeSetupScript | Set-BinWipsToken -Key AssemblyPath -Value ($OutFile.TrimStart('.')) -Required 
+
+      $powerShellPath = "pwsh"
+      $powershellArgs = "-NoProfile -NoLogo -EncodedCommand" # a space + the encoded command will be appended later
+      if ($PowerShellEdition -eq 'Desktop')
+      {
+         $powerShellPath = "powershell.exe"
+      }
    
       if ($Tokens)
       {
@@ -145,7 +167,8 @@ function Write-BinWipsExe
       }
    
       Write-Verbose $runtimeSetupScript
-      if($PSCmdlet.ShouldProcess('Create Runtime Setup Script')) {
+      if ($PSCmdlet.ShouldProcess('Create Runtime Setup Script'))
+      {
          $runtimeSetupScript | Out-File "$ScratchDir\Setup-Runtime.ps1" -Encoding unicode -Force:$Force
       }
       $encodedRuntimeSetup = [Convert]::ToBase64String(([System.Text.Encoding]::Unicode.GetBytes($runtimeSetupScript)))
@@ -157,12 +180,15 @@ function Write-BinWipsExe
       
       # 4. Insert script and replace tokens in class template
       $funtionName = [System.IO.Path]::GetFileNameWithoutExtension($OutFile)
+      $binWipsVersion = $MyInvocation.MyCommand.ScriptBlock.Module.Version
       $csProgram = $ClassTemplate | Set-BinWipsToken -Key Script -Value $encodedScript `
       | Set-BinWipsToken -Key RuntimeSetup -Value $encodedRuntimeSetup -Required `
       | Set-BinWipsToken -Key ClassName -Value $ClassName -Required `
       | Set-BinWipsToken -Key Namespace -Value $Namespace -Required `
-      | Set-BinWipsToken -Key BinWipsVersion -Value "0.1"
-      | Set-BinWipsToken -Key FunctionName -Value $funtionName
+      | Set-BinWipsToken -Key BinWipsVersion -Value $binWipsVersion
+      | Set-BinWipsToken -Key FunctionName -Value $funtionName `
+      | Set-BinWipsToken -Key PowerShellPath -Value $powerShellPath `
+      | Set-BinWipsToken -Key PowerShellArguments -Value $powershellArgs
    
    
       
@@ -212,10 +238,12 @@ function Write-BinWipsExe
    
       # 5. Output class + additional files to .cs files in scratch dir
       Write-Verbose "Writing to $ScratchDir"
-      if($PSCmdlet.ShouldProcess('Create C# Source File')){
+      if ($PSCmdlet.ShouldProcess('Create C# Source File'))
+      {
          $csProgram | Out-File "$ScratchDir/PSBinary.cs" -Encoding unicode -Force:$Force
       }
-      if($PSCmdlet.ShouldProcess('Create BinWiPS Attribute File')){
+      if ($PSCmdlet.ShouldProcess('Create BinWiPS Attribute File'))
+      {
          $attributesTemplate | Out-File "$ScratchDir/BinWipsAttr.cs" -Encoding unicode -Force:$Force
       }
      
@@ -234,6 +262,8 @@ function Write-BinWipsExe
          $CompilerArgs | ForEach-Object {
             $psi.ArgumentList.Add($_)
          }
+ 
+ 
   
 
 
@@ -245,7 +275,7 @@ function Write-BinWipsExe
          
          if ($results -like '*Error*')
          {
-           throw $results
+            Write-Output $results
          }
          elseif ($null -ne $results)
          {

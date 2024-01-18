@@ -187,6 +187,12 @@ function New-BinWips
       [hashtable]
       $Tokens = @{},
 
+      <#
+        List of .NET assemblies for the host .exe to reference. These references will not be accessible from within the powershell script.
+      #>
+      [string[]]
+      $HostReferences,
+
       <# List of files to include with the app 
              - If -NoEmbedResources is specified then files are embedded in the exe.
                 - Files are copied to out dir with exe if they don't already exist
@@ -220,7 +226,23 @@ function New-BinWips
 
       # Additional parameters to pass to the bflat compiler
       [string[]]
-      $ExtraArguments
+      $ExtraArguments,
+
+      <#
+        Which edition of PowerShell to target:
+         - Core: PowerShell Core (pwsh)
+         - Desktop: Windows PowerShell (powershell.exe)
+
+        If not specified, defaults to the edition of PowerShell that is running the cmdlet.
+        So if this function is run from pwsh, it will default to PowerShell Core.
+        If this function is run from powershell.exe, it will default to Windows PowerShell.
+
+        PowerShellEdition='Desktop' is only supported on Windows PowerShell 5.1 and newer. 
+        If you try to use  PowerShellEdition='Desktop' and Platform='Linux', an error will be thrown. 
+      #>
+      [string]
+      [ValidateSet('Core', 'Desktop')]
+      $PowerShellEdition = $PSEdition
    )
 
    Begin
@@ -258,6 +280,18 @@ function New-BinWips
       $multipleFiles = !$inline -and ($InFile.Count -gt 0)
       $target = "exe"
       $outExt = "exe"
+
+      # If the user wants to cross-compile to linux but runs the cmdlet from Windows PowerShell, we nede to change the PowerShellEdition to Core
+      # use can override this behavior by specifying -PowerShellEdition
+      if($Platform -eq 'Linux' -and $PowerShellEdition -eq 'Desktop' -and !$PSBoundParameters.ContainsKey('PowerShellEdition'))
+      {
+         $PowerShellEdition = 'Core'
+      }
+
+      if($PowerShellEdition -eq 'Desktop' -and $Platform -eq 'Linux')
+      {
+         throw "PowerShellEdition='Desktop' is only supported when Platform='Windows'"
+      }
       
       $currentDir = (Get-Location).Path
       if (!$hasOutDir)
@@ -366,6 +400,8 @@ function New-BinWips
          NoEmbedResources   = $NoEmbedResources
          Platform           = $Platform
          Architecture       = $Architecture
+         References         = $HostReferences
+         PowerShellEdition  = $PowerShellEdition
       }     
 
       Build-Bflat @funcArgs

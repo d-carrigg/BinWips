@@ -46,6 +46,16 @@ Describe 'New-BinWips' {
         $result | Should -Be "Shared-Function from MutliFile1.ps1"
     }
 
+    
+    It 'Given a PowerShellEdition, should use that edition' -Tag "PowerShellEdition" {
+        New-BinWips -ScriptBlock { Write-Host "Hello World" } -ScratchDir $script:scratchDir -OutFile $script:outFile -PowerShellEdition Desktop
+
+        # read the PSBinary.exe and make sure it contains "powershell.exe"
+        $script:outFile | Should -Exist
+        $contents = Get-Content "$script:scratchDir/PSBinary.cs" -Raw
+        $contents | Should -BeLike "*powershell.exe*"
+    }
+
     It 'Given a script block with parameters, should accept the valid parameters' {
         New-BinWips -ScriptBlock { param($foo) Write-Output "$foo" } -ScratchDir $script:scratchDir -OutFile $script:outFile
 
@@ -172,4 +182,40 @@ Describe 'New-BinWips' {
         $result = & $script:outFile -baz
         $result | Should -Be "Ignore Script"
     }
+
+    It 'Should reference required dlls when supplied' -Tag "References" {
+        $sb = {
+            Write-Host "It Worked"
+        }  
+        $classTemplate = @"
+        using Newtonsoft.Json;
+        // use tokens to replace values in the template, see -Tokens for more info
+        namespace {#Namespace#} {
+           public class MyClass {
+              public static void Main(string[] args) {
+                 //.. Custom Host class implementation
+                 var x = "{#RuntimeSetip#}"; // ignored but required to be in template
+                 var y = "{#Script#}"; // ignored but required to be in template
+                 var ext = ".exe";
+                 var p = System.Diagnostics.Process.Start("pwsh", "-NoProfile -NoLogo -Command \"Write-host 'Ignore Script'\"");
+                 p.WaitForExit();
+              }
+           }
+        }
+"@
+        
+        $pwshPath = (get-command pwsh).Source
+        $pwshFolder = Split-Path $pwshPath -Parent
+        $newtonsoftPath = Join-Path $pwshFolder "Newtonsoft.Json.dll"
+        
+        New-BinWips -ScriptBlock $sb -ScratchDir $script:scratchDir -OutFile $script:outFile `
+             -ClassTemplate $classTemplate `
+             -HostReferences @($newtonsoftPath)
+        
+        # So Long as the program compiles and runs, we're golden
+        $script:outFile | Should -Exist
+        $result = & $script:outFile
+        $result | Should -Be "Ignore Script"
+    }
+
 }

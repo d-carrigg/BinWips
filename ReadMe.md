@@ -19,97 +19,85 @@ Install-Module BinWips -AllowPrerelease
 Import-Module BinWips
 ```
 
-> Note: BinWips uses the [bflat](https://github.com/bflattened/bflat) compiler
-> to generate the C# code. This is a dependency of the module and will be
-> downloaded (one time) automatically if not detected in the path.
+> Note: BinWips uses [bflat](https://github.com/bflattened/bflat). This is a
+> dependency of the module and will be downloaded (one time) automatically if
+> not detected in the path.
 
-To install from the source code (not recommended):
-
-```powershell
-# git clone or download the source code from the releases page
-Import-Module /path/to/BinWips/src/Modules/BinWips
-```
-
-Create a simple program from an inline script block:
+Create a simple program from an inline script block to create a program with the
+default name `PSBinary.exe`:
 
 ```powershell
 New-BinWips -ScriptBlock {echo "Hello World!"}
+
+# Run: ./PSBinary.exe
+# Output:
+# Hello World!
 ```
 
-This will generate a program named `PSBinary.exe` in the current directory.
-Confirm everything worked by running:
+Interactive programs are supported:
 
 ```powershell
-.\PSBinary.exe
+New-BinWips -ScriptBlock {
+    $name = Read-Host "What is your name?"
+    echo "Hello $name!"
+}
+
+# Output:
+# What is your name?: BinWips
+# Hello BinWips!
 ```
 
-You should see the following output:
-
-```text
-Hello World!
-```
-
-You can also generate programs from script files:
+As well as, programs that take parameters:
 
 ```powershell
-New-BinWips -InFile "path/to/myScript.ps1"
+New-BinWips -ScriptBlock {
+    param($myParam)
+    echo "Param was $myParam"
+}
+
+# Run: ./PSBinary.exe -myParam "Hello World!"
+# Output:
+# Param was Hello World!
 ```
 
-An executable will be generated in the current directory with the name
-`myScript.exe`.
+You can also generate programs from script files. The files will be loaded in
+the order they are passed in. The first filename will be used as the name of the
+generated program. For example, if you have two files `myScript.ps1` and
+`myOtherScript.ps1` and you want to generate a program called `myScript.exe` you
+would run:
+
+```powershell
+New-BinWips -InFile "path/to/myScript.ps1", "path/to/myOtherScript.ps1"
+
+# Run: ./myScript.exe
+```
+
+You can always override the name of the generated program with the `-OutFile`
+parameter.
 
 > :spiral_notepad: Note: By default BinWips compiles to the platform and
 > architecture of the machine it is run on. You can override this behavior with
 > the `-Platform` and `-Architecture` parameters. See the
 > [Parameters](#Parameters) section for more information.
 
-BinWips programs can take parameters just like the PowerShell scripts they are
-based on.
+When generating a program from a script file, the script file can take
+parameters as well, if you pass in multiple script files, the program parameters
+are generated from the first script file.
 
-```powershell
-# Note the escaped variable `$myParam
-New-BinWips -ScriptBlock {
-    param($myParam)
-    echo "Param was `$myParam"
-}
-
-# Also works with scripts
-New-BinWips -InFile "MyScript.ps1"
-## Content of MyScript.ps1
-# param($myParam)
-# echo "Param was $myParam"
-```
-
-Arguments work the same as they would if you wrote a script. E.g.
-
-```powershell
-.\PSBinary.exe -String1 "Some Text" -ScriptBlock "{Write-Host 'Inception'}" -Switch1 -Array "Arrays?","Of Course"
-```
-
-Parameter validation works, tab completion does not. You can use
-`.\PSBinary.exe help` to get help. For your module. This will produce PowerShell
-style help for your program. No additional work is required on your part, this
-is done automatically.
+Parameter validation works, tab completion does not. BinWips automatically adds
+support for getting help on the generated program by using
+`.\PSBinary.exe help`.
 
 ```text
 NAME
     PSBinary
 
 SYNTAX
-    PSBinary [-baz] [<CommonParameters>]
-
+    PSBinary [-SomeParam] <string> [<CommonParameters>]
 
 PARAMETERS
-    -baz
-
-    <CommonParameters>
-        This cmdlet supports the common parameters: Verbose, Debug,
-        ErrorAction, ErrorVariable, WarningAction, WarningVariable,
-        OutBuffer, PipelineVariable, and OutVariable. For more information, see
-        about_CommonParameters (https://go.microsoft.com/fwlink/?LinkID=113216).
-
-REMARKS
-    None
+    -SomeParam <string>
+        Description for SomeParam
 ```
 
 ### Other examples
@@ -223,6 +211,9 @@ PARAMETERS
         Reserved Tokens
         ---------------
         {#Script#} The script content to compile
+    
+    -HostReferences <String[]>
+        List of .NET assemblies for the host .exe to reference. These references will not be accessible from within the powershell script.
 
     -Resources <String[]>
         List of files to include with the app
@@ -251,6 +242,18 @@ PARAMETERS
     -ExtraArguments <String[]>
         Additional parameters to pass to the bflat compiler
 
+    -PowerShellEdition <String>
+        Which edition of PowerShell to target:
+         - Core: PowerShell Core (pwsh)
+         - Desktop: Windows PowerShell (powershell.exe)
+
+        If not specified, defaults to the edition of PowerShell that is running the cmdlet.
+        So if this function is run from pwsh, it will default to PowerShell Core.
+        If this function is run from powershell.exe, it will default to Windows PowerShell.
+
+        PowerShellEdition='Desktop' is only supported on Windows PowerShell 5.1 and newer.
+        If you try to use  PowerShellEdition='Desktop' and Platform='Linux', an error will be thrown.
+    
     -WhatIf [<SwitchParameter>]
 
     -Confirm [<SwitchParameter>]
@@ -317,9 +320,7 @@ You can fully customize the generated output by replacing the class template and
 you can run additional preprocessing before the compiler is invoked. If the
 built in customization options don't meet your needs this section will guide you
 through full customization of the compiled output. This section requires
-knowledge of C#. Additionally, unless you include the default BinWips attribute
-in your attributes/class template you will not be able to detect your
-application as a BinWips application (how-to is included in this section).
+knowledge of C#.
 
 ### Class Tempalates
 
@@ -398,6 +399,41 @@ namespace {#Namespace#} {
 }
 ```
 
+### Tokens
+
+BinWips uses tokens in the format of `{#TokenName#}` to replace values in the
+class template. The following tokens are replaced by default. Any tokens marked
+as required must be included in the class template or an exception will be
+thrown.
+
+| Token Name      | Required | Description                                                                                 |
+| --------------- | -------- | ------------------------------------------------------------------------------------------- |
+| BinWipsVersion  | Yes      | The version of BinWips used to generate the program                                         |
+| Script          | Yes      | The script to run, encoded as a base64 string                                               |
+| RuntimeSetup    | Yes      | The runtime setup script, encoded as a base64 string                                        |
+| ClassName       | Yes      | The name of the class to generate                                                           |
+| Namespace       | Yes      | The namespace to use                                                                        |
+| BinWipsVersion  | No       | The version of BinWips used to generate the program                                         |
+| FunctionName    | No       | The name of the function to display when showing help documentation                         |
+| BinWipsPipeGuid | No       | The guid used to identify the pipe between the generated program and the powershell process |
+
+When creating a custom class template you can use any of the above tokens. You
+can also define additional tokens, enabling template reuse.
+
+## References
+
+If you're C# class template needs to reference other assemblies you can use the
+`-HostReferences` parameter. This parameter takes an array of strings which are
+paths to assemblies to reference. For example, if you want to reference
+`Newtonsoft.Json.dll` you would use the following syntax:
+
+```powershell
+New-BinWips -InFile "MyScript.ps1" -HostReferences "C:\Path\To\Newtonsoft.Json.dll"
+```
+
+BinWips will throw an error if the assembly does not exist or if you do not have
+a matching reference for each assembly you reference in your class template.
+
 ## Testing
 
 Testing is done through Pester. To run the tests, clone the repo and run
@@ -406,8 +442,17 @@ Testing is done through Pester. To run the tests, clone the repo and run
 Invoke-Pester -Script ./tests/BinWips.Tests.ps1
 
 <#
-Tags: Named Params, Switches
+Tags: Basic, MultiFile, Named Params, Switches, ScriptBlockParameters, ClassTemplate, CustomNamespace, CustomClassName, Resources
 #>
+```
+
+## Installing from source
+
+To install from the source code (not recommended):
+
+```powershell
+git clone https://github.com/d-carrigg/BinWips.git
+Import-Module ./BinWips/src/Modules/BinWips
 ```
 
 ## Troubleshoting

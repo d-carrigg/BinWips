@@ -23,9 +23,9 @@ namespace {#Namespace#} {
             var runtimeSetup = DecodeBase64("{#RuntimeSetup#}");
             var funcName = "{#FunctionName#}";
             var ending = "";
-            if (args.Length == 1 && args[0] == "help")
+            if (AreArgsHelp(args))
             {
-                ending = $"Get-Help -Detailed {funcName}";
+                ending = $"Get-Help -Detailed {funcName}; Write-host 'Created with BinWips v{#BinWipsVersion#}'";
             }
             else
             {
@@ -38,29 +38,25 @@ namespace {#Namespace#} {
             var encodedCommand = EncodeBase64(wrappedScript);
 
             // call PWSH to execute the script passing in the args
-            var psi = new ProcessStartInfo(@"pwsh");
-            psi.Arguments = "-NoProfile -NoLogo -EncodedCommand " + encodedCommand;
-            //psi.RedirectStandardInput = true;
+            var psi = new ProcessStartInfo(@"{#PowerShellPath#}");
+            // e.g -NoProfile -NoLogo -EncodedCommand
+            psi.Arguments = "{#PowerShellArguments#}" + " " + encodedCommand;
+
             var process = Process.Start(psi);
-            process.EnableRaisingEvents = true;
-
             process.WaitForExit();
+        }
 
-
+        static bool AreArgsHelp(string[] args)
+        {
+            if (args.Length != 1) return false;
+            string lower = args[0].ToLower();
+            return lower == "help" || lower == "-h" || lower == "--help";
         }
         static string DecodeBase64(string encoded)
-        {
-            var decodedBytes = Convert.FromBase64String(encoded);
-            var text = System.Text.Encoding.Unicode.GetString(decodedBytes);
-            return text;
-        }
+            => System.Text.Encoding.Unicode.GetString(Convert.FromBase64String(encoded));
 
         static string EncodeBase64(string text)
-        {
-            var bytes = System.Text.Encoding.Unicode.GetBytes(text);
-            var encoded = Convert.ToBase64String(bytes);
-            return encoded;
-        }
+         => Convert.ToBase64String(System.Text.Encoding.Unicode.GetBytes(text));
 
         static void StartServer()
         {
@@ -87,7 +83,9 @@ namespace {#Namespace#} {
                                 writer.Flush();
                             }
                         }
-                    } catch(Exception ex){
+                    }
+                    catch (Exception ex)
+                    {
                         // invalid resource
                         writer.WriteLine("Invalid Resource");
                         writer.WriteLine(ex.Message);
