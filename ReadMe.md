@@ -84,30 +84,19 @@ When generating a program from a script file, the script file can take
 parameters as well, if you pass in multiple script files, the program parameters
 are generated from the first script file.
 
-Parameter validation works, tab completion does not. You can use
-`.\PSBinary.exe help` to get help. For your module. This will produce PowerShell
-style help for your program. No additional work is required on your part, this
-is done automatically.
+Parameter validation works, tab completion does not. BinWips automatically adds
+support for getting help on the generated program by using `.\PSBinary.exe help`.
 
 ```text
 NAME
     PSBinary
 
 SYNTAX
-    PSBinary [-baz] [<CommonParameters>]
-
+    PSBinary [-SomeParam] <string> [<CommonParameters>]
 
 PARAMETERS
-    -baz
-
-    <CommonParameters>
-        This cmdlet supports the common parameters: Verbose, Debug,
-        ErrorAction, ErrorVariable, WarningAction, WarningVariable,
-        OutBuffer, PipelineVariable, and OutVariable. For more information, see
-        about_CommonParameters (https://go.microsoft.com/fwlink/?LinkID=113216).
-
-REMARKS
-    None
+    -SomeParam <string>
+        Description for SomeParam
 ```
 
 ### Other examples
