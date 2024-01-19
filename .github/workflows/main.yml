@@ -34,7 +34,7 @@ jobs:
           $config.TestResult.Enabled = $true
           $config.TestResult.OutputFormat = "NUnitXml"
           $config.TestResult.OutputPath = "Test.xml"
-          Invoke-Pester tests/BinWips.Tests.ps1 -Passthru
+          Invoke-Pester -Configuration $config
       # generates coverage-report.md and publishes as checkrun
       - name: JaCoCo Code Coverage Report
         id: jacoco_reporter
