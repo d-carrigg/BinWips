@@ -13,11 +13,9 @@ Describe 'New-BinWips' {
     
     AfterEach {
         # Cleanup
-        Remove-Item -Path $script:outFile -ErrorAction SilentlyContinue
-        Remove-Item $script:scratchDir -Recurse -ErrorAction SilentlyContinue
+        #Remove-Item -Path $script:outFile -ErrorAction SilentlyContinue
+        #Remove-Item $script:scratchDir -Recurse -ErrorAction SilentlyContinue
     }
-
-
 
     It 'Given a script block, should create a .exe that runs the script block' -Tag 'Basic' {
         
@@ -111,6 +109,36 @@ Describe 'New-BinWips' {
         $script:outFile | Should -Exist
         $result = & $script:outFile -baz "{ Write-Host 'Hello World' }"
         $result | Should -Be "Hello World"
+    }
+
+    It 'Given a hash table parameter, should work correctly' -Tag "HashTableParameters" {
+        $sb = {
+            [CmdletBinding()]
+            param(
+                [Parameter(Mandatory = $true)]
+                [hashtable]$baz
+            )
+            Write-Host "Baz['foo'] = $($baz['foo'])"
+        }
+        New-BinWips -ScriptBlock $sb -ScratchDir $script:scratchDir -OutFile $script:outFile
+        $script:outFile | Should -Exist
+        $result = & $script:outFile -baz '@{foo="bar"}'
+        $result | Should -Be "Baz['foo'] = bar"
+    }
+
+    It 'Given an array parameter, should work correctly' -Tag "ArrayParameters" {
+        $sb = {
+            [CmdletBinding()]
+            param(
+                [Parameter(Mandatory = $true)]
+                [array]$baz
+            )
+            Write-Host "Baz[0] = $($baz[0]), Baz[1] = $($baz[1])"
+        }
+        New-BinWips -ScriptBlock $sb -ScratchDir $script:scratchDir -OutFile $script:outFile
+        $script:outFile | Should -Exist
+        $result = & $script:outFile -baz "foo","bar"
+        $result | Should -Be "Baz[0] = foo, Baz[1] = bar"
     }
 
     It 'Given resources, should embed those resources and make them accessible in the script' -Tag "Resources" {
