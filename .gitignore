@@ -21,7 +21,8 @@ test/**.exe
 
 # test reports
 reports/
-
+coverage.xml
+Test.xml
 
 src/Modules/BinWips/files/bflat/**
 

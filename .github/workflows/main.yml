@@ -32,7 +32,7 @@ jobs:
           $config.CodeCoverage.Path = @("./src/Modules/BinWips/Public")
 
           $config.TestResult.Enabled = $true
-          $config.TestResult.OutputFormat = "NUnitXml"
+          $config.TestResult.OutputFormat = "JUnitXml"
           $config.TestResult.OutputPath = "Test.xml"
           Invoke-Pester -Configuration $config
       # generates coverage-report.md and publishes as checkrun
@@ -54,7 +54,7 @@ jobs:
         with:
           name: Pester Test Results # Name of the check run which will be created
           path: Test.xml # Path to test results
-          reporter: dotnet-trx # Type of test results
+          reporter: jest-junit # Type of test results
   publish-module:
     if: github.ref == 'refs/heads/master'
     name: Publish Module
