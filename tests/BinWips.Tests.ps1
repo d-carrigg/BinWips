@@ -246,7 +246,7 @@ Describe 'New-BinWips' {
         $result | Should -Be "Ignore Script"
     }
 
-    It 'Given an Invalid class template, correctly displays compiler errors' -Tag -Tag "ClassTemplate", "InvalidClassTemplate" {
+    It 'Given an Invalid class template, correctly displays compiler errors' -Tag "ClassTemplate", "InvalidClassTemplate" {
         $sb = {
             throw "Should not be called"
         }  
@@ -302,9 +302,4 @@ Describe 'New-BinWips' {
         $result = & $script:outFile
         $result | Should -Be "Ignore Script"
     }
-
-
-
-
-
 }
