@@ -13,8 +13,8 @@ Describe 'New-BinWips' {
     
     AfterEach {
         # Cleanup
-        #Remove-Item -Path $script:outFile -ErrorAction SilentlyContinue
-        #Remove-Item $script:scratchDir -Recurse -ErrorAction SilentlyContinue
+        Remove-Item -Path $script:outFile -ErrorAction SilentlyContinue
+        Remove-Item $script:scratchDir -Recurse -ErrorAction SilentlyContinue
     }
 
     It 'Given a script block, should create a .exe that runs the script block' -Tag 'Basic' {
