@@ -454,6 +454,15 @@ New-BinWips -InFile "MyScript.ps1" -HostReferences "C:\Path\To\Newtonsoft.Json.d
 BinWips will throw an error if the assembly does not exist or if you do not have
 a matching reference for each assembly you reference in your class template.
 
+## Contributing
+
+Contributions are welcome, please open an issue or pull request. A couple of
+general requirements:
+
+- Must pass PSScriptAnalyzer with severity of `warning` or greater
+- Add Pester tests for any new features, see the workflow file for how the
+  pipeline runs the tests
+
 ## Testing
 
 Testing is done through Pester. To run the tests, clone the repo and run

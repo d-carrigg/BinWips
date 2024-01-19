@@ -10,7 +10,7 @@ on:
 
 jobs:
   pester-test:
-    name: Pester test
+    name: Run Script Analyzer and Pester tests
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
@@ -30,19 +30,18 @@ jobs:
           $config.Run.Path = "./tests/BinWips.Tests.ps1"
           $config.CodeCoverage.Enabled = $true
           $config.CodeCoverage.Path = @("./src/Modules/BinWips/Public")
-
           $config.TestResult.Enabled = $true
           $config.TestResult.OutputFormat = "JUnitXml"
           $config.TestResult.OutputPath = "Test.xml"
           Invoke-Pester -Configuration $config
       # generates coverage-report.md and publishes as checkrun
-      - name: JaCoCo Code Coverage Report
+      - name: BinWips Code Coverage Report
         id: jacoco_reporter
         uses: PavanMudigonda/jacoco-reporter@v4.9
         with:
           coverage_results_path: coverage.xml
           coverage_report_name: Coverage
-          coverage_report_title: JaCoCo
+          coverage_report_title: BinWips
           github_token: ${{ secrets.GITHUB_TOKEN }}
           skip_check_run: false
           minimum_coverage: 80
