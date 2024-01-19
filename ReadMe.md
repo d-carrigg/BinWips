@@ -72,6 +72,14 @@ New-BinWips -ScriptBlock {
 # Param was Hello World!
 ```
 
+> :spiral_notepad: If you call a BinWips program from a powershell session, you
+> will need to wrap powershell objects in quotes. For example, if you want to
+> pass in a hash table: `.\PSBinary.exe -HashTable '@{MyVal=1;OtherVal=2}'`.
+> This is because PowerShell will create the object, then convert it into a
+> string using `.ToString()`, which in this case would be the string literal
+> `System.Collections.Hashtable`, not the actual hash table. This limitation
+> does not apply to calling from another shell (bash, cmd, etc).
+
 You can also generate programs from script files. The files will be loaded in
 the order they are passed in. The first filename will be used as the name of the
 generated program. For example, if you have two files `myScript.ps1` and
@@ -223,7 +231,7 @@ PARAMETERS
         Reserved Tokens
         ---------------
         {#Script#} The script content to compile
-    
+
     -HostReferences <String[]>
         List of .NET assemblies for the host .exe to reference. These references will not be accessible from within the powershell script.
 
@@ -265,7 +273,7 @@ PARAMETERS
 
         PowerShellEdition='Desktop' is only supported on Windows PowerShell 5.1 and newer.
         If you try to use  PowerShellEdition='Desktop' and Platform='Linux', an error will be thrown.
-    
+
     -WhatIf [<SwitchParameter>]
 
     -Confirm [<SwitchParameter>]
