@@ -267,7 +267,7 @@ function New-BinWips
       #>
       [string]
       [ValidateSet('Core', 'Desktop')]
-      $PowerShellEdition = $PSEdition
+      $PowerShellEdition = $(Get-PSEdition)
    )
 
    Begin
@@ -341,7 +341,6 @@ function New-BinWips
          {
             $OutFile = $InFile.Replace(".ps1", ".$outExt")
          }
-         
       } 
  
 

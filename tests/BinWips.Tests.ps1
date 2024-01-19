@@ -13,8 +13,8 @@ Describe 'New-BinWips' {
     
     AfterEach {
         # Cleanup
-        #Remove-Item -Path $script:outFile -ErrorAction SilentlyContinue
-        #Remove-Item $script:scratchDir -Recurse -ErrorAction SilentlyContinue
+        Remove-Item -Path $script:outFile -ErrorAction SilentlyContinue
+        Remove-Item $script:scratchDir -Recurse -ErrorAction SilentlyContinue
     }
 
     It 'Given a script block, should create a .exe that runs the script block' -Tag 'Basic' {
@@ -51,7 +51,7 @@ Describe 'New-BinWips' {
         # read the PSBinary.exe and make sure it contains "powershell.exe"
         $script:outFile | Should -Exist
         $contents = Get-Content "$script:scratchDir/PSBinary.cs" -Raw
-        $contents | Should -BeLike "*powershell.exe*"
+        $contents | Should -BeLike "*ProcessStartInfo(@`"powershell.exe`")*"
     }
 
     It 'Given a script block with parameters, should accept the valid parameters' {
@@ -118,13 +118,16 @@ Describe 'New-BinWips' {
                 [Parameter(Mandatory = $true)]
                 [hashtable]$baz
             )
-           Write-Host "Baz['foo'] = $($baz['foo'])"
+            Write-Host "Baz['foo'] = $($baz['foo'])"
         }
         New-BinWips -ScriptBlock $sb -ScratchDir $script:scratchDir -OutFile $script:outFile
         $script:outFile | Should -Exist
-        if($IsWindows){
+        if ($IsWindows)
+        {
             $result = & $script:outFile -baz '@{foo="bar"}'
-        }else {
+        }
+        else
+        {
             $result = & $script:outFile -baz '@{foo=\"bar\"}'
         }
         
@@ -142,7 +145,7 @@ Describe 'New-BinWips' {
         }
         New-BinWips -ScriptBlock $sb -ScratchDir $script:scratchDir -OutFile $script:outFile
         $script:outFile | Should -Exist
-        $result = & $script:outFile -baz "foo","bar"
+        $result = & $script:outFile -baz "foo", "bar"
         $result | Should -Be "Baz[0] = foo, Baz[1] = bar"
     }
 
@@ -237,18 +240,66 @@ Describe 'New-BinWips' {
         }
 "@
         
-        $pwshPath = (get-command pwsh).Source
+        $pwshPath = (Get-Command pwsh).Source
         $pwshFolder = Split-Path $pwshPath -Parent
         $newtonsoftPath = Join-Path $pwshFolder "Newtonsoft.Json.dll"
         
         New-BinWips -ScriptBlock $sb -ScratchDir $script:scratchDir -OutFile $script:outFile `
-             -ClassTemplate $classTemplate `
-             -HostReferences @($newtonsoftPath)
+            -ClassTemplate $classTemplate `
+            -HostReferences @($newtonsoftPath)
         
         # So Long as the program compiles and runs, we're golden
         $script:outFile | Should -Exist
         $result = & $script:outFile
         $result | Should -Be "Ignore Script"
+    }
+
+    It 'Given an Invalid class template, correctly displays compiler errors' -Tag "InvalidClassTemplate" {
+        $sb = {
+            throw "Should not be called"
+        }  
+        $classTemplate = @"
+        // use tokens to replace values in the template, see -Tokens for more info
+        namespace {#Namespace#} {
+           public class MyClass {
+              public static void Main(string[] args) {
+                var x = "{#RuntimeSetip#}"; // ignored but required to be in template
+                var y = "{#Script#}"; // ignored but required to be in template
+                Console.WriteLine(x) // syntax error, missing ;
+              }
+           }
+        }
+"@
+        { New-BinWips -ScriptBlock $sb -ScratchDir $script:scratchDir -OutFile $script:outFile `
+                -ClassTemplate $classTemplate
+        } | Should -Throw -ExpectedMessage "*error CS1002: ; expected*"
+    }
+
+    It 'Given an invalid path for -InFile, should throw' -Tag "InvalidInFile" {
+        { 
+            New-BinWips -InFile "kajhgkjadfhlkjashdf" -ScratchDir $script:scratchDir -OutFile $script:outFile 
+        } | Should -Throw -ExpectedMessage "Error: kajhgkjadfhlkjashdf could not be found or you do not have access"
+
+    }
+
+    It 'When running on windows powershell, targeting Linux, correctly uses core edition when not explicity set' -Tag "PSEditionSwitch" {
+
+        Mock -ModuleName BinWips Get-PSEdition { return "Desktop" } 
+        
+
+        New-BinWips -ScriptBlock { Write-Output "Hello World" } -Platform Linux `
+            -ScratchDir $script:scratchDir -OutFile $script:outFile 
+
+        $content = Get-Content $script:scratchDir/PSBinary.cs -Raw
+        $content | Should -BeLike "*ProcessStartInfo(@`"pwsh`")*"
+    
+    }
+
+    It 'Throws an exception when Target=Linux and PowerShellEdition=Desktop' -Tag "PSEditionSwitch" {
+        { 
+            New-BinWips -ScriptBlock { Write-Output "Hello World" } -Platform Linux `
+                -ScratchDir $script:scratchDir -OutFile $script:outFile -PowerShellEdition Desktop
+        } | Should -Throw -ExpectedMessage "PowerShellEdition='Desktop' is only supported when Platform='Windows'"
     }
 
 }

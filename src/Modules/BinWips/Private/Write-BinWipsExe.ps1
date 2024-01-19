@@ -274,7 +274,7 @@ function Write-BinWipsExe
          
          if ($results -like '*Error*')
          {
-            Write-Output $results
+            throw $results
          }
          elseif ($null -ne $results)
          {

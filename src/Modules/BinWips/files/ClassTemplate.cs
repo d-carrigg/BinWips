@@ -5,7 +5,8 @@ using System.Diagnostics;
 using System.IO.Pipes;
 using System.Threading.Tasks;
 using System.IO;
-
+using System.Linq;
+using System.Reflection;
 
 // attributes which can be used to identify this assembly as a BinWips
 // https://stackoverflow.com/questions/1936953/custom-assembly-attributes
@@ -16,6 +17,12 @@ namespace {#Namespace#} {
     {#ClassAttributes#}
     class {#ClassName#} 
     {
+
+        static {#ClassName#}()
+        {
+            // load the assembly into memory
+            ProgramAssembly = System.Reflection.Assembly.GetExecutingAssembly();
+        }
         
         public static void Main(string[] args)
         {
@@ -23,17 +30,16 @@ namespace {#Namespace#} {
             var runtimeSetup = DecodeBase64("{#RuntimeSetup#}");
             var funcName = "{#FunctionName#}";
             var ending = "";
+            SetVerboseMode(args);
             if (AreArgsHelp(args))
             {
                 ending = $"Get-Help -Detailed {funcName}; Write-host 'Created with BinWips v{#BinWipsVersion#}'";
+                Log("Call Command: {0}", ending);
             }
             else
             {
-                // Console.WriteLine("Args:");
-                // Console.WriteLine(string.Join("\n", args));
-                // Console.WriteLine("End Args");
                 ending = $"{funcName} {string.Join(" ", args)}";
-                //Console.WriteLine($"Call Command: {ending}");
+                Log("Call Command: {0}", ending);
                 StartServer();
             }
 
@@ -43,11 +49,27 @@ namespace {#Namespace#} {
 
             // call PWSH to execute the script passing in the args
             var psi = new ProcessStartInfo(@"{#PowerShellPath#}");
+            Log("PowerShell Path: {0}", psi.FileName);
             // e.g -NoProfile -NoLogo -EncodedCommand
             psi.Arguments = "{#PowerShellArguments#}" + " " + encodedCommand;
-
             var process = Process.Start(psi);
             process.WaitForExit();
+        }
+
+        private static bool VerboseMode = false;
+        static void SetVerboseMode(string[] args){
+            if (args.Length == 0) return;
+            if(args.Any(a => a.ToLower() == "-verbose")){
+                VerboseMode = true;
+            }
+        }
+
+        private static void Log(string messageFormat, params object[] args)
+        {
+            if (VerboseMode)
+            {
+                Console.WriteLine(messageFormat, args);
+            }
         }
 
         static bool AreArgsHelp(string[] args)
@@ -62,23 +84,25 @@ namespace {#Namespace#} {
         static string EncodeBase64(string text)
          => Convert.ToBase64String(System.Text.Encoding.Unicode.GetBytes(text));
 
+        static Assembly ProgramAssembly;
+
         static void StartServer()
         {
             Task.Factory.StartNew(() =>
             {
                 var server = new NamedPipeServerStream("BinWipsPipe{#BinWipsPipeGuid#}");
+                Log("Waiting for connection on pipe: {0}", "BinWipsPipe{#BinWipsPipeGuid#}");
                 server.WaitForConnection();
                 StreamReader reader = new StreamReader(server);
                 StreamWriter writer = new StreamWriter(server);
                 while (true)
                 {
-                    var line = reader.ReadLine();
+                    var resourceName = reader.ReadLine();
                     try
                     {
-                        var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-                        var resourcename = line;
+                        Log("Requesting Resource: {0}", resourceName);
                         // get the resouce from the assembly
-                        using (var stream = assembly.GetManifestResourceStream(resourcename))
+                        using (var stream = ProgramAssembly.GetManifestResourceStream(resourceName))
                         {
                             using (var resourceReader = new System.IO.StreamReader(stream))
                             {
@@ -90,13 +114,12 @@ namespace {#Namespace#} {
                     }
                     catch (Exception ex)
                     {
+                        Log("Error getting resource: {0}", ex.Message);
                         // invalid resource
                         writer.WriteLine("Invalid Resource");
                         writer.WriteLine(ex.Message);
                         writer.Flush();
                     }
-
-
                 }
             });
         }

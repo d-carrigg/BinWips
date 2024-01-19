@@ -81,13 +81,13 @@ New-BinWips -ScriptBlock {
 > does not apply to calling from another shell (bash, cmd, etc).
 
 You can also generate programs from script files. The files will be loaded in
-the order they are passed in. The first filename will be used as the name of the
+the order they are passed in. The last filename will be used as the name of the
 generated program. For example, if you have two files `myScript.ps1` and
 `myOtherScript.ps1` and you want to generate a program called `myScript.exe` you
 would run:
 
 ```powershell
-New-BinWips -InFile "path/to/myScript.ps1", "path/to/myOtherScript.ps1"
+New-BinWips -InFile "path/to/myOtherScript.ps1", "path/to/myScript.ps1"
 
 # Run: ./myScript.exe
 ```
