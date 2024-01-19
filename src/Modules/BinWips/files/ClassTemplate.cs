@@ -29,7 +29,11 @@ namespace {#Namespace#} {
             }
             else
             {
+                // Console.WriteLine("Args:");
+                // Console.WriteLine(string.Join("\n", args));
+                // Console.WriteLine("End Args");
                 ending = $"{funcName} {string.Join(" ", args)}";
+                //Console.WriteLine($"Call Command: {ending}");
                 StartServer();
             }
 

@@ -13,8 +13,8 @@ Describe 'New-BinWips' {
     
     AfterEach {
         # Cleanup
-        Remove-Item -Path $script:outFile -ErrorAction SilentlyContinue
-        Remove-Item $script:scratchDir -Recurse -ErrorAction SilentlyContinue
+        #Remove-Item -Path $script:outFile -ErrorAction SilentlyContinue
+        #Remove-Item $script:scratchDir -Recurse -ErrorAction SilentlyContinue
     }
 
     It 'Given a script block, should create a .exe that runs the script block' -Tag 'Basic' {
@@ -118,11 +118,16 @@ Describe 'New-BinWips' {
                 [Parameter(Mandatory = $true)]
                 [hashtable]$baz
             )
-            Write-Host "Baz['foo'] = $($baz['foo'])"
+           Write-Host "Baz['foo'] = $($baz['foo'])"
         }
         New-BinWips -ScriptBlock $sb -ScratchDir $script:scratchDir -OutFile $script:outFile
         $script:outFile | Should -Exist
-        $result = & $script:outFile -baz '@{foo="bar"}'
+        if($IsWindows){
+            $result = & $script:outFile -baz '@{foo="bar"}'
+        }else {
+            $result = & $script:outFile -baz '@{foo=\"bar\"}'
+        }
+        
         $result | Should -Be "Baz['foo'] = bar"
     }
 
