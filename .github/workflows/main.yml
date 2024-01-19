@@ -32,8 +32,8 @@ jobs:
           $config.CodeCoverage.Path = @("./src/Modules/BinWips/Public")
 
           $config.TestResult.Enabled = $true
-          $config.TestResult.Format = "NUnitXml"
-          $config.TestResult.Path = "Test.xml"
+          $config.TestResult.OutputFormat = "NUnitXml"
+          $config.TestResult.OutputPath = "Test.xml"
           Invoke-Pester tests/BinWips.Tests.ps1 -Passthru
       # generates coverage-report.md and publishes as checkrun
       - name: JaCoCo Code Coverage Report
@@ -54,7 +54,7 @@ jobs:
         with:
           name: Pester Test Results # Name of the check run which will be created
           path: Test.xml # Path to test results
-          reporter: nunit-xml # Type of test results
+          reporter: dotnet-trx # Type of test results
   publish-module:
     if: github.ref == 'refs/heads/master'
     name: Publish Module
