@@ -26,6 +26,18 @@ Describe 'New-BinWips' {
 
     }
 
+    It 'Given a script block with -OutFile, should use the -OutFile name' -Tag "Basic" {
+
+        New-BinWips -ScriptBlock { Write-Host "Hello World" } -ScratchDir $script:scratchDir -OutFile "ThisIsATestExeFromBinWipsTests.exe"
+
+        "ThisIsATestExeFromBinWipsTests.exe" | Should -Exist
+        $result = & "$(pwd)/ThisIsATestExeFromBinWipsTests.exe"
+        $result | Should -Be "Hello World" 
+
+        # remove the special file
+        Remove-Item "ThisIsATestExeFromBinWipsTests.exe" -ErrorAction SilentlyContinue
+    }
+
     It 'Given a script file, should create a .exe that runs the script' -Tag "InFile" {
         New-BinWips -InFile "$PSScriptRoot\files\HelloWorld.ps1" -ScratchDir $script:scratchDir -OutFile $script:outFile
 
@@ -35,12 +47,38 @@ Describe 'New-BinWips' {
 
     }
 
+    It 'Given a script file with -OutFile, should use the -OutFile name' -Tag "Basic" {
+
+        New-BinWips -InFile "$PSScriptRoot\files\HelloWorld.ps1" -ScratchDir $script:scratchDir -OutFile "ThisIsATestExeFromBinWipsTests.exe"
+
+        "ThisIsATestExeFromBinWipsTests.exe" | Should -Exist
+        $result = & "$(pwd)/ThisIsATestExeFromBinWipsTests.exe"
+        $result | Should -Be "Hello World" 
+
+        # remove the special file
+        Remove-Item "ThisIsATestExeFromBinWipsTests.exe" -ErrorAction SilentlyContinue
+    }
+
     It 'Given multiple files, should produce a single exe' -Tag "InFile", "MultiFile" {
         New-BinWips -InFile "$PSScriptRoot/files/MultiFile1.ps1", "$PSScriptRoot/files/MultiFile2.ps1"  -ScratchDir $script:scratchDir -OutFile $script:outFile
 
         $script:outFile | Should -Exist
         $result = & $script:outFile
         $result | Should -Be "Shared-Function from MutliFile1.ps1"
+    }
+
+    It 'Given a script file with -OutFile, should use the -OutFile name' -Tag "Basic" {
+
+        New-BinWips -InFile "$PSScriptRoot/files/MultiFile1.ps1", "$PSScriptRoot/files/MultiFile2.ps1" `
+                -ScratchDir $script:scratchDir `
+                -OutFile "ThisIsATestExeFromBinWipsTests.exe"
+
+        "ThisIsATestExeFromBinWipsTests.exe" | Should -Exist
+        $result = & "$(pwd)/ThisIsATestExeFromBinWipsTests.exe"
+        $result | Should -Be "Shared-Function from MutliFile1.ps1"
+
+        # remove the special file
+        Remove-Item "ThisIsATestExeFromBinWipsTests.exe" -ErrorAction SilentlyContinue
     }
 
     

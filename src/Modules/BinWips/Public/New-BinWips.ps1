@@ -341,7 +341,11 @@ function New-BinWips
          {
             $OutFile = $InFile.Replace(".ps1", ".$outExt")
          }
-      } 
+      } # otherwise if path isn't absolute, make it absolute to out dir
+      elseif ([System.IO.Path]::IsPathRooted($OutFile) -eq $false)
+      {
+         $OutFile = Join-Path $OutDir $OutFile
+      }  
  
 
       if (!$hasClassTemplate -and $Library)
