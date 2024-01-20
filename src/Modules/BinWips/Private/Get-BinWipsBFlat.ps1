@@ -68,6 +68,4 @@
     }
 
     Write-Verbose "Bflat installed at $path"
-
-
 }

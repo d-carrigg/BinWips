@@ -194,7 +194,6 @@ function Write-BinWipsExe
       
       if ($hasAssemblyAttributes)
       {
-         # TODO: preformat assembly attributes
          Write-Verbose "Applying Assembly Attribuytes"
          $att = ""
          $AssemblyAttributes | ForEach-Object {
@@ -275,7 +274,7 @@ function Write-BinWipsExe
          
          if ($results -like '*Error*')
          {
-            Write-Output $results
+            throw $results
          }
          elseif ($null -ne $results)
          {

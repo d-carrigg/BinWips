@@ -6,16 +6,16 @@ on:
       - master
       - release/*
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
   pester-test:
-    name: Pester test
+    name: Run Script Analyzer and Pester tests
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
-      - name : Check module manifest
+      - name: Check module manifest
         shell: pwsh
         run: |
           Test-ModuleManifest -Path ./src/Modules/BinWips/BinWips.psd1
@@ -26,28 +26,47 @@ jobs:
       - name: Perform a Pester test from the Tests.ps1 file
         shell: pwsh
         run: |
-          Invoke-Pester tests/BinWips.Tests.ps1 -Passthru | Export-CliXml -Path Unit.Tests.xml
-      - name: Upload test results
-        uses: actions/upload-artifact@v3
+          $config = New-PesterConfiguration
+          $config.Run.Path = "./tests/BinWips.Tests.ps1"
+          $config.CodeCoverage.Enabled = $true
+          $config.CodeCoverage.Path = @("./src/Modules/BinWips/Public")
+          $config.TestResult.Enabled = $true
+          $config.TestResult.OutputFormat = "JUnitXml"
+          $config.TestResult.OutputPath = "Test.xml"
+          Invoke-Pester -Configuration $config
+      # generates coverage-report.md and publishes as checkrun
+      - name: BinWips Code Coverage Report
+        id: jacoco_reporter
+        uses: PavanMudigonda/jacoco-reporter@v4.9
         with:
-          name: ubuntu-Unit-Tests
-          path: Unit.Tests.xml
-        if: ${{ always() }}
+          coverage_results_path: coverage.xml
+          coverage_report_name: Coverage
+          coverage_report_title: BinWips
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          skip_check_run: false
+          minimum_coverage: 80
+          fail_below_threshold: true
+          publish_only_summary: false
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: success() || failure() # run this step even if previous step failed
+        with:
+          name: Pester Test Results # Name of the check run which will be created
+          path: Test.xml # Path to test results
+          reporter: jest-junit # Type of test results
   publish-module:
-      if: github.ref == 'refs/heads/master'
-      name: Publish Module
-      runs-on: ubuntu-latest
-      needs: pester-test 
-      steps:
-        - name: Check out repository code
-          uses: actions/checkout@v4
-        - name: Publish PowerShell Module to github packages
-          uses: natescherer/publish-powershell-action@v1
-          with:
-            token: ${{ secrets.GITHUB_TOKEN }}
-            target: packages
-            path: src/Modules/BinWips
-
-
+    if: github.ref == 'refs/heads/master'
+    name: Publish Module
+    runs-on: ubuntu-latest
+    needs: pester-test
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Publish PowerShell Module to github packages
+        uses: natescherer/publish-powershell-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          target: packages
+          path: src/Modules/BinWips
 # See: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-powershell
 # https://github.com/marketplace/actions/publish-powershell

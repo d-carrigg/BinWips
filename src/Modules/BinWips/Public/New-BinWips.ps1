@@ -3,9 +3,11 @@ function New-BinWips
 {
    <#
     .SYNOPSIS
-       Creates a new PowerShell binary.
+       Creates a new .exe from a script block or script file.
     .DESCRIPTION
-       Generates a .EXE from a script.
+       Generates a .EXE from a script. Support for parameters, interactive programs,
+       cross-platform compiling, resource embedding. See examples for more information.
+       Use Get-Help BinWips -Online to open the read me on github. 
     .EXAMPLE
        New-BinWips -ScriptBlock {Write-Host "Hello, World!"}
        # ./PSBinary.exe 
@@ -24,6 +26,16 @@ function New-BinWips
       # ./PSBinary.exe -foo "bar"
       
       Creates a program which accepts a parameter and writes it to the console
+   .EXAMPLE
+      New-BinWips -ScriptBlock {
+         $input = Read-Host "What's your name?"
+         Write-Host "Hello, $input!"
+      }
+      # ./PSBinary.exe
+      # What's your name?: BinWips
+      # Hello, BinWips!
+
+      Create an interactive program (Read-Host works the same).
    .EXAMPLE
       New-BinWips -ScriptBlock {
          $fileContent = Get-PsBinaryResource "MyFile.txt"
@@ -72,9 +84,10 @@ function New-BinWips
         } -Platform Windows -Architecture x64
       
       Creates a program that shows a window on Windows x64.
+   .LINK
+        https://github.com/d-carrigg/BinWips
     #>
    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
-   [OutputType([int])]
    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', '', Justification = 'BinWips is not plural')]
    Param
    (
@@ -137,37 +150,49 @@ function New-BinWips
 
 
       <# List of assembly attributes to apply to the assembly level.
-             - list of defaults here: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/attributes/global
-             - custom attributes can also be aplied.
-             - Invalid attributes will throw a c# compiler exception
+            - list of defaults here: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/attributes/global
+            - custom attributes can also be aplied.
+            - Invalid attributes will throw a c# compiler exception
         #>
       [string[]]
       $AssemblyAttributes,
 
 
       <# List of assembly attributes to apply to the class.
-             - Any valid c# class attribute can be applied
-             - Invalid attributes will throw a c# compiler exception
+            - Any valid c# class attribute can be applied
+            - Invalid attributes will throw a c# compiler exception
         #>
       [string[]]
       $ClassAttributes,
         
 
       <#
-            Override the default class template.
+         Override the default C# class template.
             - BinWips Tokens (a character sequence such as beginning with {# and ending with #}) can be included
-              and will be replaced with the matching token either from defaults or the -Tokens paramter.
+               and will be replaced with the matching token either from defaults or the -Tokens paramter.
             - If a BinWips exists with out a matching value in -Tokens an exception is thrown.
             - Example: In the default template there is namespace '{#PSNameSpace#} {...}' when compiled
-              {#PSNamespace#} is replaced with PSBinary to produce namesapce PSBinary {...}
+               {#PSNamespace#} is replaced with PSBinary to produce namesapce PSBinary {...}
         #>
       [string]
       $ClassTemplate,
 
       
       <#
-            Override the default attributes template.
-            BinWips Tokens not supported.
+            Override the default C# attribute template.
+            BinWips Tokens are not supported.
+
+            Example Template:
+
+               using System;
+               namespace BinWips {
+                  [AttributeUsage(AttributeTargets.Assembly)]
+                  public class BinWipsAttribute : Attribute {
+                     public string Version { get; set; }
+                     public BinWipsAttribute() { }
+                     public BinWipsAttribute(string version) { Version = version; }
+                  }
+               }
         #>
       [string]
       $AttributesTemplate,
@@ -193,10 +218,10 @@ function New-BinWips
       [string[]]
       $HostReferences,
 
-      <# List of files to include with the app 
-             - If -NoEmbedResources is specified then files are embedded in the exe.
-                - Files are copied to out dir with exe if they don't already exist
-             - Else files must be referenced specially (see below)
+      <# List of files to include with the app. I.e., `-Resources "MyFirstResource.txt", "MySecondResource.txt"`
+            - If -NoEmbedResources is specified then files are embedded in the exe.
+               - Files are copied to out dir with exe if they don't already exist
+            - Else files must be referenced specially (see below)
 
            To call files in script (if -NoEmbedresources is *not* included):
            `$myFile = Get-PsBinaryResource FileName.ext`
@@ -214,12 +239,12 @@ function New-BinWips
       [switch]
       $NoEmbedResources,
 
-      # The platform to target
+      # The platform to target, valid options include Linux and Windows
       [string]
       [ValidateSet('Linux', 'Windows')]
       $Platform,
 
-      # The architecture to target
+      # The architecture to target, valid options include x86, x64, and arm64
       [string]
       [ValidateSet('x86', 'x64', 'arm64')]
       $Architecture,
@@ -242,7 +267,7 @@ function New-BinWips
       #>
       [string]
       [ValidateSet('Core', 'Desktop')]
-      $PowerShellEdition = $PSEdition
+      $PowerShellEdition = $(Get-PSEdition)
    )
 
    Begin
@@ -283,12 +308,12 @@ function New-BinWips
 
       # If the user wants to cross-compile to linux but runs the cmdlet from Windows PowerShell, we nede to change the PowerShellEdition to Core
       # use can override this behavior by specifying -PowerShellEdition
-      if($Platform -eq 'Linux' -and $PowerShellEdition -eq 'Desktop' -and !$PSBoundParameters.ContainsKey('PowerShellEdition'))
+      if ($Platform -eq 'Linux' -and $PowerShellEdition -eq 'Desktop' -and !$PSBoundParameters.ContainsKey('PowerShellEdition'))
       {
          $PowerShellEdition = 'Core'
       }
 
-      if($PowerShellEdition -eq 'Desktop' -and $Platform -eq 'Linux')
+      if ($PowerShellEdition -eq 'Desktop' -and $Platform -eq 'Linux')
       {
          throw "PowerShellEdition='Desktop' is only supported when Platform='Windows'"
       }
@@ -316,8 +341,11 @@ function New-BinWips
          {
             $OutFile = $InFile.Replace(".ps1", ".$outExt")
          }
-         
-      } 
+      } # otherwise if path isn't absolute, make it absolute to out dir
+      elseif ([System.IO.Path]::IsPathRooted($OutFile) -eq $false)
+      {
+         $OutFile = Join-Path $OutDir $OutFile
+      }  
  
 
       if (!$hasClassTemplate -and $Library)

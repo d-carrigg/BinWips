@@ -1,3 +1,6 @@
+# Jet brains
+.idea/
+
 **/tests/**/*.exe
 **/tests/**/*.cs
 !**/tests/**.ps1
@@ -10,10 +13,16 @@
 **/*.exe
 **/*.dll
 
+# test
 tests/ExampleRunspace/bin/
 tests/ExampleRunspace/obj/
 tests/out
 test/**.exe
-.idea/
+
+# test reports
+reports/
+coverage.xml
+Test.xml
 
 src/Modules/BinWips/files/bflat/**
+

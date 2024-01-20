@@ -45,7 +45,6 @@
         }
         
         Write-Verbose "Replacing $key with $value"
-        # TODO: Make regex and use that to prevent accidental replacements (allow escape sequences)
         return ($source.Replace("{#$key#}", $value))
     }
    
