@@ -26,7 +26,7 @@ jobs:
         run: |
           $branch = $env:GITHUB_REF.Replace("refs/heads/release/", "")
           $manifest =  Test-ModuleManifest -Path ./src/Modules/BinWips/BinWips.psd1
-          $moduleVersion = $manifest.ModuleVersion
+          $moduleVersion = $manifest.Version
           $preRelease = $manifest.PrivateData.PSData.PreRelease
           if($preRelease -ne $null) {
             $moduleVersion = "$moduleVersion-$preRelease"
