@@ -8,6 +8,10 @@ function New-BinWips
        Generates a .EXE from a script. Support for parameters, interactive programs,
        cross-platform compiling, resource embedding. See examples for more information.
        Use Get-Help BinWips -Online to open the read me on github. 
+    .NOTES
+      This module is not associated with Bflat or the developers. The license for 
+      Bflat (if installed through the module), can be found at:
+         module_folder/BinWips/files/bflat/platform/License.txt 
     .EXAMPLE
        New-BinWips -ScriptBlock {Write-Host "Hello, World!"}
        # ./PSBinary.exe 
