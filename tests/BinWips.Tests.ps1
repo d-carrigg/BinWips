@@ -302,4 +302,18 @@ Describe 'New-BinWips' {
         $result = & $script:outFile
         $result | Should -Be "Ignore Script"
     }
+
+    It 'Adds program output when -Verbose is passed in' -Tag "Debugging" {
+        $sb = {
+            Write-Host "It Worked"
+        }  
+        
+        New-BinWips -ScriptBlock $sb -ScratchDir $script:scratchDir -OutFile $script:outFile 
+        $funcName = [System.IO.Path]::GetFileNameWithoutExtension($script:outFile)
+        $script:outFile | Should -Exist
+        $result = & $script:outFile -Verbose
+
+        # Will only be printed if -Verbose is passed in
+        $result | Should -Contain "Call Command: $funcName -Verbose"
+    }
 }
