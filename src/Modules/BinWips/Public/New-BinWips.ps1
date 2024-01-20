@@ -335,11 +335,13 @@ function New-BinWips
          }
          elseif ($multipleFiles)
          {
-            $OutFile = $InFile[-1].Replace(".ps1", ".$outExt")
+            #$OutFile = #$InFile[-1].Replace(".ps1", ".$outExt")
+            $OutFile = [System.IO.Path]::ChangeExtension($InFile[-1], $outExt)
          }
          else
          {
-            $OutFile = $InFile.Replace(".ps1", ".$outExt")
+            #$OutFile = $InFile.Replace(".ps1", ".$outExt")
+            $OutFile = [System.IO.Path]::ChangeExtension($InFile, $outExt)
          }
       } # otherwise if path isn't absolute, make it absolute to out dir
       elseif ([System.IO.Path]::IsPathRooted($OutFile) -eq $false)
