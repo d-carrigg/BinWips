@@ -1,4 +1,4 @@
-name: Test PowerShell on Ubuntu
+name: Test and Publish PowerShell on Ubuntu
 
 on:
   push:
@@ -19,6 +19,21 @@ jobs:
         shell: pwsh
         run: |
           Test-ModuleManifest -Path ./src/Modules/BinWips/BinWips.psd1
+      # On release/* branches, verify that the module version matches the branch name
+      - name: Check module version
+        if: startsWith(github.ref, 'refs/heads/release/')
+        shell: pwsh
+        run: |
+          $branch = $env:GITHUB_REF.Replace("refs/heads/release/", "")
+          $manifest =  Test-ModuleManifest -Path ./src/Modules/BinWips/BinWips.psd1
+          $moduleVersion = $manifest.Version
+          $preRelease = $manifest.PrivateData.PSData.PreRelease
+          if($preRelease -ne $null) {
+            $moduleVersion = "$moduleVersion-$preRelease"
+          }
+          if ($branch -ne $moduleVersion) {
+            throw "Module version ($moduleVersion) does not match branch name ($branch)"
+          }
       - name: Run PS Script Analyzer
         shell: pwsh
         run: |
