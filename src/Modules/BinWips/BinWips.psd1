@@ -30,7 +30,22 @@ CompanyName = 'dcarrigg'
 Copyright = '(c) 2021 dcarrigg. All rights reserved.'
 
 # Description of the functionality provided by this module
-Description = 'Binary Written in PowerShell. Convert PowerShell scripts into .NET Applications/executables.'
+Description = @"
+Binary Written in PowerShell. Convert PowerShell scripts into .NET Applications/executables.
+See the [Read Me](https://github.com/d-carrigg/BinWips) for full usage and examples.
+
+
+### Quickstart 
+
+```powershell
+Install-Module -Name BinWips -AllowPrerelease
+New-BinWips -ScriptBlock { Write-Host "Hello, World!" } -OutFile .\HelloWorld.exe
+.\HelloWorld.exe
+# Hello, World!
+```
+
+
+"@
 
 # Minimum version of the PowerShell engine required by this module
 PowerShellVersion = '5.0'
