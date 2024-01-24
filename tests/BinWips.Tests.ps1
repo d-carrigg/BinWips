@@ -240,6 +240,22 @@ Describe 'New-BinWips' {
         $csContent | Should -BeLike "*class MyClass*"
     }
 
+    It 'Given a custom class name and a Tokens parameter, should use the -ClassName' -Tag "CustomClassName", "ClassNameConflict" {
+        $sb = {
+            [CmdletBinding()]
+            param(
+                [Parameter(Mandatory = $true)]
+                [string]$foo
+            )
+            Write-Output "$foo"
+        }
+        New-BinWips -ScriptBlock $sb -ScratchDir $script:scratchDir -OutFile $script:outFile `
+                 -ClassName "MyClass" -Tokens @{ClassName="MyOtherClass"}
+        $script:outFile | Should -Exist
+        $csContent = Get-Content $script:scratchDir/PSBinary.cs -Raw
+        $csContent | Should -BeLike "*class MyClass*"
+    }
+
     It 'Given a custom namespace, should use that namespace' -Tag "CustomNamespace" {
         $sb = {
             [CmdletBinding()]
@@ -253,6 +269,38 @@ Describe 'New-BinWips' {
         $script:outFile | Should -Exist
         $csContent = Get-Content $script:scratchDir/PSBinary.cs -Raw
         $csContent | Should -BeLike "*namespace MyNamespace*"
+    }
+
+    It 'Given a custom namespace and a Tokens parameter, should use the -Namespace' -Tag "CustomNamespace", "NamespaceConflict" {
+        $sb = {
+            [CmdletBinding()]
+            param(
+                [Parameter(Mandatory = $true)]
+                [string]$foo
+            )
+            Write-Output "$foo"
+        }
+        New-BinWips -ScriptBlock $sb -ScratchDir $script:scratchDir -OutFile $script:outFile `
+                 -Namespace "MyNamespace" -Tokens @{Namespace="MyOtherNamespace"} 
+        $script:outFile | Should -Exist
+        $csContent = Get-Content $script:scratchDir/PSBinary.cs -Raw
+        $csContent | Should -BeLike "*namespace MyNamespace*"
+    }
+
+
+    It 'Given a -ClassName and -Namespace that match, should throw' -Tag "CustomClassName", "CustomNamespace", "ErrorHandling" {
+        $sb = {
+            [CmdletBinding()]
+            param(
+                [Parameter(Mandatory = $true)]
+                [string]$foo
+            )
+            Write-Output "$foo"
+        }
+        { 
+            New-BinWips -ScriptBlock $sb -ScratchDir $script:scratchDir -OutFile $script:outFile `
+                 -Namespace "MyNamespace" -ClassName "MyNamespace"  
+        } | Should -Throw -ExpectedMessage "ClassName cannot be equal to Namespace"
     }
 
     It 'Given a custom class template, uses that template' -Tag "ClassTemplate" { 

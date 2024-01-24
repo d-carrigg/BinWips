@@ -77,11 +77,35 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
+      - name: Verify Module isn't bloated and doesn't contain bflat compiler
+        shell: pwsh
+        run: |
+          # We need to make sure we don't accidentally publish the bflat compiler (it's yuuuuuuuuge)
+          if([System.IO.Directory]::Exists("./src/Modules/BinWips/files/bflat")) {
+            Remove-Item -Path "./src/Modules/BinWips/files/bflat" -Recurse -Force
+          }
+          # Sanity check, make sure that we are less than 2MB in size
+          # just picked a reasonable number, change later as needed
+          $size = Get-ChildItem -Path ./src/Modules/BinWips -Recurse | Measure-Object -Property Length -Sum | Select-Object -ExpandProperty Sum
+          if($size -gt 2000000) {
+            throw "Module is too large ($size bytes), pipeline will need to be updated to publish this module"
+          }
+      - name: Check if Publish would work to PowerShell Gallery
+        shell: pwsh
+        run: |
+          # If This fails, it could mean we forgot to bump the version num in module manifest, DO NOT REMOVE
+          Publish-Module -Path ./src/Modules/BinWips -NuGetApiKey ${{ secrets.PSGALLERY_API_KEY }}  -WhatIf -Verbose -ErrorAction Stop
       - name: Publish PowerShell Module to github packages
         uses: natescherer/publish-powershell-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           target: packages
+          path: src/Modules/BinWips
+      - name: Publish PowerShell Module to PowerShell Gallery
+        uses: natescherer/publish-powershell-action@v1
+        with:
+          token: ${{ secrets.PSGALLERY_API_KEY }}
+          target: gallery
           path: src/Modules/BinWips
 # See: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-powershell
 # https://github.com/marketplace/actions/publish-powershell

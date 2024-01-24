@@ -8,6 +8,10 @@ function New-BinWips
        Generates a .EXE from a script. Support for parameters, interactive programs,
        cross-platform compiling, resource embedding. See examples for more information.
        Use Get-Help BinWips -Online to open the read me on github. 
+    .NOTES
+      This module is not associated with Bflat or the developers. The license for 
+      Bflat (if installed through the module), can be found at:
+         module_folder/BinWips/files/bflat/platform/License.txt 
     .EXAMPLE
        New-BinWips -ScriptBlock {Write-Host "Hello, World!"}
        # ./PSBinary.exe 
@@ -114,8 +118,8 @@ function New-BinWips
       [string]
       $OutDir,
 
-      # Change the directory where work will be done defaults to 'obj' folder in current directory
-      # Use -Clean to clean this directory before building
+      # Change the directory where work will be done defaults to `.binwips` folder in current directory
+      # Use -Cleanup to clean this directory after build
       # Dir will be created if it doesn't already exist. 
       [string]
       $ScratchDir,
@@ -126,24 +130,22 @@ function New-BinWips
       $OutFile,
 
 
-      # Clean the scratch directory before building
-      # As compared to -KeepScratchDir which removes scratch dir *after* build. 
+      # Recursively delete the scratch directory after build
+      # Disabled by default to prevent accidental deletion of files
       [switch]
       $Cleanup,
 
       # Namespace for the generated program. 
-      # This parameter is trumped by -Tokens, so placing a value here will be overriden by
-      # whatever is in -Tokens
-      # So if you did -Namespace A -Tokens @{Namespace='B'} Namespace would be set to B not A
+      # This parameter is trumps -Tokens, so placing a value here will be override whatever is in -Tokens
+      # So if you did -Namespace A -Tokens @{Namespace='B'} Namespace would be set to A not B
       # Must be a valid C# namespace
       # Defaults to PSBinary
       [string]
       $Namespace = "PSBinary",
 
       # Class name for the generated program
-      # This parameter is trumped by -Tokens, so placing a value here will be overriden
-      # by whatever is in -Tokens
-      # So if you did -ClassName A -Tokens @{ClassName='B'} ClassName would be set to B not A
+      # This parameter is trumps -Tokens, so placing a value here will override whatever is in -Tokens
+      # So if you did -ClassName A -Tokens @{ClassName='B'} ClassName would be set to A not B
       # must be a valid c# class name and cannot be equal to -Namespace
       # Defaults to Program
       $ClassName = "Program",
@@ -219,9 +221,6 @@ function New-BinWips
       $HostReferences,
 
       <# List of files to include with the app. I.e., `-Resources "MyFirstResource.txt", "MySecondResource.txt"`
-            - If -NoEmbedResources is specified then files are embedded in the exe.
-               - Files are copied to out dir with exe if they don't already exist
-            - Else files must be referenced specially (see below)
 
            To call files in script (if -NoEmbedresources is *not* included):
            `$myFile = Get-PsBinaryResource FileName.ext`
@@ -316,6 +315,23 @@ function New-BinWips
       if ($PowerShellEdition -eq 'Desktop' -and $Platform -eq 'Linux')
       {
          throw "PowerShellEdition='Desktop' is only supported when Platform='Windows'"
+      }
+
+      # Warn if both -Namespace and -Tokens are specified and tokens contains Namespace
+      if ($PSBoundParameters.ContainsKey('Namespace') -and $null -ne $Tokens -and $Tokens.ContainsKey('Namespace'))
+      {
+         Write-Warning "Both -Namespace was specified and -Tokens, containing a value for Namespace. The value passed via -Tokens will be ignored."
+      }
+
+      # Warn if both -ClassName and -Tokens are specified and tokens contains ClassName
+      if ($PSBoundParameters.ContainsKey('ClassName') -and $null -ne $Tokens -and $Tokens.ContainsKey('ClassName'))
+      {
+         Write-Warning "Both -ClassName was specified and -Tokens, containing a value for ClassName. The value passed via -Tokens will be ignored."
+      }
+
+      if ($ClassName -eq $Namespace)
+      {
+         throw "ClassName cannot be equal to Namespace"
       }
       
       $currentDir = (Get-Location).Path

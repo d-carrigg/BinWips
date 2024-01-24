@@ -164,7 +164,7 @@
       [switch]
       $Cleanup,
 
-        <#
+      <#
         Which edition of PowerShell to target (PowerShell Core vs Windows PowerShell). 
         If not specified, defaults to the edition of PowerShell that is running the cmdlet.
         So if this function is run from pwsh, it will default to PowerShell Core.
@@ -184,7 +184,7 @@
    }
    Process
    {
-      $dotNetPath = (get-command bflat -ErrorAction SilentlyContinue).Source
+      $dotNetPath = (Get-Command bflat -ErrorAction SilentlyContinue).Source
 
       # Locate the compiler
       $moduleRoot = Split-Path -Path $PSScriptRoot -Parent
@@ -201,7 +201,8 @@
          $dotNetPath = "$moduleRoot/files/bflat/linux-glibc/bflat"
       }
 
-      if(!(Test-Path $dotNetPath)){
+      if (!(Test-Path $dotNetPath))
+      {
          throw "Could not find bflat at $dotNetPath"
       }
     
@@ -210,8 +211,8 @@
          "--target", "$target",
          "--no-debug-info", # Don't create a .pdb
          "--os", "$($Platform.ToLower())",
-         "--arch", "$($Architecture.ToLower())",
-         "-i", "Main"
+         "--arch", "$($Architecture.ToLower())"
+         #"-i", "Main"
       )
       if ($null -ne $CscArgumentList -and $CscArgumentList.Length -gt 0)
       {
@@ -252,8 +253,8 @@
       }
      
       # Run C# compiler over those files and produce an exe in the out dir
-      $cscArgs +=  "$ScratchDir/PSBinary.cs"
-      $cscArgs +=  "$ScratchDir/BinWipsAttr.cs"
+      $cscArgs += "$ScratchDir/PSBinary.cs"
+      $cscArgs += "$ScratchDir/BinWipsAttr.cs"
 
       $guid = [guid]::NewGuid().ToString()
       $Tokens['BinWipsPipeGuid'] = $guid
