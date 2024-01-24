@@ -101,5 +101,11 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           target: packages
           path: src/Modules/BinWips
+      - name: Publish PowerShell Module to PowerShell Gallery
+        uses: natescherer/publish-powershell-action@v1
+        with:
+          token: ${{ secrets.PSGALLERY_API_KEY }}
+          target: gallery
+          path: src/Modules/BinWips
 # See: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-powershell
 # https://github.com/marketplace/actions/publish-powershell
