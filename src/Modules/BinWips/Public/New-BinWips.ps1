@@ -118,7 +118,7 @@ function New-BinWips
       [string]
       $OutDir,
 
-      # Change the directory where work will be done defaults to 'obj' folder in current directory
+      # Change the directory where work will be done defaults to `.binwips` folder in current directory
       # Use -Cleanup to clean this directory after build
       # Dir will be created if it doesn't already exist. 
       [string]
@@ -317,6 +317,18 @@ function New-BinWips
       if ($PowerShellEdition -eq 'Desktop' -and $Platform -eq 'Linux')
       {
          throw "PowerShellEdition='Desktop' is only supported when Platform='Windows'"
+      }
+
+      # Warn if both -Namespace and -Tokens are specified and tokens contains Namespace
+      if ($PSBoundParameters.ContainsKey('Namespace') -and $null -ne $Tokens -and $Tokens.ContainsKey('Namespace'))
+      {
+         Write-Warning "Both -Namespace was specified and -Tokens, containing a value for Namespace. The value passed via -Namespace will be ignored."
+      }
+
+      # Warn if both -ClassName and -Tokens are specified and tokens contains ClassName
+      if ($PSBoundParameters.ContainsKey('ClassName') -and $null -ne $Tokens -and $Tokens.ContainsKey('ClassName'))
+      {
+         Write-Warning "Both -ClassName was specified and -Tokens, containing a value for ClassName. The value passed via -ClassName will be ignored."
       }
       
       $currentDir = (Get-Location).Path
