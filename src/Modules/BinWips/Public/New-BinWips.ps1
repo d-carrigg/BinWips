@@ -119,7 +119,7 @@ function New-BinWips
       $OutDir,
 
       # Change the directory where work will be done defaults to 'obj' folder in current directory
-      # Use -Clean to clean this directory before building
+      # Use -Cleanup to clean this directory after build
       # Dir will be created if it doesn't already exist. 
       [string]
       $ScratchDir,
@@ -130,8 +130,8 @@ function New-BinWips
       $OutFile,
 
 
-      # Clean the scratch directory before building
-      # As compared to -KeepScratchDir which removes scratch dir *after* build. 
+      # Recursively delete the scratch directory after build
+      # Disabled by default to prevent accidental deletion of files
       [switch]
       $Cleanup,
 
@@ -223,9 +223,6 @@ function New-BinWips
       $HostReferences,
 
       <# List of files to include with the app. I.e., `-Resources "MyFirstResource.txt", "MySecondResource.txt"`
-            - If -NoEmbedResources is specified then files are embedded in the exe.
-               - Files are copied to out dir with exe if they don't already exist
-            - Else files must be referenced specially (see below)
 
            To call files in script (if -NoEmbedresources is *not* included):
            `$myFile = Get-PsBinaryResource FileName.ext`
