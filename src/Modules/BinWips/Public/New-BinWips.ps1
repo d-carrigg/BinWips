@@ -136,18 +136,16 @@ function New-BinWips
       $Cleanup,
 
       # Namespace for the generated program. 
-      # This parameter is trumped by -Tokens, so placing a value here will be overriden by
-      # whatever is in -Tokens
-      # So if you did -Namespace A -Tokens @{Namespace='B'} Namespace would be set to B not A
+      # This parameter is trumps -Tokens, so placing a value here will be override whatever is in -Tokens
+      # So if you did -Namespace A -Tokens @{Namespace='B'} Namespace would be set to A not B
       # Must be a valid C# namespace
       # Defaults to PSBinary
       [string]
       $Namespace = "PSBinary",
 
       # Class name for the generated program
-      # This parameter is trumped by -Tokens, so placing a value here will be overriden
-      # by whatever is in -Tokens
-      # So if you did -ClassName A -Tokens @{ClassName='B'} ClassName would be set to B not A
+      # This parameter is trumps -Tokens, so placing a value here will override whatever is in -Tokens
+      # So if you did -ClassName A -Tokens @{ClassName='B'} ClassName would be set to A not B
       # must be a valid c# class name and cannot be equal to -Namespace
       # Defaults to Program
       $ClassName = "Program",
@@ -322,13 +320,18 @@ function New-BinWips
       # Warn if both -Namespace and -Tokens are specified and tokens contains Namespace
       if ($PSBoundParameters.ContainsKey('Namespace') -and $null -ne $Tokens -and $Tokens.ContainsKey('Namespace'))
       {
-         Write-Warning "Both -Namespace was specified and -Tokens, containing a value for Namespace. The value passed via -Namespace will be ignored."
+         Write-Warning "Both -Namespace was specified and -Tokens, containing a value for Namespace. The value passed via -Tokens will be ignored."
       }
 
       # Warn if both -ClassName and -Tokens are specified and tokens contains ClassName
       if ($PSBoundParameters.ContainsKey('ClassName') -and $null -ne $Tokens -and $Tokens.ContainsKey('ClassName'))
       {
-         Write-Warning "Both -ClassName was specified and -Tokens, containing a value for ClassName. The value passed via -ClassName will be ignored."
+         Write-Warning "Both -ClassName was specified and -Tokens, containing a value for ClassName. The value passed via -Tokens will be ignored."
+      }
+
+      if ($ClassName -eq $Namespace)
+      {
+         throw "ClassName cannot be equal to Namespace"
       }
       
       $currentDir = (Get-Location).Path

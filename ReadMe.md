@@ -202,18 +202,18 @@ prevent accidental deletion of files.
 
 ### Namespace `String`
 
-Namespace for the generated program. This parameter is trumped by
-[Tokens](#tokens-hashtable), so placing a value here will be overriden by
+Namespace for the generated program. This parameter trumps the value in
+[Tokens](#tokens-hashtable), so placing a value here will override
 whatever is in [Tokens](#tokens-hashtable). So if you use
-`-Namespace A -Tokens @{Namespace='B'}` Namespace would be set to B not A Must
+`-Namespace A -Tokens @{Namespace='B'}` Namespace would be set to A not B Must
 be a valid C# namespace Defaults to `PSBinary`.
 
 ### ClassName `Object`
 
-Class name for the generated program This parameter is trumped by
-[Tokens](#tokens-hashtable), so placing a value here will be overriden by
-whatever is in [Tokens](#tokens-hashtable). So if you did
-`-ClassName A -Tokens @{ClassName='B'}` ClassName would be set to B not A must
+Class name for the generated program This parameter trumps the value in
+[Tokens](#tokens-hashtable), so placing a value here will override whatever is
+in [Tokens](#tokens-hashtable). So if you did
+`-ClassName A -Tokens @{ClassName='B'}` ClassName would be set to A not B. Must
 be a valid c# class name and cannot be equal to `Namespace`. Defaults to
 `Program`.
 

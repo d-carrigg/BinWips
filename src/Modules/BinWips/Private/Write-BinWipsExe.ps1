@@ -227,8 +227,11 @@ function Write-BinWipsExe
       {
          $csProgram = $csProgram | Remove-BinWipsToken -Key ClassAttributes
       }
+
+
       if ($Tokens)
       {
+         Write-Verbose "Applying $($Tokens.Count) tokens"
          $Tokens.GetEnumerator() | ForEach-Object {
             $csProgram = $csProgram | Set-BinWipsToken -Key $_.Key -Value $_.Value 
          } 
