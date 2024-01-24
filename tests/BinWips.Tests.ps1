@@ -250,7 +250,7 @@ Describe 'New-BinWips' {
             Write-Output "$foo"
         }
         New-BinWips -ScriptBlock $sb -ScratchDir $script:scratchDir -OutFile $script:outFile `
-                 -ClassName "MyClass" -Tokens @{ClassName="MyOtherClass"} -Verbose
+                 -ClassName "MyClass" -Tokens @{ClassName="MyOtherClass"}
         $script:outFile | Should -Exist
         $csContent = Get-Content $script:scratchDir/PSBinary.cs -Raw
         $csContent | Should -BeLike "*class MyClass*"
@@ -281,7 +281,7 @@ Describe 'New-BinWips' {
             Write-Output "$foo"
         }
         New-BinWips -ScriptBlock $sb -ScratchDir $script:scratchDir -OutFile $script:outFile `
-                 -Namespace "MyNamespace" -Tokens @{Namespace="MyOtherNamespace"} -Verbose
+                 -Namespace "MyNamespace" -Tokens @{Namespace="MyOtherNamespace"} 
         $script:outFile | Should -Exist
         $csContent = Get-Content $script:scratchDir/PSBinary.cs -Raw
         $csContent | Should -BeLike "*namespace MyNamespace*"
@@ -299,7 +299,7 @@ Describe 'New-BinWips' {
         }
         { 
             New-BinWips -ScriptBlock $sb -ScratchDir $script:scratchDir -OutFile $script:outFile `
-                 -Namespace "MyNamespace" -ClassName "MyNamespace" -Verbose
+                 -Namespace "MyNamespace" -ClassName "MyNamespace"  
         } | Should -Throw -ExpectedMessage "ClassName cannot be equal to Namespace"
     }
 
