@@ -286,6 +286,8 @@ function New-BinWips
               preprocessing on c# files (allow a script block -PreprocessBlock argument)
          6. Run C# compiler over those files and produce an exe in the out dir
          7. Cleanup
+
+         This function handles steps 1 and 2, then passes off work to Build-Bflat
        #>
 
       # 1. Verify params and perform setup (create dirs, clean, etc.)
