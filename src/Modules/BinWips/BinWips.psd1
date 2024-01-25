@@ -12,7 +12,7 @@
 RootModule = 'BinWips.psm1'
 
 # Version number of this module.
-ModuleVersion = '0.0.6'
+ModuleVersion = '0.1.0'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -34,7 +34,7 @@ Description = @"
 Binary Written in PowerShell. Convert PowerShell scripts into .NET Applications/executables.
 Generates small, self-contained executables targeting Windows/Linux on x86/x64/ARM64.
 
-See https://github.com/d-carrigg/BinWips for more information.
+See https://github.com/d-carrigg/BinWips for examples, documentation, and support.
 "@
 
 # Minimum version of the PowerShell engine required by this module
@@ -115,7 +115,7 @@ PrivateData = @{
         # ReleaseNotes = ''
 
         # Prerelease string of this module
-        Prerelease = 'alpha'
+        Prerelease = 'beta'
 
         # Flag to indicate whether the module requires explicit user acceptance for install/update/save
         # RequireLicenseAcceptance = $false
