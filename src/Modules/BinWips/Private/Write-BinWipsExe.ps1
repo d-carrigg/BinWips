@@ -200,10 +200,6 @@ function Write-BinWipsExe
          $AssemblyAttributes | ForEach-Object {
             $att += "$_`r`n"
          }
-         if ($att -eq $null)
-         {
-            Write-Error "Failed to build assembly attributes"
-         }
          $csProgram = $csProgram | Set-BinWipsToken -Key AssemblyAttributes -Value $att
       }
       else
@@ -217,10 +213,6 @@ function Write-BinWipsExe
          $att = ""
          $ClassAttributes | ForEach-Object {
             $att += "$_`r`n"
-         }
-         if ($att -eq $null)
-         {
-            Write-Error "Failed to build class attributes"
          }
          $csProgram = $csProgram | Set-BinWipsToken -Key ClassAttributes -Value $att
       }
