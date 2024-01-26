@@ -61,6 +61,14 @@ namespace {#Namespace#} {
             process.WaitForExit();
         }
 
+        static readonly string[] _knownWindowsPaths = new [] {
+            @"c:\Program Files\PowerShell", 
+            @"c:\Windows\System32\WindowsPowerShell\v1.0",
+        };
+
+        static readonly string[] _knownLinuxPaths = new [] {
+            @"/usr/bin",
+        };
 
         static string ResolvePowerShellPath(string filename)
         {
@@ -77,17 +85,9 @@ namespace {#Namespace#} {
             }
 
             if(System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows)){
-                return SearchForPowerShellInDirs(filename, new [] {
-                    // pwsh on windows
-                    @"c:\Program Files\PowerShell", 
-                    // windows powershell on windows
-                    @"c:\Windows\System32\WindowsPowerShell\v1.0",
-                });
+                return SearchForPowerShellInDirs(filename, _knownWindowsPaths);
             } else {
-                return SearchForPowerShellInDirs(filename, new [] {
-                    // pwsh on linux
-                    @"/usr/bin",
-                });
+                return SearchForPowerShellInDirs(filename, _knownLinuxPaths);
             }
 
       
@@ -145,8 +145,8 @@ namespace {#Namespace#} {
                 var server = new NamedPipeServerStream("BinWipsPipe{#BinWipsPipeGuid#}");
                 Log("Waiting for connection on pipe: {0}", "BinWipsPipe{#BinWipsPipeGuid#}");
                 server.WaitForConnection();
-                StreamReader reader = new StreamReader(server);
-                StreamWriter writer = new StreamWriter(server);
+                using StreamReader reader = new StreamReader(server);
+                using StreamWriter writer = new StreamWriter(server);
                 while (true)
                 {
                     var resourceName = reader.ReadLine();
@@ -154,15 +154,11 @@ namespace {#Namespace#} {
                     {
                         Log("Requesting Resource: {0}", resourceName);
                         // get the resouce from the assembly
-                        using (var stream = ProgramAssembly.GetManifestResourceStream(resourceName))
-                        {
-                            using (var resourceReader = new System.IO.StreamReader(stream))
-                            {
-                                var text = resourceReader.ReadToEnd();
-                                writer.WriteLine(text);
-                                writer.Flush();
-                            }
-                        }
+                        using (var stream = ProgramAssembly.GetManifestResourceStream(resourceName));
+                        using (var resourceReader = new System.IO.StreamReader(stream));
+                        var text = resourceReader.ReadToEnd();
+                        writer.WriteLine(text);
+                        writer.Flush();
                     }
                     catch (Exception ex)
                     {
