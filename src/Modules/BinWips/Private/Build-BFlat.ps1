@@ -2,17 +2,8 @@
 {
    <#
     .SYNOPSIS
-       Creates a new PowerShell binary.
-    .DESCRIPTION
-       Generates a .EXE from a script.
-    .EXAMPLE
-       New-PSBinary -ScriptBlock {Get-Process}
-       
-       Creates a file in the current directory named PSBinary.exe which runs get-process
-    .EXAMPLE
-       New-PsBinary MyScript.ps1
-
-       Creates an exe in the current directory named MyScript.exe
+       This function handles resolving the bflat compiler path and generating the necessary bflat compiler arguments.
+       It then passes those arguments to the Write-BinWipsExe function to generate the exe.
     #>
    [CmdletBinding()]
    [Alias()]
@@ -276,6 +267,7 @@
          CompilerArgs       = $cscArgs
          ScratchDir         = $ScratchDir
          PowerShellEdition  = $PowerShellEdition
+         Platform           = $Platform
       }
 
       Write-BinWipsExe @funcArgs

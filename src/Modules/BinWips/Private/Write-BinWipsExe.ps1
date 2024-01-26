@@ -2,17 +2,12 @@ function Write-BinWipsExe
 {
    <#
     .SYNOPSIS
-       Creates a new PowerShell binary.
+       Compiler agnostic program generator.
     .DESCRIPTION
-       Generates a .EXE from a script.
-    .EXAMPLE
-       New-PSBinary -ScriptBlock {Get-Process}
-       
-       Creates a file in the current directory named PSBinary.exe which runs get-process
-    .EXAMPLE
-       New-PsBinary MyScript.ps1
-
-       Creates an exe in the current directory named MyScript.exe
+      This function generates a C# program from a script block or file and compiles it into an exe. It assumes 
+      that parameters have been resolved (e.g, $Script is a valid powershell script as a string). Also assumes all 
+      compiler path/related argument stuff is setup. Applies BinWips tokens, sets scratch dir will all the files, then 
+      calls the compiler and returns the results.
     #>
    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
    [Alias()]
@@ -140,7 +135,10 @@ function Write-BinWipsExe
       #>
       [string]
       [ValidateSet('Core', 'Desktop')]
-      $PowerShellEdition = $PSEdition
+      $PowerShellEdition = $PSEdition,
+
+      [string]
+      $Platform
    )
 
    process
@@ -158,6 +156,9 @@ function Write-BinWipsExe
       {
          $powerShellPath = "powershell.exe"
       }
+      elseif($Platform -eq 'Windows'){
+         $powerShellpath += ".exe"
+      }
    
       if ($Tokens)
       {
@@ -174,11 +175,11 @@ function Write-BinWipsExe
       $encodedRuntimeSetup = [Convert]::ToBase64String(([System.Text.Encoding]::Unicode.GetBytes($runtimeSetupScript)))
     
    
-      # 3. Base64 encode script for easy handling (no dealing with quotes)
+      # Base64 encode script for easy handling (no dealing with quotes)
       # https://stackoverflow.com/questions/15414678/how-to-decode-a-base64-string
       $encodedScript = [Convert]::ToBase64String(([System.Text.Encoding]::Unicode.GetBytes($psScript)))
       
-      # 4. Insert script and replace tokens in class template
+      # Insert script and replace tokens in class template
       $funtionName = [System.IO.Path]::GetFileNameWithoutExtension($OutFile)
       $binWipsVersion = $MyInvocation.MyCommand.ScriptBlock.Module.Version
       $csProgram = $ClassTemplate | Set-BinWipsToken -Key Script -Value $encodedScript `
@@ -191,17 +192,13 @@ function Write-BinWipsExe
       | Set-BinWipsToken -Key PowerShellArguments -Value $powershellArgs
    
    
-      
+      # Assembly and class attributes
       if ($hasAssemblyAttributes)
       {
          Write-Verbose "Applying Assembly Attribuytes"
          $att = ""
          $AssemblyAttributes | ForEach-Object {
             $att += "$_`r`n"
-         }
-         if ($att -eq $null)
-         {
-            Write-Error "Failed to build assembly attributes"
          }
          $csProgram = $csProgram | Set-BinWipsToken -Key AssemblyAttributes -Value $att
       }
@@ -217,10 +214,6 @@ function Write-BinWipsExe
          $ClassAttributes | ForEach-Object {
             $att += "$_`r`n"
          }
-         if ($att -eq $null)
-         {
-            Write-Error "Failed to build class attributes"
-         }
          $csProgram = $csProgram | Set-BinWipsToken -Key ClassAttributes -Value $att
       }
       else
@@ -228,7 +221,7 @@ function Write-BinWipsExe
          $csProgram = $csProgram | Remove-BinWipsToken -Key ClassAttributes
       }
 
-
+      # Apply other tokens
       if ($Tokens)
       {
          Write-Verbose "Applying $($Tokens.Count) tokens"
@@ -237,8 +230,7 @@ function Write-BinWipsExe
          } 
       }
    
-   
-      # 5. Output class + additional files to .cs files in scratch dir
+      # Output class + additional files to .cs files in scratch dir
       Write-Verbose "Writing to $ScratchDir"
       if ($PSCmdlet.ShouldProcess('Create C# Source File'))
       {
@@ -248,26 +240,18 @@ function Write-BinWipsExe
       {
          $attributesTemplate | Out-File "$ScratchDir/BinWipsAttr.cs" -Encoding unicode -Force:$Force
       }
-     
-   
-   
       
+      # Run the compiler
       $buildCmd = "$CompilerPath $CompilerArgs"
       Write-Verbose $buildCmd
       if ($PSCmdlet.ShouldProcess('Create Binary'))
       {
-         #$results = Invoke-Expression $buildCmd
-
          # Use [System.Diagnostics.Process]::Start() and redirect input to avoid Invoke-Expression
          $psi = [System.Diagnostics.ProcessStartInfo]::new($CompilerPath)
          
          $CompilerArgs | ForEach-Object {
             $psi.ArgumentList.Add($_)
          }
- 
- 
-  
-
 
          $psi.RedirectStandardOutput = $true
          $psi.RedirectStandardError = $true
@@ -290,8 +274,6 @@ function Write-BinWipsExe
          return
       }
      
-   
-      # 7.
       if ($Cleanup)
       {
          Remove-Item $ScratchDir -Recurse
