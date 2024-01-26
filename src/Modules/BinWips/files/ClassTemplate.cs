@@ -154,8 +154,8 @@ namespace {#Namespace#} {
                     {
                         Log("Requesting Resource: {0}", resourceName);
                         // get the resouce from the assembly
-                        using (var stream = ProgramAssembly.GetManifestResourceStream(resourceName));
-                        using (var resourceReader = new System.IO.StreamReader(stream));
+                        using var stream = ProgramAssembly.GetManifestResourceStream(resourceName);
+                        using var resourceReader = new System.IO.StreamReader(stream);
                         var text = resourceReader.ReadToEnd();
                         writer.WriteLine(text);
                         writer.Flush();
@@ -164,8 +164,7 @@ namespace {#Namespace#} {
                     {
                         Log("Error getting resource: {0}", ex.Message);
                         // invalid resource
-                        writer.WriteLine("Invalid Resource");
-                        writer.WriteLine(ex.Message);
+                        writer.WriteLine($"Invalid Resource: {resourceName}");
                         writer.Flush();
                     }
                 }
