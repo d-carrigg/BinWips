@@ -10,7 +10,7 @@ using System.Reflection;
 
 // attributes which can be used to identify this assembly as a BinWips
 // https://stackoverflow.com/questions/1936953/custom-assembly-attributes
-[assembly: BinWips("{#BinWipsVersion#}")]
+[assembly:BinWips("{#BinWipsVersion#}")]
 {#AssemblyAttributes#}
 namespace {#Namespace#} {
          
@@ -47,8 +47,13 @@ namespace {#Namespace#} {
             var wrappedScript = $"{runtimeSetup}\n\n function {funcName}\n {{\n {script}\n }}\n{ending}";
             var encodedCommand = EncodeBase64(wrappedScript);
 
+            // resolve the path to the powershell exe
+            var resolved = ResolvePowerShellPath(@"{#PowerShellPath#}");
+
+            if(resolved == null) throw new Exception("Could not find powershell in path");
+
             // call PWSH to execute the script passing in the args
-            var psi = new ProcessStartInfo(@"{#PowerShellPath#}");
+            var psi = new ProcessStartInfo(resolved);
             Log("PowerShell Path: {0}", psi.FileName);
             // e.g -NoProfile -NoLogo -EncodedCommand
             psi.Arguments = "{#PowerShellArguments#}" + " " + encodedCommand;
@@ -56,6 +61,53 @@ namespace {#Namespace#} {
             process.WaitForExit();
         }
 
+
+        static string ResolvePowerShellPath(string filename)
+        {
+            var userPath = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Process) + ";"
+                     + Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.User) + ";"
+                     + Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Machine);
+
+            var directories = userPath.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            foreach (var dir in directories)
+            {
+                var fullpath = Path.Combine(dir, filename);
+                if (File.Exists(fullpath)) return fullpath;
+            }
+
+            if(System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows)){
+                return SearchForPowerShellInDirs(filename, new [] {
+                    // pwsh on windows
+                    @"c:\Program Files\PowerShell", 
+                    // windows powershell on windows
+                    @"c:\Windows\System32\WindowsPowerShell\v1.0",
+                });
+            } else {
+                return SearchForPowerShellInDirs(filename, new [] {
+                    // pwsh on linux
+                    @"/usr/bin",
+                });
+            }
+
+      
+            return null;
+        }
+
+        static string SearchForPowerShellInDirs(string filename, string[] known_dirs){
+            foreach(var dir in known_dirs){
+                var entries = Directory.EnumerateFiles(dir, filename, new EnumerationOptions{
+                    MatchCasing = MatchCasing.CaseInsensitive,
+                    RecurseSubdirectories = true,
+                    MaxRecursionDepth = 2
+                });
+
+                if(entries.Any()){
+                    return entries.First();
+                }
+            }
+            return null;
+        }
         private static bool VerboseMode = false;
         static void SetVerboseMode(string[] args){
             if (args.Length == 0) return;

@@ -135,7 +135,10 @@ function Write-BinWipsExe
       #>
       [string]
       [ValidateSet('Core', 'Desktop')]
-      $PowerShellEdition = $PSEdition
+      $PowerShellEdition = $PSEdition,
+
+      [string]
+      $Platform
    )
 
    process
@@ -152,6 +155,9 @@ function Write-BinWipsExe
       if ($PowerShellEdition -eq 'Desktop')
       {
          $powerShellPath = "powershell.exe"
+      }
+      elseif($Platform -eq 'Windows'){
+         $powerShellpath += ".exe"
       }
    
       if ($Tokens)

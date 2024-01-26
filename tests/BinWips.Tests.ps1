@@ -96,7 +96,7 @@ Describe 'New-BinWips' {
         # read the PSBinary.exe and make sure it contains "powershell.exe"
         $script:outFile | Should -Exist
         $contents = Get-Content "$script:scratchDir/PSBinary.cs" -Raw
-        $contents | Should -BeLike "*ProcessStartInfo(@`"powershell.exe`")*"
+        $contents | Should -BeLike "*ResolvePowerShellPath(@`"powershell.exe`")*"
     }
 
     It 'When running on windows powershell, targeting Linux, correctly uses core edition when not explicity set' -Tag "PowerShellEdition" {
@@ -108,7 +108,7 @@ Describe 'New-BinWips' {
             -ScratchDir $script:scratchDir -OutFile $script:outFile 
 
         $content = Get-Content $script:scratchDir/PSBinary.cs -Raw
-        $content | Should -BeLike "*ProcessStartInfo(@`"pwsh`")*"
+        $content | Should -BeLike "*ResolvePowerShellPath(@`"pwsh`")*"
     
     }
 

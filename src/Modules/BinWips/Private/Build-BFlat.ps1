@@ -267,6 +267,7 @@
          CompilerArgs       = $cscArgs
          ScratchDir         = $ScratchDir
          PowerShellEdition  = $PowerShellEdition
+         Platform           = $Platform
       }
 
       Write-BinWipsExe @funcArgs
