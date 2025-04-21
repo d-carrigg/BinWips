@@ -119,7 +119,6 @@ function New-BinWips
       $OutDir,
 
       # Change the directory where work will be done defaults to `.binwips` folder in current directory
-      # Use -Cleanup to clean this directory after build
       # Dir will be created if it doesn't already exist. 
       [string]
       $ScratchDir,
@@ -128,12 +127,6 @@ function New-BinWips
       # PSBinary.exe if a script block is inlined
       [string]
       $OutFile,
-
-
-      # Recursively delete the scratch directory after build
-      # Disabled by default to prevent accidental deletion of files
-      [switch]
-      $Cleanup,
 
       # Namespace for the generated program. 
       # This parameter is trumps -Tokens, so placing a value here will be override whatever is in -Tokens
@@ -285,8 +278,6 @@ function New-BinWips
             - Maybe add an additional step here in the future to run 
               preprocessing on c# files (allow a script block -PreprocessBlock argument)
          6. Run C# compiler over those files and produce an exe in the out dir
-         7. Cleanup
-
          This function handles steps 1 and 2, then passes off work to Build-Bflat
        #>
 
@@ -337,14 +328,38 @@ function New-BinWips
       }
       
       $currentDir = (Get-Location).Path
-      if (!$hasOutDir)
+      if (!$hasOutDir -and $hasOutFile)
       {
+         $absoluteOutFile = [System.IO.Path]::GetFullPath($OutFile)
+         $OutDir = [System.IO.Path]::GetDirectoryName($absoluteOutFile)
+         # Make out dir if it doesn't exist
+         New-Item -ItemType Directory -Path $OutDir -Force | Out-Null
+      }
+      elseif (!$hasOutDir){
          $OutDir = $currentDir
       }
+
+      # Validate out dir
+      if (!(Test-Path $OutDir))
+      {
+         throw "Output directory does not exist: $OutDir"
+      }
+      elseif ($null -eq $OutDir -or $OutDir -eq "")
+      {
+         throw "Output directory cannot be null or empty"
+      }
+
+
       if (!$hasScratchDir)
       {
          $ScratchDir = "$currentDir/.binwips"
+      } 
+      elseif ($null -eq $ScratchDir -or $ScratchDir -eq "")
+      {
+         throw "Scratch directory cannot be null or empty"
       }
+ 
+
       if (!$hasOutFile)
       {
          if ($inline)
@@ -384,14 +399,11 @@ function New-BinWips
       if ($inline)
       {
          $psScript = $ScriptBlock.ToString()
-         
       }
       else
       { 
          # read in content from each input file and merge them into 1 string
          $psScript = $InFile | ForEach-Object { Get-Content -Raw $_ } | Out-String
-
-         
       }
 
       # If Platform and Architecture are not specified, use the current platform and architecture
@@ -406,7 +418,7 @@ function New-BinWips
       }
       elseif (!$PSBoundParameters.ContainsKey('Platform'))
       {
-         throw "Unsported platform"
+         throw "Unsupported platform"
       }
 
       if (!$PSBoundParameters.ContainsKey('Architecture'))
@@ -442,7 +454,6 @@ function New-BinWips
          CscArgumentList    = $ExtraArguments
          OutDir             = $OutDir
          ScratchDir         = $ScratchDir
-         Cleanup            = $Cleanup
          Force              = $Force
          Resources          = $Resources
          NoEmbedResources   = $NoEmbedResources

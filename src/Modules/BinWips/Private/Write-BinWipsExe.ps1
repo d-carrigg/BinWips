@@ -104,14 +104,10 @@ function Write-BinWipsExe
       $OutDir,
 
       # Change the directory where work will be done defaults to 'obj' folder in current directory
-      # Use -Clean to clean this directory before building
       # Dir will be created if it doesn't already exist. 
       [string]
       $ScratchDir,
 
-      # Clean the scratch directory after building
-      [switch]
-      $Cleanup,
 
       # Overrite -OutFile if it already exists
       [switch]
@@ -159,6 +155,7 @@ function Write-BinWipsExe
       elseif($Platform -eq 'Windows'){
          $powerShellpath += ".exe"
       }
+      Write-Debug "PowerShellPath: $powerShellPath"
    
       if ($Tokens)
       {
@@ -180,14 +177,14 @@ function Write-BinWipsExe
       $encodedScript = [Convert]::ToBase64String(([System.Text.Encoding]::Unicode.GetBytes($psScript)))
       
       # Insert script and replace tokens in class template
-      $funtionName = [System.IO.Path]::GetFileNameWithoutExtension($OutFile)
+      $functionName = [System.IO.Path]::GetFileNameWithoutExtension($OutFile)
       $binWipsVersion = $MyInvocation.MyCommand.ScriptBlock.Module.Version
       $csProgram = $ClassTemplate | Set-BinWipsToken -Key Script -Value $encodedScript `
       | Set-BinWipsToken -Key RuntimeSetup -Value $encodedRuntimeSetup -Required `
       | Set-BinWipsToken -Key ClassName -Value $ClassName -Required `
       | Set-BinWipsToken -Key Namespace -Value $Namespace -Required `
-      | Set-BinWipsToken -Key BinWipsVersion -Value $binWipsVersion
-      | Set-BinWipsToken -Key FunctionName -Value $funtionName `
+      | Set-BinWipsToken -Key BinWipsVersion -Value $binWipsVersion `
+      | Set-BinWipsToken -Key FunctionName -Value $functionName `
       | Set-BinWipsToken -Key PowerShellPath -Value $powerShellPath `
       | Set-BinWipsToken -Key PowerShellArguments -Value $powershellArgs
    
@@ -267,6 +264,13 @@ function Write-BinWipsExe
          {
             Write-Output $results
          }
+         Write-Verbose "Created program at $OutFile"
+         # if linux or macos, make the file executable
+         if ($Platform -eq 'Linux' -or $Platform -eq 'MacOS')
+         {
+            Write-Verbose "Making $OutFile executable"
+            chmod +x $OutFile
+         }
       }
       else
       {
@@ -274,10 +278,7 @@ function Write-BinWipsExe
          return
       }
      
-      if ($Cleanup)
-      {
-         Remove-Item $ScratchDir -Recurse
-      }
+ 
       
    }
  

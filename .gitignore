@@ -12,12 +12,15 @@
 **/*.obj
 **/*.exe
 **/*.dll
+**/*.out
 
 # test
 tests/ExampleRunspace/bin/
 tests/ExampleRunspace/obj/
 tests/out
 test/**.exe
+tests/obj/**
+
 
 # test reports
 reports/

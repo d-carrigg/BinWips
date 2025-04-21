@@ -152,9 +152,6 @@
       [ValidateSet('x86', 'x64', 'arm64')]
       $Architecture,
 
-      [switch]
-      $Cleanup,
-
       <#
         Which edition of PowerShell to target (PowerShell Core vs Windows PowerShell). 
         If not specified, defaults to the edition of PowerShell that is running the cmdlet.
@@ -175,9 +172,15 @@
    }
    Process
    {
-      $dotNetPath = (Get-Command bflat -ErrorAction SilentlyContinue).Source
+      <#
+      # In early versions of BinWips I tested different compilers. This function is designed to build 
+      # all of the args that could be passed to any compiler. Currently, only BFalt is supported but 
+      # this helps with seperation of concerns and makes it easier to add support for other compilers
+      # in the future if needed.
+      #>
 
-      # Locate the compiler
+      # Locate the compiler if it's not already in the path
+      $dotNetPath = (Get-Command bflat -ErrorAction SilentlyContinue).Source
       $moduleRoot = Split-Path -Path $PSScriptRoot -Parent
       if ([string]::IsNullOrWhiteSpace($dotNetPath) -eq $false)
       {
@@ -195,6 +198,13 @@
       if (!(Test-Path $dotNetPath))
       {
          throw "Could not find bflat at $dotNetPath"
+      }
+
+      # Check linux deps
+      if ($Platform -eq 'Linux')
+      {
+         # we need install libc++-dev
+
       }
     
       $cscArgs = @("build",
@@ -261,7 +271,6 @@
          AttributesTemplate = $AttributesTemplate
          Tokens             = $Tokens
          OutDir             = $OutDir
-         Cleanup            = $Cleanup
          Force              = $Force
          CompilerPath       = $dotNetPath
          CompilerArgs       = $cscArgs

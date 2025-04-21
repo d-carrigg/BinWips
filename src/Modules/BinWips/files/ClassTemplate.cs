@@ -75,11 +75,18 @@ namespace {#Namespace#} {
             var userPath = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Process) + ";"
                      + Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.User) + ";"
                      + Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Machine);
+            
+            // linux and macos have a different path separator
+            if(!System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows)){
+                userPath = userPath.Replace(':', ';');
+            }
+            
 
             var directories = userPath.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
             foreach (var dir in directories)
             {
+
                 var fullpath = Path.Combine(dir, filename);
                 if (File.Exists(fullpath)) return fullpath;
             }

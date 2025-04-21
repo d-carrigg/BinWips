@@ -28,16 +28,20 @@ jobs:
           $manifest =  Test-ModuleManifest -Path ./src/Modules/BinWips/BinWips.psd1
           $moduleVersion = $manifest.Version
           $preRelease = $manifest.PrivateData.PSData.PreRelease
-          if($preRelease -ne $null) {
+          if($preRelease -ne $null -and $preRelease -ne "") {
             $moduleVersion = "$moduleVersion-$preRelease"
           }
-          if ($branch -ne $moduleVersion) {
+          if ($branch -ne $moduleVersion -and $branch -ne "v$moduleVersion") {
             throw "Module version ($moduleVersion) does not match branch name ($branch)"
           }
       - name: Run PS Script Analyzer
         shell: pwsh
         run: |
           Invoke-ScriptAnalyzer -Path ./src -Recurse -Severity Error,Warning -EnableExit
+      - name: Install libc++-dev
+        shell: pwsh
+        run: |
+          sudo apt-get install -y libc++-dev
       - name: Perform a Pester test from the Tests.ps1 file
         shell: pwsh
         run: |

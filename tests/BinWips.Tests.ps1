@@ -4,6 +4,7 @@
 
     $script:scratchDir = Join-Path $PSScriptRoot ".binwips"
     $script:outFile = Join-Path $PSScriptRoot "PSBinary.exe"
+    $script:outDir = Join-Path $PSScriptRoot "obj"
 }
 
 
@@ -12,8 +13,8 @@ Describe 'New-BinWips' {
     
     AfterEach {
         # Cleanup
-        Remove-Item -Path $script:outFile -ErrorAction SilentlyContinue
-        Remove-Item $script:scratchDir -Recurse -ErrorAction SilentlyContinue
+        Remove-Item -Path $script:outFile -Force -ErrorAction SilentlyContinue
+        Remove-Item $script:scratchDir -Force -Recurse -ErrorAction SilentlyContinue
     }
 
     It 'Given a script block, should create a .exe that runs the script block' -Tag 'Basic' {
@@ -23,7 +24,6 @@ Describe 'New-BinWips' {
         $script:outFile | Should -Exist
         $result = & $script:outFile
         $result | Should -Be "Hello World" 
-
     }
 
     It 'Given a script block with -OutFile, should use the -OutFile name' -Tag "Basic" {
@@ -187,14 +187,9 @@ Describe 'New-BinWips' {
         }
         New-BinWips -ScriptBlock $sb -ScratchDir $script:scratchDir -OutFile $script:outFile
         $script:outFile | Should -Exist
-        if ($IsWindows)
-        {
-            $result = & $script:outFile -baz '@{foo="bar"}'
-        }
-        else
-        {
-            $result = & $script:outFile -baz '@{foo=\"bar\"}'
-        }
+
+        
+        $result = & $script:outFile -baz '@{foo="bar"}'
         
         $result | Should -Be "Baz['foo'] = bar"
     }
@@ -223,6 +218,19 @@ Describe 'New-BinWips' {
         $script:outFile | Should -Exist
         $result = & $script:outFile -baz
         $result | Should -Be "This is an embedded resource."
+    }
+
+    It 'Copies resources to output directory when NoEmbedResources is used' -Tag 'NoEmbedResources' {
+        $resourcePath = "$PSScriptRoot/files/EmbeddedResource.txt"
+        
+        $pth = Join-Path $script:outDir 'PSBinary.exe'
+        New-BinWips -ScriptBlock { Write-Host "Hello World" } -ScratchDir $script:scratchDir `
+                        -OutFile $pth `
+                        -Resources $resourcePath `
+                        -NoEmbedResources 
+
+        $pth | Should -Exist
+        (Join-Path $script:outDir 'EmbeddedResource.txt') | Should -Exist
     }
 
     It 'Given a custom class name, should use that class name' -Tag "CustomClassName" {
@@ -401,5 +409,12 @@ Describe 'New-BinWips' {
 
         # Will only be printed if -Verbose is passed in
         $result | Should -Contain "Call Command: $funcName -Verbose"
+    }
+ 
+
+    It 'Throws error for missing required tokens in custom template' -Tag 'ErrorHandling' {
+        #$invalidTemplate = "namespace {#InvalidToken#} { class Program {} }"
+        { New-BinWips -ScriptBlock { Write-Host "Hello World" } -ScratchDir $script:scratchDir -OutFile $script:outFile -Namespace ""} |
+                Should -Throw -ExpectedMessage "*Required token 'Namespace' not found*"
     }
 }
