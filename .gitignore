@@ -19,6 +19,8 @@ tests/ExampleRunspace/bin/
 tests/ExampleRunspace/obj/
 tests/out
 test/**.exe
+tests/obj/**
+
 
 # test reports
 reports/
