@@ -152,9 +152,6 @@
       [ValidateSet('x86', 'x64', 'arm64')]
       $Architecture,
 
-      [switch]
-      $Cleanup,
-
       <#
         Which edition of PowerShell to target (PowerShell Core vs Windows PowerShell). 
         If not specified, defaults to the edition of PowerShell that is running the cmdlet.
@@ -201,6 +198,13 @@
       if (!(Test-Path $dotNetPath))
       {
          throw "Could not find bflat at $dotNetPath"
+      }
+
+      # Check linux deps
+      if ($Platform -eq 'Linux')
+      {
+         # we need install libc++-dev
+
       }
     
       $cscArgs = @("build",
@@ -267,7 +271,6 @@
          AttributesTemplate = $AttributesTemplate
          Tokens             = $Tokens
          OutDir             = $OutDir
-         Cleanup            = $Cleanup
          Force              = $Force
          CompilerPath       = $dotNetPath
          CompilerArgs       = $cscArgs

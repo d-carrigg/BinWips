@@ -104,14 +104,10 @@ function Write-BinWipsExe
       $OutDir,
 
       # Change the directory where work will be done defaults to 'obj' folder in current directory
-      # Use -Clean to clean this directory before building
       # Dir will be created if it doesn't already exist. 
       [string]
       $ScratchDir,
 
-      # Clean the scratch directory after building
-      [switch]
-      $Cleanup,
 
       # Overrite -OutFile if it already exists
       [switch]
@@ -159,6 +155,7 @@ function Write-BinWipsExe
       elseif($Platform -eq 'Windows'){
          $powerShellpath += ".exe"
       }
+      Write-Debug "PowerShellPath: $powerShellPath"
    
       if ($Tokens)
       {
@@ -267,6 +264,13 @@ function Write-BinWipsExe
          {
             Write-Output $results
          }
+         Write-Verbose "Created program at $OutFile"
+         # if linux or macos, make the file executable
+         if ($Platform -eq 'Linux' -or $Platform -eq 'MacOS')
+         {
+            Write-Verbose "Making $OutFile executable"
+            chmod +x $OutFile
+         }
       }
       else
       {
@@ -274,10 +278,7 @@ function Write-BinWipsExe
          return
       }
      
-      if ($Cleanup)
-      {
-         Remove-Item $ScratchDir -Recurse
-      }
+ 
       
    }
  

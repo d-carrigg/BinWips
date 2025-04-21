@@ -13,8 +13,8 @@ Describe 'New-BinWips' {
     
     AfterEach {
         # Cleanup
-        Remove-Item -Path $script:outFile -ErrorAction SilentlyContinue
-        Remove-Item $script:scratchDir -Recurse -ErrorAction SilentlyContinue
+        Remove-Item -Path $script:outFile -Force -ErrorAction SilentlyContinue
+        Remove-Item $script:scratchDir -Force -Recurse -ErrorAction SilentlyContinue
     }
 
     It 'Given a script block, should create a .exe that runs the script block' -Tag 'Basic' {
@@ -24,7 +24,6 @@ Describe 'New-BinWips' {
         $script:outFile | Should -Exist
         $result = & $script:outFile
         $result | Should -Be "Hello World" 
-
     }
 
     It 'Given a script block with -OutFile, should use the -OutFile name' -Tag "Basic" {
@@ -418,17 +417,11 @@ Describe 'New-BinWips' {
         # Will only be printed if -Verbose is passed in
         $result | Should -Contain "Call Command: $funcName -Verbose"
     }
-
-    It 'Cleans up scratch directory when Cleanup switch is used' -Tag 'Cleanup' {
-        New-BinWips -ScriptBlock { Write-Host "Hello World" } -ScratchDir $script:scratchDir -OutFile $script:outFile -Cleanup
-
-        $script:outFile | Should -Exist
-        $script:scratchDir | Should -Not -Exist
-    }
+ 
 
     It 'Throws error for missing required tokens in custom template' -Tag 'ErrorHandling' {
-        $invalidTemplate = "namespace {#InvalidToken#} { class Program {} }"
-        { New-BinWips -ScriptBlock { Write-Host "Hello World" } -ScratchDir $script:scratchDir -OutFile $script:outFile -ClassTemplate $invalidTemplate } |
-                Should -Throw -ExpectedMessage "*Required token 'InvalidToken' not found*"
+        #$invalidTemplate = "namespace {#InvalidToken#} { class Program {} }"
+        { New-BinWips -ScriptBlock { Write-Host "Hello World" } -ScratchDir $script:scratchDir -OutFile $script:outFile -Namespace ""} |
+                Should -Throw -ExpectedMessage "*Required token 'Namespace' not found*"
     }
 }

@@ -129,12 +129,6 @@ function New-BinWips
       [string]
       $OutFile,
 
-
-      # Recursively delete the scratch directory after build
-      # Disabled by default to prevent accidental deletion of files
-      [switch]
-      $Cleanup,
-
       # Namespace for the generated program. 
       # This parameter is trumps -Tokens, so placing a value here will be override whatever is in -Tokens
       # So if you did -Namespace A -Tokens @{Namespace='B'} Namespace would be set to A not B
@@ -285,8 +279,6 @@ function New-BinWips
             - Maybe add an additional step here in the future to run 
               preprocessing on c# files (allow a script block -PreprocessBlock argument)
          6. Run C# compiler over those files and produce an exe in the out dir
-         7. Cleanup
-
          This function handles steps 1 and 2, then passes off work to Build-Bflat
        #>
 
@@ -341,10 +333,28 @@ function New-BinWips
       {
          $OutDir = $currentDir
       }
+
+      # Validate out dir
+      if (!(Test-Path $OutDir))
+      {
+         throw "Output directory does not exist: $OutDir"
+      }
+      elseif ($null -eq $OutDir -or $OutDir -eq "")
+      {
+         throw "Output directory cannot be null or empty"
+      }
+
+
       if (!$hasScratchDir)
       {
          $ScratchDir = "$currentDir/.binwips"
+      } 
+      elseif ($null -eq $ScratchDir -or $ScratchDir -eq "")
+      {
+         throw "Scratch directory cannot be null or empty"
       }
+ 
+
       if (!$hasOutFile)
       {
          if ($inline)
@@ -439,7 +449,6 @@ function New-BinWips
          CscArgumentList    = $ExtraArguments
          OutDir             = $OutDir
          ScratchDir         = $ScratchDir
-         Cleanup            = $Cleanup
          Force              = $Force
          Resources          = $Resources
          NoEmbedResources   = $NoEmbedResources

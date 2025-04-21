@@ -36,8 +36,8 @@
         $Required
     )
     process {
-        if($Required -and ($null -eq $Value)){
-            throw "Required property not inclued for key $Key"
+        if($Required -and ($null -eq $Value -or $Value -eq "")){
+            throw "Required token '$Key' not found"
         } elseif(($null -eq $Value) -and (!$Required))
         {
             write-warning "Value for BinWipsToken: $Key was null so it will be removed. To throw an error, use the -Required paramter."
