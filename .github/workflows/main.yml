@@ -28,7 +28,7 @@ jobs:
           $manifest =  Test-ModuleManifest -Path ./src/Modules/BinWips/BinWips.psd1
           $moduleVersion = $manifest.Version
           $preRelease = $manifest.PrivateData.PSData.PreRelease
-          if($preRelease -ne $null) {
+          if($preRelease -ne $null -and $preRelease -ne "") {
             $moduleVersion = "$moduleVersion-$preRelease"
           }
           if ($branch -ne $moduleVersion) {
