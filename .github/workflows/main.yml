@@ -31,7 +31,7 @@ jobs:
           if($preRelease -ne $null -and $preRelease -ne "") {
             $moduleVersion = "$moduleVersion-$preRelease"
           }
-          if ($branch -ne $moduleVersion) {
+          if ($branch -ne $moduleVersion -and $branch -ne "v$moduleVersion") {
             throw "Module version ($moduleVersion) does not match branch name ($branch)"
           }
       - name: Run PS Script Analyzer
