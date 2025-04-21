@@ -180,14 +180,14 @@ function Write-BinWipsExe
       $encodedScript = [Convert]::ToBase64String(([System.Text.Encoding]::Unicode.GetBytes($psScript)))
       
       # Insert script and replace tokens in class template
-      $funtionName = [System.IO.Path]::GetFileNameWithoutExtension($OutFile)
+      $functionName = [System.IO.Path]::GetFileNameWithoutExtension($OutFile)
       $binWipsVersion = $MyInvocation.MyCommand.ScriptBlock.Module.Version
       $csProgram = $ClassTemplate | Set-BinWipsToken -Key Script -Value $encodedScript `
       | Set-BinWipsToken -Key RuntimeSetup -Value $encodedRuntimeSetup -Required `
       | Set-BinWipsToken -Key ClassName -Value $ClassName -Required `
       | Set-BinWipsToken -Key Namespace -Value $Namespace -Required `
       | Set-BinWipsToken -Key BinWipsVersion -Value $binWipsVersion `
-      | Set-BinWipsToken -Key FunctionName -Value $funtionName `
+      | Set-BinWipsToken -Key FunctionName -Value $functionName `
       | Set-BinWipsToken -Key PowerShellPath -Value $powerShellPath `
       | Set-BinWipsToken -Key PowerShellArguments -Value $powershellArgs
    
