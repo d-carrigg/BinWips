@@ -186,7 +186,7 @@ function Write-BinWipsExe
       | Set-BinWipsToken -Key RuntimeSetup -Value $encodedRuntimeSetup -Required `
       | Set-BinWipsToken -Key ClassName -Value $ClassName -Required `
       | Set-BinWipsToken -Key Namespace -Value $Namespace -Required `
-      | Set-BinWipsToken -Key BinWipsVersion -Value $binWipsVersion
+      | Set-BinWipsToken -Key BinWipsVersion -Value $binWipsVersion `
       | Set-BinWipsToken -Key FunctionName -Value $funtionName `
       | Set-BinWipsToken -Key PowerShellPath -Value $powerShellPath `
       | Set-BinWipsToken -Key PowerShellArguments -Value $powershellArgs

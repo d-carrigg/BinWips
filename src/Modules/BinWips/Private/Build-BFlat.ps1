@@ -175,9 +175,15 @@
    }
    Process
    {
-      $dotNetPath = (Get-Command bflat -ErrorAction SilentlyContinue).Source
+      <#
+      # In early versions of BinWips I tested different compilers. This function is designed to build 
+      # all of the args that could be passed to any compiler. Currently, only BFalt is supported but 
+      # this helps with seperation of concerns and makes it easier to add support for other compilers
+      # in the future if needed.
+      #>
 
-      # Locate the compiler
+      # Locate the compiler if it's not already in the path
+      $dotNetPath = (Get-Command bflat -ErrorAction SilentlyContinue).Source
       $moduleRoot = Split-Path -Path $PSScriptRoot -Parent
       if ([string]::IsNullOrWhiteSpace($dotNetPath) -eq $false)
       {

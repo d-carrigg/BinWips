@@ -1,28 +1,29 @@
 ﻿function Get-BinWipsBFlat
 {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess=$true)]
     param()
 
     $platform = "windows"
     $arch = [System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture
     $archiveType = "zip"
 
-    
+
     if ($IsLinux)
     {
-     
         $platform = "linux-glibc"
         $archiveType = "tar.gz"
-    } elseif ($IsMacOS){
+    }
+    elseif ($IsMacOS)
+    {
         throw "MacOS is not supported"
     }
 
-     
-    $moduleRoot =  Split-Path -Path $PSScriptRoot -Parent
+
+    $moduleRoot = Split-Path -Path $PSScriptRoot -Parent
     # Locate the compiler
     # https://stackoverflow.com/questions/11242368/test-if-executable-is-in-path-in-powershell
-    if ($null -ne (Get-Command "bflat" -ErrorAction SilentlyContinue) ) 
-    { 
+    if ($null -ne (Get-Command "bflat" -ErrorAction SilentlyContinue))
+    {
         Write-Verbose "Found bflat on path"
         return
     }
@@ -39,16 +40,26 @@
         Write-Verbose "Found bflat at $dotNetPath"
         return
     }
- 
+    
+    # confirm with user that they want to install using shouldProcess
+    if ($PSCmdlet.ShouldProcess("Install BFlat", "Install BFlat"))
+    {
+        Write-Verbose "Installing BFlat"
+    }
+    else
+    {
+        throw "User cancelled installation of BFlat"
+    }
+
 
     $path = "$moduleRoot/files/bflat/$platform"
     New-Item -ItemType Directory -Path $path -Force | Out-Null
     
-
+    
     # Check if the latest release is already downloaded
     Write-Verbose "BFlat not found, downloading from github"
 
-    $apiUrl = "https://api.github.com/repos/bflattened/bflat/releases/latest"       
+    $apiUrl = "https://api.github.com/repos/bflattened/bflat/releases/latest"
     $response = Invoke-RestMethod -Uri $apiUrl
 
     $asset = $response.assets | Where-Object { $_.name -like "*-$platform-$arch.$archiveType" }
@@ -57,7 +68,8 @@
     $downloadPath = Join-Path $path "bflat.$archiveType"
     Write-Verbose "Downloading $url to $downloadPath"
     Invoke-WebRequest -Uri $url -OutFile $downloadPath
- 
+
+    # TODO: This is a bug, tar won't work on windows, won't show unless a non-zip archive is used
     if ($archiveType -eq "zip")
     {
         Expand-Archive -Path $downloadPath -DestinationPath $path

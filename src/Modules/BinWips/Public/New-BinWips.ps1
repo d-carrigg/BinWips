@@ -384,14 +384,11 @@ function New-BinWips
       if ($inline)
       {
          $psScript = $ScriptBlock.ToString()
-         
       }
       else
       { 
          # read in content from each input file and merge them into 1 string
          $psScript = $InFile | ForEach-Object { Get-Content -Raw $_ } | Out-String
-
-         
       }
 
       # If Platform and Architecture are not specified, use the current platform and architecture
@@ -406,7 +403,7 @@ function New-BinWips
       }
       elseif (!$PSBoundParameters.ContainsKey('Platform'))
       {
-         throw "Unsported platform"
+         throw "Unsupported platform"
       }
 
       if (!$PSBoundParameters.ContainsKey('Architecture'))

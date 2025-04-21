@@ -123,6 +123,31 @@ New-BinWips -ScriptBlock  {
 
 Detailed help for this module is included via the `Get-Help` cmdlet. Run `Get-Help New-BinWips -Detailed` for more information. Examples are included in the help. You can also check out the [/tests/BinWips.Tests.ps1](/tests/BinWips.Tests.ps1) file for examples of how to use the module.
 
+
+Parmaters List:
+
+- [Script Block](#script-block-object)
+- [InFile](#infile-string-array)
+- [OutDir](#outdir-string)
+- [ScratchDir](#scratchdir-string)
+- [OutFile](#outfile-string)
+- [Cleanup](#cleanup-switchparameter)
+- [Namespace](#namespace-string)
+- [ClassName](#classname-object)
+- [AssemblyAttributes](#assemblyattributes-string-array)
+- [ClassAttributes](#classattributes-string-array)
+- [ClassTemplate](#classtemplate-string)
+- [AttributesTemplate](#attributestemplate-string)
+- [Tokens](#tokens-hashtable)
+- [Resources](#resources-string-array)
+- [NoEmbedResources](#noembedresources-switchparameter)
+- [Platform](#platform-string)
+- [Architecture](#architecture-string)
+- [ExtraArguments](#extraarguments-string)
+- [PowerShellEdition](#powershelledition-enum)
+- [WhatIf](#whatif-switchparameter)
+- [Confirm](#confirm-switchparameter)
+
 ### Syntax
 
 There are two major ways to use the module. You can either pass in a script block, or you can pass in 1 or more scripts. The syntax for each is below.
@@ -240,7 +265,7 @@ If not specified, defaults to the architecture of the machine running the cmdlet
 
 Additional parameters to pass to the bflat compiler. See [Bflat Compiler](https://github.com/bflattened/bflat) for more information. Not commonly used.
 
-### PowerShellEdition
+### PowerShellEdition `Enum`
 
 Which edition of PowerShell to target:
 
