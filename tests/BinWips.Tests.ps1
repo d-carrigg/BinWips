@@ -4,6 +4,7 @@
 
     $script:scratchDir = Join-Path $PSScriptRoot ".binwips"
     $script:outFile = Join-Path $PSScriptRoot "PSBinary.exe"
+    $script:outDir = Join-Path $PSScriptRoot "obj"
 }
 
 
@@ -225,6 +226,21 @@ Describe 'New-BinWips' {
         $result | Should -Be "This is an embedded resource."
     }
 
+    It 'Copies resources to output directory when NoEmbedResources is used' -Tag 'NoEmbedResources' {
+        $resourcePath = "$PSScriptRoot/files/EmbeddedResource.txt"
+        
+
+        New-BinWips -ScriptBlock { Write-Host "Hello World" } -ScratchDir $script:scratchDir `
+                        -OutFile "PSBinary.exe" `
+                        -Resources $resourcePath `
+                        -NoEmbedResources `
+                        -OutDir $script:outDir
+
+        $exePath = Join-Path $script:outDir "PSBinary.exe"
+        $exePath | Should -Exist
+        (Join-Path $outDir 'EmbeddedResource.txt') | Should -Exist
+    }
+
     It 'Given a custom class name, should use that class name' -Tag "CustomClassName" {
         $sb = {
             [CmdletBinding()]
@@ -401,5 +417,18 @@ Describe 'New-BinWips' {
 
         # Will only be printed if -Verbose is passed in
         $result | Should -Contain "Call Command: $funcName -Verbose"
+    }
+
+    It 'Cleans up scratch directory when Cleanup switch is used' -Tag 'Cleanup' {
+        New-BinWips -ScriptBlock { Write-Host "Hello World" } -ScratchDir $script:scratchDir -OutFile $script:outFile -Cleanup
+
+        $script:outFile | Should -Exist
+        $script:scratchDir | Should -Not -Exist
+    }
+
+    It 'Throws error for missing required tokens in custom template' -Tag 'ErrorHandling' {
+        $invalidTemplate = "namespace {#InvalidToken#} { class Program {} }"
+        { New-BinWips -ScriptBlock { Write-Host "Hello World" } -ScratchDir $script:scratchDir -OutFile $script:outFile -ClassTemplate $invalidTemplate } |
+                Should -Throw -ExpectedMessage "*Required token 'InvalidToken' not found*"
     }
 }
