@@ -119,7 +119,6 @@ function New-BinWips
       $OutDir,
 
       # Change the directory where work will be done defaults to `.binwips` folder in current directory
-      # Use -Cleanup to clean this directory after build
       # Dir will be created if it doesn't already exist. 
       [string]
       $ScratchDir,

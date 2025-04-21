@@ -17,6 +17,9 @@ Install-Module BinWips
 Import-Module BinWips
 ```
 
+See it on the [PowerShell Gallery](https://www.powershellgallery.com/packages/BinWips).
+
+
 > :spiral_notepad: BinWips uses [bflat](https://github.com/bflattened/bflat). This is a dependency of the module and will be downloaded (one time) automatically if not detected in the path.
 
 Create a simple program from an inline script block to create a program with the default name `PSBinary.exe`:
@@ -60,11 +63,17 @@ New-BinWips -ScriptBlock {
         $MyValidateSetParam
     )
     echo "Param was $myParam"
+    echo "MyIntParam was $MyIntParam"
+    echo "MySwitchParam was $MySwitchParam"
+    echo "MyValidateSetParam was $MyValidateSetParam"
 }
 
-# Run: ./PSBinary.exe -myParam "Hello World!"
+# Run: ./PSBinary.exe -myParam "Hello World!" -MyValidateSetParam "Option1" -MyIntParam 123 -MySwitchParam
 # Output:
-# Param was Hello World!
+# Param was Hello World! 
+# MyIntParam was 123
+# MySwitchParam was True
+# MyValidateSetParam was Option1
 ```
 
 > :spiral_notepad: If you call a BinWips program from a PowerShell session, you will need to wrap PowerShell objects in quotes. For example, if you want to pass in a hash table: `.\PSBinary.exe -HashTable '@{MyVal=1;OtherVal=2}'`. This is because PowerShell will create the object, then convert it into a string using `.ToString()`, which in this case would be the string literal `System.Collections.Hashtable`, not the actual hash table. This limitation does not apply to calling from another shell (bash, cmd, etc).
@@ -99,7 +108,7 @@ PARAMETERS
 
 ### Other Examples
 
-Some other examples of BinWips programs you can create:
+Create a program that shows a window on Windows x64.
 
 ```powershell
 # Creates a program that shows a window on Windows x64.
@@ -133,7 +142,6 @@ Parmaters List:
     - [OutDir `String`](#outdir-string)
     - [ScratchDir `String`](#scratchdir-string)
     - [OutFile `String`](#outfile-string)
-    - [Cleanup `[<SwitchParameter>]`](#cleanup-switchparameter)
     - [Namespace `String`](#namespace-string)
     - [ClassName `Object`](#classname-object)
     - [AssemblyAttributes `String[]`](#assemblyattributes-string)
@@ -170,14 +178,14 @@ There are two major ways to use the module. You can either pass in a script bloc
 ```powershell
 # Scriptblocks
 New-BinWips [-ScriptBlock] <Object> [-OutDir <String>] [-ScratchDir <String>] [-OutFile <String>]
-[-Cleanup] [-Namespace <String>] [-ClassName <Object>] [-AssemblyAttributes <String[]>]
+[-Namespace <String>] [-ClassName <Object>] [-AssemblyAttributes <String[]>]
 [-ClassAttributes <String[]>] [-ClassTemplate <String>] [-AttributesTemplate <String>]
 [-Tokens <Hashtable>] [-Resources <String[]>] [-NoEmbedResources] [-Platform <String>]
 [-Architecture <String>] [-ExtraArguments <String[]>] [-WhatIf] [-Confirm]
 
 # With Scripts
 New-BinWips [-InFile] <String[]> [-OutDir <String>] [-ScratchDir <String>] [-OutFile <String>]
-[-Cleanup] [-Namespace <String>] [-ClassName <Object>] [-AssemblyAttributes <String[]>]
+[-Namespace <String>] [-ClassName <Object>] [-AssemblyAttributes <String[]>]
 [-ClassAttributes <String[]>] [-ClassTemplate <String>] [-AttributesTemplate <String>]
 [-Tokens <Hashtable>] [-Resources <String[]>] [-NoEmbedResources] [-Platform <String>]
 [-Architecture <String>] [-ExtraArguments <String[]>] [-WhatIf] [-Confirm]
@@ -197,15 +205,12 @@ Directory to place output in, defaults to the current directory. The directory w
 
 ### ScratchDir `String`
 
-Change the directory where work will be done. Defaults to `.binwips` folder in the current directory. Use `-Cleanup` to clean this directory after build. Disabled by default to prevent accidental deletion of files.
+Change the directory where work will be done. Defaults to `.binwips` folder in the current directory.
 
 ### OutFile `String`
 
 Name of the .exe to generate. Defaults to the -InFile (replaced with .exe) or PSBinary.exe if a script block is inlined.
 
-### Cleanup `[<SwitchParameter>]`
-
-Recursively delete the scratch directory after build. Disabled by default to prevent accidental deletion of files.
 
 ### Namespace `String`
 
