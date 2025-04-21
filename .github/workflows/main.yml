@@ -38,10 +38,13 @@ jobs:
         shell: pwsh
         run: |
           Invoke-ScriptAnalyzer -Path ./src -Recurse -Severity Error,Warning -EnableExit
-      - name: Perform a Pester test from the Tests.ps1 file
+      - name: Install libc++-dev
         shell: pwsh
         run: |
           sudo apt-get install -y libc++-dev
+      - name: Perform a Pester test from the Tests.ps1 file
+        shell: pwsh
+        run: |
           $config = New-PesterConfiguration
           $config.Run.Path = "./tests/BinWips.Tests.ps1"
           $config.CodeCoverage.Enabled = $true
