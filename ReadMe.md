@@ -1,6 +1,6 @@
 # BinWips: Binary Written in PowerShell
 
-Create .NET applications from PowerShell scripts and inline code blocks with control over the generated `.cs` and `.exe` files and any additional resources. Build for linux and windows on x86, x64, and arm64 architectures.
+Create .NET applications from PowerShell scripts and inline code blocks with control over the generated `.cs` and `.exe` files and any additional resources. Build for Linux and Windows on x86, x64, and arm64 architectures.
 
 ```powershell
 New-BinWips -ScriptBlock {echo "Hello World!"} -OutFile "HelloWorld.exe"
@@ -13,7 +13,7 @@ New-BinWips -ScriptBlock {echo "Hello World!"} -OutFile "HelloWorld.exe"
 Install the module with:
 
 ```powershell
-Install-Module BinWips -AllowPrerelease
+Install-Module BinWips
 Import-Module BinWips
 ```
 
@@ -42,7 +42,7 @@ New-BinWips -ScriptBlock {
 # Hello BinWips!
 ```
 
-As well as, programs that take parameters (simple and complex):
+Programs that take parameters (simple and complex) are also supported:
 
 ```powershell
 New-BinWips -ScriptBlock {
@@ -67,11 +67,9 @@ New-BinWips -ScriptBlock {
 # Param was Hello World!
 ```
 
-> :spiral_notepad: If you call a BinWips program from a powershell session, you will need to wrap powershell objects in quotes. For example, if you want to pass in a hash table: `.\PSBinary.exe -HashTable '@{MyVal=1;OtherVal=2}'`. This is because PowerShell will create the object, then convert it into a string using `.ToString()`, which in this case would be the string literal `System.Collections.Hashtable`, not the actual hash table. This limitation does not apply to calling from another shell (bash, cmd, etc).
+> :spiral_notepad: If you call a BinWips program from a PowerShell session, you will need to wrap PowerShell objects in quotes. For example, if you want to pass in a hash table: `.\PSBinary.exe -HashTable '@{MyVal=1;OtherVal=2}'`. This is because PowerShell will create the object, then convert it into a string using `.ToString()`, which in this case would be the string literal `System.Collections.Hashtable`, not the actual hash table. This limitation does not apply to calling from another shell (bash, cmd, etc).
 
-You can also generate programs from script files. The files will be loaded in the order they are passed in. The last filename will be used as the name of the
-generated program. For example, if you have two files `myScript.ps1` and `myOtherScript.ps1` and you want to generate a program called `myScript.exe` you
-would run:
+You can also generate programs from script files. The files will be loaded in the order they are passed in. The last filename will be used as the name of the generated program. For example, if you have two files `myScript.ps1` and `myOtherScript.ps1` and you want to generate a program called `myScript.exe` you would run:
 
 ```powershell
 New-BinWips -InFile "path/to/myOtherScript.ps1", "path/to/myScript.ps1"
@@ -81,11 +79,11 @@ New-BinWips -InFile "path/to/myOtherScript.ps1", "path/to/myScript.ps1"
 
 You can always override the name of the generated program with the `-OutFile` parameter.
 
-> :spiral_notepad: By default BinWips compiles to the platform and architecture of the machine it is run on. You can override this behavior with the `-Platform` and `-Architecture` parameters. See the [Parameters](#parameters) section for more information.
+> :spiral_notepad: By default, BinWips compiles to the platform and architecture of the machine it is run on. You can override this behavior with the `-Platform` and `-Architecture` parameters. See the [Parameters](#parameters) section for more information.
 
-When generating a program from a script file, the script file can take parameters as well, if you pass in multiple script files, the program parameters are generated from the first script file.
+When generating a program from a script file, the script file can take parameters as well. If you pass in multiple script files, the program parameters are generated from the first script file.
 
-Parameter validation works, tab completion does not. BinWips automatically adds support for getting help on the generated program by using `.\PSBinary.exe help`.
+Parameter validation works, but tab completion does not. BinWips automatically adds support for getting help on the generated program by using `.\PSBinary.exe help`.
 
 ```text
 NAME
@@ -99,7 +97,7 @@ PARAMETERS
         Description for SomeParam
 ```
 
-### Other examples
+### Other Examples
 
 Some other examples of BinWips programs you can create:
 
@@ -116,7 +114,6 @@ New-BinWips -ScriptBlock  {
             $form.Text = "Hello World"
             $form.ShowDialog()
         } -Platform Windows -Architecture x64
-
 ```
 
 ## Parameters
@@ -126,31 +123,49 @@ Detailed help for this module is included via the `Get-Help` cmdlet. Run `Get-He
 
 Parmaters List:
 
-- [Script Block](#script-block-object)
-- [InFile](#infile-string-array)
-- [OutDir](#outdir-string)
-- [ScratchDir](#scratchdir-string)
-- [OutFile](#outfile-string)
-- [Cleanup](#cleanup-switchparameter)
-- [Namespace](#namespace-string)
-- [ClassName](#classname-object)
-- [AssemblyAttributes](#assemblyattributes-string-array)
-- [ClassAttributes](#classattributes-string-array)
-- [ClassTemplate](#classtemplate-string)
-- [AttributesTemplate](#attributestemplate-string)
-- [Tokens](#tokens-hashtable)
-- [Resources](#resources-string-array)
-- [NoEmbedResources](#noembedresources-switchparameter)
-- [Platform](#platform-string)
-- [Architecture](#architecture-string)
-- [ExtraArguments](#extraarguments-string)
-- [PowerShellEdition](#powershelledition-enum)
-- [WhatIf](#whatif-switchparameter)
-- [Confirm](#confirm-switchparameter)
+- [BinWips: Binary Written in PowerShell](#binwips-binary-written-in-powershell)
+  - [Getting Started](#getting-started)
+    - [Other Examples](#other-examples)
+  - [Parameters](#parameters)
+    - [Syntax](#syntax)
+    - [Script Block `Object`](#script-block-object)
+    - [InFile `String[]`](#infile-string)
+    - [OutDir `String`](#outdir-string)
+    - [ScratchDir `String`](#scratchdir-string)
+    - [OutFile `String`](#outfile-string)
+    - [Cleanup `[<SwitchParameter>]`](#cleanup-switchparameter)
+    - [Namespace `String`](#namespace-string)
+    - [ClassName `Object`](#classname-object)
+    - [AssemblyAttributes `String[]`](#assemblyattributes-string)
+    - [ClassAttributes `String[]`](#classattributes-string)
+    - [ClassTemplate `String`](#classtemplate-string)
+    - [AttributesTemplate `String`](#attributestemplate-string)
+    - [Tokens `Hashtable`](#tokens-hashtable)
+    - [HostReferences `String[]`](#hostreferences-string)
+    - [Resources `String[]`](#resources-string)
+    - [NoEmbedResources `[<SwitchParameter>]`](#noembedresources-switchparameter)
+    - [Platform `String`](#platform-string)
+    - [Architecture `String`](#architecture-string)
+    - [ExtraArguments `String[]`](#extraarguments-string)
+    - [PowerShellEdition `Enum`](#powershelledition-enum)
+    - [WhatIf `[<SwitchParameter>]`](#whatif-switchparameter)
+    - [Confirm `[<SwitchParameter>]`](#confirm-switchparameter)
+  - [Advanced Usage](#advanced-usage)
+    - [Class Templates](#class-templates)
+    - [Token Details](#token-details)
+  - [References](#references)
+  - [Contributing](#contributing)
+  - [Testing](#testing)
+  - [Installing from Source](#installing-from-source)
+  - [Troubleshooting](#troubleshooting)
+    - [Error: DllNotFound\_Linux, objwriter, objwriter.so](#error-dllnotfound_linux-objwriter-objwriterso)
+  - [TODO List](#todo-list)
+  - [Limitations](#limitations)
+  - [Inspiration and References](#inspiration-and-references)
 
 ### Syntax
 
-There are two major ways to use the module. You can either pass in a script block, or you can pass in 1 or more scripts. The syntax for each is below.
+There are two major ways to use the module. You can either pass in a script block, or you can pass in one or more scripts. The syntax for each is below.
 
 ```powershell
 # Scriptblocks
@@ -170,23 +185,23 @@ New-BinWips [-InFile] <String[]> [-OutDir <String>] [-ScratchDir <String>] [-Out
 
 ### Script Block `Object`
 
-The powershell command to convert into a program cannot be combined with `InFile`.
+The PowerShell command to convert into a program cannot be combined with `InFile`.
 
 ### InFile `String[]`
 
-Source Script file(s), order is important Files added in order entered Exe name is defaulted to last file in array
+Source script file(s), order is important. Files are added in the order entered. The exe name is defaulted to the last file in the array.
 
 ### OutDir `String`
 
-Directory to place output in, defaults to current directory Dir will be created if it doesn't already exist.
+Directory to place output in, defaults to the current directory. The directory will be created if it doesn't already exist.
 
 ### ScratchDir `String`
 
-Change the directory where work will be done defaults to `.binwips` folder in current directory Use `-Cleanup` to clean this directory after build. Disabled by default to prevent accidental deletion of files.
+Change the directory where work will be done. Defaults to `.binwips` folder in the current directory. Use `-Cleanup` to clean this directory after build. Disabled by default to prevent accidental deletion of files.
 
 ### OutFile `String`
 
-Name of the .exe to generate. Defaults to the -InFile (replaced with .exe) or PSBinary.exe if a script block is inlined
+Name of the .exe to generate. Defaults to the -InFile (replaced with .exe) or PSBinary.exe if a script block is inlined.
 
 ### Cleanup `[<SwitchParameter>]`
 
@@ -194,29 +209,25 @@ Recursively delete the scratch directory after build. Disabled by default to pre
 
 ### Namespace `String`
 
-Namespace for the generated program. This parameter trumps the value in [Tokens](#tokens-hashtable), so placing a value here will override whatever is
-in [Tokens](#tokens-hashtable). So if you use `-Namespace A -Tokens @{Namespace='B'}` Namespace would be set to A not B Must be a valid C# namespace Defaults to `PSBinary`.
+Namespace for the generated program. This parameter overrides the value in [Tokens](#tokens-hashtable), so placing a value here will override whatever is in [Tokens](#tokens-hashtable). Must be a valid C# namespace. Defaults to `PSBinary`.
 
 ### ClassName `Object`
 
-Class name for the generated program This parameter trumps the value in [Tokens](#tokens-hashtable), so placing a value here will override whatever is
-in [Tokens](#tokens-hashtable). So if you did `-ClassName A -Tokens @{ClassName='B'}` ClassName would be set to A not B. Must be a valid c# class name and cannot be equal to `Namespace`. Defaults to `Program`.
+Class name for the generated program. This parameter overrides the value in [Tokens](#tokens-hashtable), so placing a value here will override whatever is in [Tokens](#tokens-hashtable). Must be a valid C# class name and cannot be equal to `Namespace`. Defaults to `Program`.
 
 ### AssemblyAttributes `String[]`
 
-List of assembly attributes to apply to the assembly level. List of defaults can be found in the
-[Microsoft Language Reference](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/attributes/global).
-Custom attributes can also be aplied. Invalid attributes will throw a c# compiler exception.
+List of assembly attributes to apply to the assembly level. List of defaults can be found in the [Microsoft Language Reference](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/attributes/global). Custom attributes can also be applied. Invalid attributes will throw a C# compiler exception.
 
 ### ClassAttributes `String[]`
 
-List of assembly attributes to apply to the class. - Any valid c# class attribute can be applied - Invalid attributes will throw a c# compiler exception
+List of assembly attributes to apply to the class. Any valid C# class attribute can be applied. Invalid attributes will throw a C# compiler exception.
 
 ### ClassTemplate `String`
 
-Override the default class template. - BinWips Tokens (a character sequence such as beginning with {# and ending with #}) can be included and will be replaced with the matching token either from defaults or the -Tokens paramter. - If a BinWips exists with out a matching value in -Tokens an exception is thrown.
+Override the default class template. BinWips Tokens (a character sequence such as beginning with {# and ending with #}) can be included and will be replaced with the matching token either from defaults or the -Tokens parameter. If a BinWips exists without a matching value in -Tokens, an exception is thrown.
 
-Example: In the default template there is namespace `{#PSNameSpace#} {...}` when compiled `{#PSNamespace#}` is replaced with PSBinary to produce `namesapce PSBinary {...}`. See the [Advanced Usage](#advanced-usage) section for more information.
+Example: In the default template there is namespace `{#PSNameSpace#} {...}` when compiled `{#PSNamespace#}` is replaced with PSBinary to produce `namespace PSBinary {...}`. See the [Advanced Usage](#advanced-usage) section for more information.
 
 ### AttributesTemplate `String`
 
@@ -232,7 +243,7 @@ See the [Advanced Usage](#advanced-usage) section for more information.
 
 ### HostReferences `String[]`
 
-List of .NET assemblies for the host .exe to reference. These references will not be accessible from within the powershell script.
+List of .NET assemblies for the host .exe to reference. These references will not be accessible from within the PowerShell script.
 
 ### Resources `String[]`
 
@@ -240,7 +251,7 @@ List of files to include with the app. By default, embedded into the exe referen
 
 ### NoEmbedResources `[<SwitchParameter>]`
 
-Don't embed any resource specifed by -Resources instead they are copied to out dir if they don't already exist. Useful in pipeline/CI scenarios where you want to ensure resources are available but don't want to embed them in the exe.
+Don't embed any resource specified by -Resources. Instead, they are copied to the out dir if they don't already exist. Useful in pipeline/CI scenarios where you want to ensure resources are available but don't want to embed them in the exe.
 
 ### Platform `String`
 
@@ -274,8 +285,7 @@ Which edition of PowerShell to target:
 
 If not specified, defaults to the edition of PowerShell that is running the cmdlet. So if this function is run from pwsh, it will default to PowerShell Core. If this function is run from powershell.exe, it will default to Windows PowerShell _unless_ you have specified `-Platform Linux`: in which case it will default to PowerShell Core. This is because PowerShell Core is the only edition of PowerShell that runs on Linux.
 
-PowerShellEdition='Desktop' is only supported on Windows PowerShell 5.1 and newer. If you try to use PowerShellEdition='Desktop' and Platform='Linux', an
-error will be thrown.
+PowerShellEdition='Desktop' is only supported on Windows PowerShell 5.1 and newer. If you try to use PowerShellEdition='Desktop' and Platform='Linux', an error will be thrown.
 
 ### WhatIf `[<SwitchParameter>]`
 
@@ -287,14 +297,14 @@ Support use of the PowerShell `-Confirm` parameter. If used, the script will pro
 
 ## Advanced Usage
 
-You can fully customize the generated output by replacing the class template and you can run additional preprocessing before the compiler is invoked. If the built  in customization options don't meet your needs this section will guide you through full customization of the compiled output. This section requires knowledge of  C#.
+You can fully customize the generated output by replacing the class template and you can run additional preprocessing before the compiler is invoked. If the built-in customization options don't meet your needs, this section will guide you through full customization of the compiled output. This section requires knowledge of C#.
 
-### Class Tempalates
+### Class Templates
 
-When BinWips generates a .NET program it uses a class template to setup a new powershell instance and run your scripts. You pass in a custom template as a string using `-ClassTemplate` parameter. BinWips supports tokens in the class template which are replaced with values at runtime. Tokens are strings which begin with `{#` and end with `#}`. To override the BinWips version you could pass in `-Tokens @{BinWipsVersion='1.0.0'}`. See the below example `-ClassTemplate` for basic usage. This template would generate a console program.
+When BinWips generates a .NET program, it uses a class template to set up a new PowerShell instance and run your scripts. You pass in a custom template as a string using the `-ClassTemplate` parameter. BinWips supports tokens in the class template which are replaced with values at runtime. Tokens are strings which begin with `{#` and end with `#}`. To override the BinWips version, you could pass in `-Tokens @{BinWipsVersion='1.0.0'}`. See the below example `-ClassTemplate` for basic usage. This template would generate a console program.
 
-```c#
-// Generaed by BinWips {#BinWipsVersion#}
+```csharp
+// Generated by BinWips {#BinWipsVersion#}
 using System;
 using BinWips;
 using System.Diagnostics;
@@ -310,8 +320,6 @@ namespace {#Namespace#} {
     {
         public static void Main(string[] args)
         {
-
-
             // script is inserted in base64 so we need to decode it
             var runtimeSetup = DecodeBase64("{#RuntimeSetup#}");
             var funcName = "{#FunctionName#}";
@@ -329,7 +337,6 @@ namespace {#Namespace#} {
             var script = DecodeBase64("{#Script#}");
             var wrappedScript = $"{runtimeSetup}\n\n function {funcName}\n {{\n {script}\n }}\n{ending}";
 
-
             var encodedCommand = EncodeBase64(wrappedScript);
 
             // call PWSH to execute the script passing in the args
@@ -340,7 +347,6 @@ namespace {#Namespace#} {
             process.EnableRaisingEvents = true;
 
             process.WaitForExit();
-
         }
         static string DecodeBase64(string encoded)
         {
@@ -372,13 +378,13 @@ BinWips uses tokens in the format of `{#TokenName#}` to replace values in the cl
 | Namespace       | Yes      | The namespace to use                                                                        |
 | BinWipsVersion  | No       | The version of BinWips used to generate the program                                         |
 | FunctionName    | No       | The name of the function to display when showing help documentation                         |
-| BinWipsPipeGuid | No       | The guid used to identify the pipe between the generated program and the powershell process |
+| BinWipsPipeGuid | No       | The guid used to identify the pipe between the generated program and the PowerShell process |
 
-When creating a custom class template you can use any of the above tokens. You can also define additional tokens, enabling template reuse. 
+When creating a custom class template, you can use any of the above tokens. You can also define additional tokens, enabling template reuse.
 
 ## References
 
-If you're C# class template needs to reference other assemblies you can use the `-HostReferences` parameter. This parameter takes an array of strings which are paths to assemblies to reference. For example, if you want to reference `Newtonsoft.Json.dll` you would use the following syntax:
+If your C# class template needs to reference other assemblies, you can use the `-HostReferences` parameter. This parameter takes an array of strings which are paths to assemblies to reference. For example, if you want to reference `Newtonsoft.Json.dll`, you would use the following syntax:
 
 ```powershell
 New-BinWips -InFile "MyScript.ps1" -HostReferences "C:\Path\To\Newtonsoft.Json.dll"
@@ -388,9 +394,9 @@ BinWips will throw an error if the assembly does not exist or if you do not have
 
 ## Contributing
 
-Contributions are welcome, please open an issue or pull request. A couple of general requirements:
+Contributions are welcome. Please open an issue or pull request. A couple of general requirements:
 
-- Must pass PSScriptAnalyzer with severity of `warning` or greater
+- Must pass PSScriptAnalyzer with a severity of `warning` or greater
 - Add Pester tests for any new features, see the workflow file for how the pipeline runs the tests
 
 ## Testing
@@ -405,7 +411,7 @@ Tags: Basic, MultiFile, Named Params, Switches, ScriptBlockParameters, ClassTemp
 #>
 ```
 
-## Installing from source
+## Installing from Source
 
 To install from the source code (not recommended):
 
@@ -414,11 +420,11 @@ git clone https://github.com/d-carrigg/BinWips.git
 Import-Module ./BinWips/src/Modules/BinWips
 ```
 
-## Troubleshoting
+## Troubleshooting
 
 ### Error: DllNotFound_Linux, objwriter, objwriter.so
 
-This error can occur if libc++-dev is not installed. To install it run:
+This error can occur if libc++-dev is not installed. To install it, run:
 
 ```bash
 sudo apt install libc++-dev
@@ -429,9 +435,6 @@ sudo apt install libc++-dev
 Order not important.
 
 - [ ] Ability to package modules with the exe (Each Function is a verb so `Verb-Noun` becomes `exe_name verb parameters`)
-- [ ] Help and Verison # Support (--help and --version or a verb/something along those lines)
-  - [x] Help
-  - [ ] Version
 
 ## Limitations
 
@@ -439,12 +442,11 @@ There are some things that cannot be accomplished by the BinWips module.
 
 1. See the [TODO List](#todo-list) for a list of features that are not yet implemented
 2. You should be aware of any security risks for the .NET Framework version you target
-3. Assemblies are not signed so they are not tamper proof
+3. Assemblies are not signed, so they are not tamper-proof
 
 ## Inspiration and References
 
-The following links either provided inspiration for this module or were used as
-references when building it.
+The following links either provided inspiration for this module or were used as references when building it.
 
 - <https://gallery.technet.microsoft.com/scriptcenter/PS2EXE-GUI-Convert-e7cb69d5>
 - <https://stackoverflow.com/questions/15414678/how-to-decode-a-base64-string>
