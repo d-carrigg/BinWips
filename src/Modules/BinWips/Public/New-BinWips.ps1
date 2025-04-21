@@ -328,8 +328,12 @@ function New-BinWips
       }
       
       $currentDir = (Get-Location).Path
-      if (!$hasOutDir)
+      if (!$hasOutDir -and $hasOutFile)
       {
+         $absoluteOutFile = [System.IO.Path]::GetFullPath($OutFile)
+         $OutDir = [System.IO.Path]::GetDirectoryName($absoluteOutFile)
+      }
+      elseif (!$hasOutDir){
          $OutDir = $currentDir
       }
 

@@ -223,16 +223,14 @@ Describe 'New-BinWips' {
     It 'Copies resources to output directory when NoEmbedResources is used' -Tag 'NoEmbedResources' {
         $resourcePath = "$PSScriptRoot/files/EmbeddedResource.txt"
         
-
+        $pth = Join-Path $script:outDir 'PSBinary.exe'
         New-BinWips -ScriptBlock { Write-Host "Hello World" } -ScratchDir $script:scratchDir `
-                        -OutFile "PSBinary.exe" `
+                        -OutFile $pth `
                         -Resources $resourcePath `
-                        -NoEmbedResources `
-                        -OutDir $script:outDir
+                        -NoEmbedResources 
 
-        $exePath = Join-Path $script:outDir "PSBinary.exe"
-        $exePath | Should -Exist
-        (Join-Path $outDir 'EmbeddedResource.txt') | Should -Exist
+        $pth | Should -Exist
+        (Join-Path $script:outDir 'EmbeddedResource.txt') | Should -Exist
     }
 
     It 'Given a custom class name, should use that class name' -Tag "CustomClassName" {
