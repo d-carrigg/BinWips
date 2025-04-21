@@ -1,5 +1,7 @@
 # BinWips: Binary Written in PowerShell
 
+[![PowerShell Gallery](https://img.shields.io/powershellgallery/v/BinWips)](https://www.powershellgallery.com/packages/BinWips)
+
 Create .NET applications from PowerShell scripts and inline code blocks with control over the generated `.cs` and `.exe` files and any additional resources. Build for Linux and Windows on x86, x64, and arm64 architectures.
 
 ```powershell
@@ -16,9 +18,6 @@ Install the module with:
 Install-Module BinWips
 Import-Module BinWips
 ```
-
-See it on the [PowerShell Gallery](https://www.powershellgallery.com/packages/BinWips).
-
 
 > :spiral_notepad: BinWips uses [bflat](https://github.com/bflattened/bflat). This is a dependency of the module and will be downloaded (one time) automatically if not detected in the path.
 
