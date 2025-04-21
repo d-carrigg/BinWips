@@ -187,14 +187,9 @@ Describe 'New-BinWips' {
         }
         New-BinWips -ScriptBlock $sb -ScratchDir $script:scratchDir -OutFile $script:outFile
         $script:outFile | Should -Exist
-        if ($IsWindows)
-        {
-            $result = & $script:outFile -baz '@{foo="bar"}'
-        }
-        else
-        {
-            $result = & $script:outFile -baz '@{foo=\"bar\"}'
-        }
+
+        
+        $result = & $script:outFile -baz '@{foo="bar"}'
         
         $result | Should -Be "Baz['foo'] = bar"
     }
