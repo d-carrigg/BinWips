@@ -332,6 +332,8 @@ function New-BinWips
       {
          $absoluteOutFile = [System.IO.Path]::GetFullPath($OutFile)
          $OutDir = [System.IO.Path]::GetDirectoryName($absoluteOutFile)
+         # Make out dir if it doesn't exist
+         New-Item -ItemType Directory -Path $OutDir -Force | Out-Null
       }
       elseif (!$hasOutDir){
          $OutDir = $currentDir
