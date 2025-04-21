@@ -69,10 +69,13 @@
     Write-Verbose "Downloading $url to $downloadPath"
     Invoke-WebRequest -Uri $url -OutFile $downloadPath
 
-    # TODO: This is a bug, tar won't work on windows, won't show unless a non-zip archive is used
     if ($archiveType -eq "zip")
     {
         Expand-Archive -Path $downloadPath -DestinationPath $path
+    }
+    elseif ($IsWindows)
+    {
+        throw "Tar is not supported on Windows"
     }
     else
     {
