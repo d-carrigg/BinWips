@@ -12,6 +12,7 @@
 **/*.obj
 **/*.exe
 **/*.dll
+**/*.out
 
 # test
 tests/ExampleRunspace/bin/
